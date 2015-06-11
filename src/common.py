@@ -69,7 +69,7 @@ TBB_DEFAULT_VERSION = TBB_V_4_0_8
 TBB_KNOWN_VERSIONS = [TBB_V_2_4_7_A1, TBB_V_3_5, TBB_V_4_0_8]
 
 # Default paths
-BASE_DIR = path.abspath(os.path.dirname(__file__))
+BASE_DIR = path.abspath(os.path.dirname(os.path.dirname(__file__)))
 DATASET_DIR = join(BASE_DIR, "datasets")
 ALEXA_DIR = join(DATASET_DIR, "alexa")
 TEST_DIR = join(BASE_DIR, 'test')

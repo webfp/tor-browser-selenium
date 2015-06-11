@@ -31,69 +31,6 @@ class TestTorUtils(unittest.TestCase):
         self.tor_process = self.tor_controller.launch_tor_service()
         self.assertTrue(self.tor_process, 'Cannot launch Tor process')
 
-    def test_tb_orig_profile_not_modified(self):
-        """Visiting a site should not modify the original profile contents."""
-        tbb_profile_dir = cm.get_tbb_profile_path(cm.TBB_DEFAULT_VERSION)
-        profile_hash_before = get_hash_of_directory(tbb_profile_dir)
-        tb_driver = TorBrowserDriver()
-        tb_driver.get("http://check.torproject.org")
-        tb_driver.quit()
-        profile_hash_after = get_hash_of_directory(tbb_profile_dir)
-        assert(profile_hash_after == profile_hash_before)
-
-    def test_tb_drv_simple_visit(self):
-        tb_driver = TorBrowserDriver()
-        tb_driver.get("http://check.torproject.org")
-        tb_driver.implicitly_wait(60)
-        h1_on = tb_driver.find_element_by_css_selector("h1.on")
-        self.assertTrue(h1_on)
-        tb_driver.quit()
-
-    def test_tb_extensions(self):
-        tb_driver = TorBrowserDriver()
-        # test HTTPS Everywhere
-        tb_driver.get(HTTP_URL)
-        time.sleep(1)
-        try:
-            WebDriverWait(tb_driver, 60).until(
-                EC.title_contains("MediaWiki")
-            )
-        except TimeoutException:
-            self.fail("The title should contain MediaWiki")
-        self.assertEqual(tb_driver.current_url, HTTPS_URL)
-        # NoScript should disable WebGL
-        webgl_test_url = "https://developer.mozilla.org/samples/webgl/sample1/index.html"  # noqa
-        tb_driver.get(webgl_test_url)
-        try:
-            WebDriverWait(tb_driver, 60).until(
-                EC.alert_is_present()
-            )
-        except TimeoutException:
-            self.fail("WebGL error alert should be present")
-        tb_driver.switch_to_alert().dismiss()
-        tb_driver.implicitly_wait(30)
-        el = tb_driver.find_element_by_class_name("__noscriptPlaceholder__")
-        self.assertTrue(el)
-        # sanity check for the above test
-        self.assertRaises(NoSuchElementException,
-                          tb_driver.find_element_by_class_name,
-                          "__nosuch_class_exist")
-        tb_driver.quit()
-
-    def test_https_everywhere_disabled(self):
-        """Test to make sure the HTTP->HTTPS redirection observed in the
-
-        previous test (test_tb_extensions) is really due to HTTPSEverywhere -
-        but not because the site is HTTPS by default. See, the following:
-        https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/tree/mozmill-tests/tbb-tests/https-everywhere-disabled.js
-        """
-
-        ff_driver = webdriver.Firefox()
-        ff_driver.get(HTTP_URL)
-        time.sleep(1)
-        # make sure it doesn't redirect to https
-        self.assertEqual(ff_driver.current_url, HTTP_URL)
-        ff_driver.quit()
 
     def test_close_all_streams(self):
         streams_open = False

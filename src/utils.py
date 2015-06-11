@@ -1,12 +1,9 @@
 import os
-import sys
 import signal
 import re
 import commands
 from time import strftime
 import distutils.dir_util as du
-from log import wl_log
-import psutil
 from urllib2 import urlopen
 from hashlib import sha256
 
@@ -42,12 +39,7 @@ def append_timestamp(_str=''):
 def clone_dir_with_timestap(orig_dir_path):
     """Copy a folder into the same directory and append a timestamp."""
     new_dir = create_dir(append_timestamp(orig_dir_path))
-    try:
-        du.copy_tree(orig_dir_path, new_dir)
-    except Exception, e:
-        wl_log.error("Error while cloning the dir with timestamp" + str(e))
-    finally:
-        return new_dir
+    du.copy_tree(orig_dir_path, new_dir)
 
 
 def raise_signal(signum, frame):
@@ -72,56 +64,6 @@ def get_filename_from_url(url, prefix):
     url = url.replace('www.', '')
     dashed = re.sub(r'[^A-Za-z0-9._]', '-', url)
     return '%s-%s' % (prefix, re.sub(r'-+', '-', dashed))
-
-
-def is_targz_archive_corrupt(arc_path):
-    # http://stackoverflow.com/a/2001749/3104416
-    tar_gz_check_cmd = "gunzip -c %s | tar t > /dev/null" % arc_path
-    tar_status, tar_txt = commands.getstatusoutput(tar_gz_check_cmd)
-    if tar_status:
-        wl_log.critical("Tar check failed: %s tar_status: %s tar_txt: %s"
-                        % (tar_gz_check_cmd, tar_status, tar_txt))
-        return tar_status
-    return False  # no error
-
-
-def pack_crawl_data(crawl_dir):
-    """Compress the crawl dir into a tar archive."""
-    if not os.path.isdir(crawl_dir):
-        wl_log.critical("Cannot find the crawl dir: %s" % crawl_dir)
-        return False
-    if crawl_dir.endswith(os.path.sep):
-        crawl_dir = crawl_dir[:-1]
-    crawl_name = os.path.basename(crawl_dir)
-    containing_dir = os.path.dirname(crawl_dir)
-    os.chdir(containing_dir)
-    arc_path = "%s.tar.gz" % crawl_name
-    tar_cmd = "tar czvf %s %s" % (arc_path, crawl_name)
-    wl_log.debug("Packing the crawl dir with cmd: %s" % tar_cmd)
-    status, txt = commands.getstatusoutput(tar_cmd)
-    if status or is_targz_archive_corrupt(arc_path):
-        wl_log.critical("Tar command failed or archive is corrupt:\
-                         %s \nSt: %s txt: %s" % (tar_cmd, status, txt))
-        return False
-    else:
-        return True
-
-
-def gen_all_children_procs(parent_pid):
-    parent = psutil.Process(parent_pid)
-    for child in parent.get_children(recursive=True):
-        yield child
-
-
-def kill_all_children(parent_pid):
-    """Kill all child process of a given parent."""
-    for child in gen_all_children_procs(parent_pid):
-        child.kill()
-
-
-def die(last_words="Unknown problem, quitting!"):
-    wl_log.error(last_words)
-    sys.exit(1)
 
 
 def read_file(path, binary=False):
@@ -156,6 +98,7 @@ def write_to_file(file_path, data):
 
 
 def download_file(uri, file_path):
+    print("Will download %s to %s" % (uri, file_path))
     write_to_file(file_path, read_url(uri))
 
 
@@ -165,14 +108,14 @@ def extract_tbb_tarball(archive_path):
     tar_cmd = "tar xvf %s -C %s" % (archive_path, arch_dir)
     status, txt = commands.getstatusoutput(tar_cmd)
     if status or not os.path.isdir(extracted_dir):
-        wl_log.error("Error extracting TBB tarball %s: (%s: %s)"
-                     % (tar_cmd, status, txt))
+        print("Error extracting TBB tarball %s: (%s: %s)"
+              % (tar_cmd, status, txt))
         return False
     dest_dir = archive_path.split(".tar")[0]
     mv_cmd = "mv %s %s" % (extracted_dir, dest_dir)
     status, txt = commands.getstatusoutput(mv_cmd)
     if status or not os.path.isdir(dest_dir):
-        wl_log.error("Error moving extracted TBB with the command %s: (%s: %s)"
-                     % (mv_cmd, status, txt))
+        print("Error moving extracted TBB with the command %s: (%s: %s)"
+              % (mv_cmd, status, txt))
         return False
     return True

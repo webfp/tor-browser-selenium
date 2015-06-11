@@ -17,7 +17,7 @@ class TorBrowserDriver(webdriver.Firefox, firefox.webdriver.RemoteWebDriver):
     def __init__(self, tbb_binary_path=None, tbb_profile_dir=None,
                  tbb_logfile_path=None,
                  tbb_version=cm.TBB_DEFAULT_VERSION, page_url="",
-                 capture_screen=True):
+                 capture_screen=True, pref_dict=None):
         self.is_running = False
         self.tbb_version = tbb_version
         self.export_lib_path()
@@ -25,6 +25,33 @@ class TorBrowserDriver(webdriver.Firefox, firefox.webdriver.RemoteWebDriver):
         self.page_url = page_url
         self.capture_screen = capture_screen
         self.profile = self.init_tbb_profile(tbb_version)
+        # Initialize Tor Browser's binary
+        self.binary = self.get_tbb_binary(tbb_version=self.tbb_version,
+                                          logfile=tbb_logfile_path)
+
+        self.update_prefs(pref_dict)
+        # Initialize capabilities
+        self.capabilities = DesiredCapabilities.FIREFOX
+        self.capabilities.update({'handlesAlerts': True,
+                                  'databaseEnabled': True,
+                                  'javascriptEnabled': True,
+                                  'browserConnectionEnabled': True})
+
+        try:
+            super(TorBrowserDriver, self)\
+                .__init__(firefox_profile=self.profile,
+                          firefox_binary=self.binary,
+                          capabilities=self.capabilities)
+            self.is_running = True
+        except WebDriverException as exc:
+            print("WebDriverException while connecting to Webdriver %s" % exc)
+        except socket.error as skterr:
+            print("Socker error connecting to Webdriver %s" % skterr.message)
+        except Exception as e:
+            print("Error connecting to Webdriver: %s" % e)
+
+    def update_prefs(self, pref_dict):
+        # TODO check if the default prefs make sense
         # set homepage to a blank tab
         self.profile.set_preference('browser.startup.page', "0")
         self.profile.set_preference('browser.startup.homepage', 'about:newtab')
@@ -50,30 +77,9 @@ class TorBrowserDriver(webdriver.Firefox, firefox.webdriver.RemoteWebDriver):
         self.profile.set_preference(
             'extensions.torbutton.versioncheck_enabled', False)
         self.profile.set_preference('permissions.memory_only', False)
+        for pref_name, pref_val in pref_dict.iteritems():
+            self.profile.set_preference(pref_name, pref_val)
         self.profile.update_preferences()
-        # Initialize Tor Browser's binary
-        self.binary = self.get_tbb_binary(tbb_version=self.tbb_version,
-                                          logfile=tbb_logfile_path)
-
-        # Initialize capabilities
-        self.capabilities = DesiredCapabilities.FIREFOX
-        self.capabilities.update({'handlesAlerts': True,
-                                  'databaseEnabled': True,
-                                  'javascriptEnabled': True,
-                                  'browserConnectionEnabled': True})
-
-        try:
-            super(TorBrowserDriver, self)\
-                .__init__(firefox_profile=self.profile,
-                          firefox_binary=self.binary,
-                          capabilities=self.capabilities)
-            self.is_running = True
-        except WebDriverException as exc:
-            print("WebDriverException while connecting to Webdriver %s" % exc)
-        except socket.error as skterr:
-            print("Socker error connecting to Webdriver %s" % skterr.message)
-        except Exception as e:
-            print("Error connecting to Webdriver: %s" % e)
 
     def export_lib_path(self):
         os.environ["LD_LIBRARY_PATH"] = os.path.dirname(
