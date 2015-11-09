@@ -8,7 +8,8 @@ from urllib2 import HTTPError
 
 SHA_SUMS_FILENAME = "sha256sums.txt"
 SHA_SUMS_UNSIGNED_FILENAME = "sha256sums-unsigned-build.txt"
-    
+
+
 def get_tbb_filename(tbb_ver):
     if int(tbb_ver.split(".")[0]) <= 2:
         file_name = 'tor-browser-gnu-linux-%s-%s-dev-en-US.tar.gz' %\
@@ -35,31 +36,34 @@ def get_url_by_tbb_ver(tbb_ver):
 
 def download_tbb_tarball(tbb_ver, dl_dir=""):
     tarball_url = get_url_by_tbb_ver(tbb_ver)
-    tarball_sig_url = tarball_url + ".asc" 
+    tarball_sig_url = tarball_url + ".asc"
     base_dir = dl_dir if dl_dir else cm.TBB_BASE_DIR
     tarball_path = os.path.join(base_dir, get_tbb_filename(tbb_ver))
     tarball_sig_path = tarball_path + ".asc"
-    
+
     if not os.path.isfile(tarball_path):
         ut.download_file(tarball_url, tarball_path)
         ut.download_file(tarball_sig_url, tarball_sig_path)
-        
-        if not verify_gpg_sig(tarball_sig_path):
-            raise cm.TBBTarballVerificationError("Cannot verify GPG signature of %s"
-                                         % tarball_sig_path)
-        
-        if not verify_tarball_shasum(tbb_ver, tarball_path, tarball_url):
-            raise cm.TBBTarballVerificationError("Cannot verify the integrity of %s"
-                                         % tarball_path)
 
+    if not verify_gpg_sig(tarball_sig_path):
+        raise cm.TBBTarballVerificationError("Cannot verify GPG signature of %s"
+                                     % tarball_sig_path)
+
+    if not verify_tarball_shasum(tbb_ver, tarball_path, tarball_url):
+        raise cm.TBBTarballVerificationError("Cannot verify the integrity of %s"
+                                     % tarball_path)
+    dest_dir = tarball_path.split(".tar")[0]
+    if not os.path.isdir(dest_dir):
         ut.extract_tbb_tarball(tarball_path)
     return tarball_path
     # we cannot verify the integrity of the downloaded tarball
-    
+
 
 def verify_gpg_sig(sig_file):
     """Verify the GPG signature."""
     TBB_DEVS_SIGNINGKEY_FP = "EF6E286DDA85EA2A4BA7DE684E2C6E8793298290"
+    ERINNS_SIGNINGKEY_FP = "8738A680B84B3031A630F2DB416F061063FEE659"
+
     # http://tor.stackexchange.com/questions/648/how-to-verify-tor-browser-bundle-tbb-3-x#comment821_667
     gpg_sig_status_file = "gpg_sig_status_file.txt"
     ret_code = subprocess.Popen(['/usr/bin/gpg',
@@ -69,22 +73,26 @@ def verify_gpg_sig(sig_file):
         return False
     ver_status = ut.read_file(gpg_sig_status_file)
     os.remove(gpg_sig_status_file)
-    if "GOODSIG" in ver_status and "VALIDSIG" in ver_status and TBB_DEVS_SIGNINGKEY_FP in ver_status:
+    if "GOODSIG" in ver_status and "VALIDSIG" in ver_status and\
+        ((TBB_DEVS_SIGNINGKEY_FP in ver_status) or
+         (ERINNS_SIGNINGKEY_FP in ver_status)):
         print "Verified the GPG signature for", sig_file
         return True
     else:
         print "GPG verification error for", sig_file, ver_status
         return False
 
+
 def sig_path(path):
     """Return the .asc signature path for a given path or URL."""
     return path + ".asc"
+
 
 def download_shasum_for_tbb_ver(tbb_ver, tarball_path):
     sha_sum_url = "%s%s" % (get_tbb_base_url(tbb_ver), SHA_SUMS_FILENAME)
     sha_sum_path = "%s.%s" % (tarball_path, SHA_SUMS_FILENAME)
     sha_sum_unsigned_path = "%s.%s" % (tarball_path, SHA_SUMS_UNSIGNED_FILENAME)
-    
+
     if not os.path.isfile(sha_sum_path) and not os.path.isfile(sha_sum_unsigned_path):
         print "Cannot find the shasums file, will download"
         try:
@@ -111,6 +119,7 @@ def verify_tarball_shasum(tbb_ver, tarball_path, tarball_url):
     tarball_sha_sum = ut.sha_256_sum_file(tarball_path).lower()
     sha_sum_path = download_shasum_for_tbb_ver(tbb_ver, tarball_path)
     if not sha_sum_path or not os.path.isfile(sha_sum_path):
+        print "Can't find sha_sum file at", sha_sum_path
         return False
 
     if not verify_gpg_sig(sig_path(sha_sum_path)):
@@ -158,10 +167,15 @@ def setup_env():
 
     Download recommended TBB version and verify it.
     """
+    import sys
+    version = None
+    if len(sys.argv) == 2:
+        version = sys.argv[1]
+    if not version:
+        version = get_recommended_tbb_version()
     import_tbb_signing_keys()
     ut.create_dir(cm.TBB_BASE_DIR)
-    tbb_rec_ver = get_recommended_tbb_version()
-    download_tbb_tarball(tbb_rec_ver)
+    download_tbb_tarball(version)
 
 if __name__ == '__main__':
     setup_env()
