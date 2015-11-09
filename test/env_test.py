@@ -33,17 +33,11 @@ class Test(unittest.TestCase):
     def test_stem(self):
         self.assert_py_pkg_installed('stem')
 
-    def test_psutil(self):
-        self.assert_py_pkg_installed('psutil')
-
     def test_xvfbwrapper(self):
         self.assert_py_pkg_installed('xvfbwrapper')
 
     def test_argparse(self):
         self.assert_py_pkg_installed('argparse')
-
-    def test_requests(self):
-        self.assert_py_pkg_installed('requests')
 
     def test_webfp_path(self):
         self.assertTrue(os.path.isdir(cm.BASE_DIR),
