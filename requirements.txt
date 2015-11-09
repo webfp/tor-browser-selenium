@@ -1,6 +1,4 @@
-requests
 stem
-psutil>=2.2.1
 xvfbwrapper
 selenium>=2.45.0
 tld
