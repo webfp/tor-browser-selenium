@@ -1,4 +1,5 @@
-from os.path import dirname, realpath, join
+import os
+from os.path import dirname, realpath, join, basename, isdir
 import sys
 import unittest
 sys.path.append(dirname(dirname(realpath(__file__))))
@@ -26,44 +27,20 @@ class Test(unittest.TestCase):
         self.assert_(cm.get_tbb_dirname(cm.TBB_V_3_5, lang="en-US") ==
                      "tor-browser-linux%s-3.5_en-US" % cm.arch)
 
+    def assert_is_executable(self, bin_path):
+        return self.assertTrue(os.access(bin_path, os.EX_OK))
+
     def test_get_tb_bin_path(self):
-        ver_str = "2.3.25-16"
-        tb_bin_path_v2_3_25_16 = cm.get_tb_bin_path(ver_str)
-        self.assert_(ver_str in tb_bin_path_v2_3_25_16)
-        self.assert_(join('App', 'Firefox', 'firefox') in
-                     tb_bin_path_v2_3_25_16)
-
-        tb_bin_path_v3_5 = cm.get_tb_bin_path(cm.TBB_V_3_5)
-        self.assert_(cm.TBB_V_3_5 in tb_bin_path_v3_5)
-        self.assert_(join('Browser', 'firefox') in tb_bin_path_v3_5)
-
-        tb_bin_path_V_4_0_8 = cm.get_tb_bin_path(cm.TBB_V_4_0_8)
-        self.assert_(cm.TBB_V_4_0_8 in tb_bin_path_V_4_0_8)
-        self.assert_(join('Browser', 'firefox') in tb_bin_path_V_4_0_8)
-
-        self.assert_(cm.TBB_BASE_DIR in tb_bin_path_v2_3_25_16)
-        self.assert_(cm.TBB_BASE_DIR in tb_bin_path_v3_5)
-        self.assert_(cm.TBB_BASE_DIR in tb_bin_path_V_4_0_8)
+        tb_bin_path = cm.get_tb_bin_path(cm.TEST_TBB_DIR)
+        self.assertEqual("firefox", basename(tb_bin_path))
+        self.assert_is_executable(tb_bin_path)
 
     def test_get_tbb_profile_path(self):
-        ver_str = "2.3.25-16"
-        tbb_prof_path_v2_3_25_16 = cm.get_tbb_profile_path(ver_str)
-        self.assert_(cm.TBB_V2_PROFILE_PATH in tbb_prof_path_v2_3_25_16)
-        self.assert_(cm.get_tbb_dirname(ver_str) in
-                     tbb_prof_path_v2_3_25_16)
-        self.assert_(cm.TBB_BASE_DIR in tbb_prof_path_v2_3_25_16)
-
-        tbb_prof_path_v3_5 = cm.get_tbb_profile_path(cm.TBB_V_3_5)
-        self.assert_(cm.TBB_V3_PROFILE_PATH in tbb_prof_path_v3_5)
-        self.assert_(cm.get_tbb_dirname(cm.TBB_V_3_5) in
-                     tbb_prof_path_v3_5)
-        self.assert_(cm.TBB_BASE_DIR in tbb_prof_path_v3_5)
-
-        tbb_prof_path_v4_0_8 = cm.get_tbb_profile_path(cm.TBB_V_4_0_8)
-        self.assert_(cm.TBB_V3_PROFILE_PATH in tbb_prof_path_v4_0_8)
-        self.assert_(cm.get_tbb_dirname(cm.TBB_V_4_0_8) in
-                     tbb_prof_path_v4_0_8)
-        self.assert_(cm.TBB_BASE_DIR in tbb_prof_path_v4_0_8)
+        tbb_prof_path = cm.get_tbb_profile_path(cm.TEST_TBB_DIR)
+        self.assertIn("profile", basename(tbb_prof_path))
+        self.assertTrue(isdir(tbb_prof_path))
+        self.assertTrue(isdir(join(tbb_prof_path, "extensions")))
+        self.assertTrue(isdir(join(tbb_prof_path, "preferences")))
 
     def test_get_tbb_data_dir_path(self):
         ver_str = "2.3.25-16"
@@ -92,24 +69,10 @@ class Test(unittest.TestCase):
                      tor_data_path_v4_0_8)
 
     def test_get_tor_bin_path(self):
-        ver_str = "2.3.25-16"
-        tor_bin_path_v2_3_25_16 = cm.get_tor_bin_path(ver_str)
-        self.assert_(cm.TBB_BASE_DIR in tor_bin_path_v2_3_25_16)
-        self.assert_(cm.TOR_V2_BINARY_PATH in tor_bin_path_v2_3_25_16)
-        self.assert_(cm.get_tbb_dirname(ver_str) in
-                     tor_bin_path_v2_3_25_16)
+        tor_bin_path = cm.get_tor_bin_path(cm.TEST_TBB_DIR)
+        self.assertEqual("tor", basename(tor_bin_path))
+        self.assert_is_executable(tor_bin_path)
 
-        tor_bin_path_v3_5 = cm.get_tor_bin_path(cm.TBB_V_3_5)
-        self.assert_(cm.TBB_BASE_DIR in tor_bin_path_v3_5)
-        self.assert_(cm.TOR_V3_BINARY_PATH in tor_bin_path_v3_5)
-        self.assert_(cm.get_tbb_dirname(cm.TBB_V_3_5) in
-                     tor_bin_path_v3_5)
-
-        tor_bin_path_v4_0_8 = cm.get_tor_bin_path(cm.TBB_V_4_0_8)
-        self.assert_(cm.TBB_BASE_DIR in tor_bin_path_v4_0_8)
-        self.assert_(cm.TOR_V4_BINARY_PATH in tor_bin_path_v4_0_8)
-        self.assert_(cm.get_tbb_dirname(cm.TBB_V_4_0_8) in
-                     tor_bin_path_v4_0_8)
 
 if __name__ == "__main__":
     unittest.main()
