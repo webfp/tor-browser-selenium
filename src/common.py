@@ -17,6 +17,19 @@ class TBBGetRecommendedVersionError(Exception):
 class DumpcapTimeoutError(Exception):
     pass
 
+class TorBrowserBinNotFoundError(Exception):
+    pass
+
+class TorBinNotFoundError(Exception):
+    pass
+
+class TBProfDirNotFoundError(Exception):
+    pass
+
+class TorDataDirNotFoundError(Exception):
+    pass
+
+
 
 env_vars = os.environ
 # whether we're running on Travis CI or not
@@ -65,7 +78,6 @@ TBB_WANG_AND_GOLDBERG = TBB_V_2_4_7_A1
 TBB_V_3_5 = "3.5"
 TBB_V_4_0_8 = "4.0.8"
 TBB_DEFAULT_VERSION = TBB_V_4_0_8
-
 TBB_KNOWN_VERSIONS = [TBB_V_2_4_7_A1, TBB_V_3_5, TBB_V_4_0_8]
 
 # Default paths
@@ -80,19 +92,12 @@ TBB_TEST_TARBALL = join(TEST_FILES_DIR,
                         'tor-browser-linux64-4.0.99_en-US.tar.xz')
 TBB_TEST_TARBALL_EXTRACTED = join(TEST_FILES_DIR,
                                   'tor-browser-linux64-4.0.99_en-US')
-RESULTS_DIR = join(BASE_DIR, 'results')
-ETC_DIR = join(BASE_DIR, 'etc')
-PERMISSIONS_DB = join(ETC_DIR, 'permissions.sqlite')
 HOME_PATH = expanduser('~')
 TBB_BASE_DIR = join(BASE_DIR, 'tbb')
-
-# Top URLs localized (DE) to prevent the effect of localization
-LOCALIZED_DATASET = join(ETC_DIR, "localized-urls-100-top.csv")
-
-# Experiment type determines what to do during the visits
-EXP_TYPE_WANG_AND_GOLDBERG = "wang_and_goldberg"  # setting from WPES'13 paper
-EXP_TYPE_MULTITAB_ALEXA = "multitab_alexa"  # open Alexa sites in multiple tabs
-
+#######################################################
+# The TBB that will be used in the tests.
+TEST_TBB_DIR = join(TBB_BASE_DIR, 'tor-browser-linux64-5.0.4_en-US')
+#######################################################
 # Tor ports
 SOCKS_PORT = 9050
 CONTROLLER_PORT = 9051
@@ -124,6 +129,8 @@ TBB_FF_BIN_PATH_DICT = {"2": TBB_V2_FF_BIN_PATH,
                         "4": TBB_V4_FF_BIN_PATH,
                         }
 
+TBB_FF_BIN_PATHS = [TBB_V3_FF_BIN_PATH, TBB_V2_FF_BIN_PATH]
+
 # Path to Firefox profile in TBB dir
 TBB_V2_PROFILE_PATH = join('Data', 'profile')
 TBB_V3_PROFILE_PATH = join('Data', 'Browser', 'profile.default')
@@ -135,15 +142,16 @@ TBB_PROFILE_DIR_DICT = {"2": TBB_V2_PROFILE_PATH,
                         "4": TBB_V4_PROFILE_PATH,
                         }
 
+TBB_PROFILE_DIRS = [TBB_V4_PROFILE_PATH,
+                    TBB_V3_PROFILE_PATH,
+                    TBB_V2_PROFILE_PATH]
+
 # Path to Tor binary in TBB dir
 TOR_V2_BINARY_PATH = join('App', 'tor')
 TOR_V3_BINARY_PATH = join('Tor', 'tor')
 TOR_V4_BINARY_PATH = join('Browser', 'TorBrowser', 'Tor', 'tor')
+TOR_BINARY_PATHS = [TOR_V4_BINARY_PATH, TOR_V3_BINARY_PATH, TOR_V2_BINARY_PATH]
 
-TOR_BINARY_PATH_DICT = {"2": TOR_V2_BINARY_PATH,
-                        "3": TOR_V3_BINARY_PATH,
-                        "4": TOR_V4_BINARY_PATH,
-                        }
 # Path to Tor binary in TBB dir
 TOR_V2_DATA_DIR = join('Data', 'Tor')
 TOR_V3_DATA_DIR = join('Data', 'Tor')
@@ -153,6 +161,8 @@ TOR_DATA_DIR_DICT = {"2": TOR_V2_DATA_DIR,
                      "3": TOR_V3_DATA_DIR,
                      "4": TOR_V4_DATA_DIR,
                      }
+
+TOR_DATA_DIRS = [TOR_V2_DATA_DIR, TOR_V3_DATA_DIR, TOR_V4_DATA_DIR]
 
 
 def get_tbb_major_version(version):
@@ -171,25 +181,56 @@ def get_tbb_path(version, os_name="linux", lang="en-US"):
     return join(TBB_BASE_DIR, dirname)
 
 
-def get_tb_bin_path(version, os_name="linux", lang="en-US"):
-    """Return a binary path for Tor Browser."""
-    major = get_tbb_major_version(version)
-    # bin_path = TBB_V3_FF_BIN_PATH if major is "3" else TBB_V2_FF_BIN_PATH
-    bin_path = TBB_FF_BIN_PATH_DICT[major]
-    dir_path = get_tbb_path(version, os_name, lang)
-    return join(dir_path, bin_path)
+# def get_tb_bin_path(version, os_name="linux", lang="en-US"):
+#     """Return a binary path for Tor Browser."""
+#     major = get_tbb_major_version(version)
+#     # bin_path = TBB_V3_FF_BIN_PATH if major is "3" else TBB_V2_FF_BIN_PATH
+#     bin_path = TBB_FF_BIN_PATH_DICT[major]
+#     dir_path = get_tbb_path(version, os_name, lang)
+#     return join(dir_path, bin_path)
 
 
-def get_tor_bin_path(version, os_name="linux", lang="en-US"):
+def get_tb_bin_path(tbb_dir):
+    """Return the path of the Tor Browser binary in a given TBB folder."""
+    for bin_path in TBB_FF_BIN_PATHS:
+        tb_abspath = join(tbb_dir, bin_path)
+        if os.path.isfile(tb_abspath):
+            return tb_abspath
+    raise TorBrowserBinNotFoundError()
+
+# def get_tor_bin_path(version, os_name="linux", lang="en-US"):
+#     """Return a binary path for Tor."""
+#     major = get_tbb_major_version(version)
+#     bin_path = TOR_BINARY_PATH_DICT[major]
+#     dir_path = get_tbb_path(version, os_name, lang)
+#     return join(dir_path, bin_path)
+
+
+def get_tor_bin_path(tbb_dir):
     """Return a binary path for Tor."""
-    major = get_tbb_major_version(version)
-    bin_path = TOR_BINARY_PATH_DICT[major]
-    dir_path = get_tbb_path(version, os_name, lang)
-    return join(dir_path, bin_path)
+    for tor_bin_path in TOR_BINARY_PATHS:
+        tor_abspath = join(tbb_dir, tor_bin_path)
+        if os.path.isfile(tor_abspath):
+            return tor_abspath
+    raise TorBinNotFoundError()
 
 
-def get_tbb_profile_path(version, os_name="linux", lang="en-US"):
+# def get_tbb_profile_path(version, os_name="linux", lang="en-US"):
+#     """Return profile path for Tor Browser Bundle."""
+#     major = get_tbb_major_version(version)
+#     profile = TBB_PROFILE_DIR_DICT[major]
+#     dir_path = get_tbb_path(version, os_name, lang)
+#     return join(dir_path, profile)
+
+def get_tbb_profile_path(tbb_dir):
     """Return profile path for Tor Browser Bundle."""
+    for tbb_prof_path in TBB_PROFILE_DIRS:
+        tbb_prof_abspath = join(tbb_dir, tbb_prof_path)
+        if os.path.isdir(tbb_prof_abspath):
+            return tbb_prof_abspath
+    raise TBProfDirNotFoundError()
+
+
     major = get_tbb_major_version(version)
     profile = TBB_PROFILE_DIR_DICT[major]
     dir_path = get_tbb_path(version, os_name, lang)
