@@ -17,6 +17,7 @@ class RunDriverWithControllerTest(unittest.TestCase):
     """
     This test shows how to run tor with TorController and browse with TorBrowserDriver.
     """
+    @unittest.skip("Only for didactic purposes.")
     def test_run_driver_with_controller(self):
         # run controller on port N
         custom_socks_port = 6666
