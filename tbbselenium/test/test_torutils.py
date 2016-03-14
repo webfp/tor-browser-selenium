@@ -1,16 +1,9 @@
-import os
-import sys
 import time
 import unittest
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-import common as cm
-from utils import get_hash_of_directory
-from datacollection.torutils import TorBrowserDriver
-from datacollection.torutils import TorController
+
+import tbbselenium.common as cm
+from tbbselenium.tbdriver import TorBrowserDriver
+from tbbselenium.tor_controller import TorController
 
 # Test URLs are taken from the TBB test suit
 # https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/tree/mozmill-tests/tbb-tests/https-everywhere.js
@@ -30,7 +23,6 @@ class TestTorUtils(unittest.TestCase):
         self.tor_process.kill()
         self.tor_process = self.tor_controller.launch_tor_service()
         self.assertTrue(self.tor_process, 'Cannot launch Tor process')
-
 
     def test_close_all_streams(self):
         streams_open = False
