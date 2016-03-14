@@ -1,9 +1,9 @@
-import os
 import shutil
 import socket
 import sqlite3
 from httplib import CannotSendRequest
-from os.path import isdir, isfile, join
+from os import environ
+from os.path import isdir, isfile, join, dirname
 
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
@@ -27,7 +27,8 @@ class TorBrowserDriver(Firefox):
                  tbb_binary_path=None,
                  tbb_profile_path=None,
                  tbb_logfile_path=None,
-                 pref_dict={}):
+                 pref_dict={},
+                 socks_port=cm.SOCKS_PORT):
 
         # Check that either the TBB directory of the latest TBB version
         # or the path to the binary and profile are passed.
@@ -42,6 +43,7 @@ class TorBrowserDriver(Firefox):
         self.tbb_binary_path = tbb_binary_path
         self.tbb_profile_path = tbb_profile_path
         self.temp_profile_path = None
+        self.socks_port = socks_port
 
         # Initialize Tor Browser's profile
         self.profile = self.init_tbb_profile()
@@ -78,7 +80,7 @@ class TorBrowserDriver(Firefox):
         # configure Firefox to use Tor SOCKS proxy
         self.profile.set_preference('network.proxy.type', 1)
         self.profile.set_preference('network.proxy.socks', '127.0.0.1')
-        self.profile.set_preference('network.proxy.socks_port', cm.SOCKS_PORT)
+        self.profile.set_preference('network.proxy.socks_port', self.socks_port)
         self.profile.set_preference('extensions.torlauncher.prompt_at_startup', 0)
         # http://www.w3.org/TR/webdriver/#page-load-strategies-1
         # wait for all frames to load and make sure there's no
@@ -99,7 +101,7 @@ class TorBrowserDriver(Firefox):
 
     def export_lib_path(self):
         """Add the Tor Browser binary to the library path."""
-        os.environ["LD_LIBRARY_PATH"] = os.path.dirname(self.tbb_binary_path)
+        environ["LD_LIBRARY_PATH"] = dirname(self.tbb_binary_path)
 
     def get_tbb_binary(self, logfile=None):
         """Return FirefoxBinary pointing to the TBB's firefox binary."""

@@ -1,8 +1,8 @@
-import unittest
-from time import sleep
 import tempfile
+import unittest
 from os import environ, remove
 from os.path import getsize, exists
+from time import sleep
 
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
@@ -13,7 +13,7 @@ from tbselenium import common as cm
 from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.utils import get_hash_of_directory
 
-WAIT_TIME = 60
+TEST_LONG_WAIT = 60
 
 # Test URLs are taken from the TBB test suit
 # https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/tree/mozmill-tests/tbb-tests/https-everywhere.js
@@ -22,9 +22,7 @@ HTTPS_URL = "https://httpbin.org/"
 
 WEBGL_URL = "https://developer.mozilla.org/samples/webgl/sample1/index.html"
 
-TEST_URL = "http://check.torproject.org"
-
-# Environemtn variable that points to TBB directory:
+# Environment variable that points to TBB directory:
 TBB_PATH = environ.get('TBB_PATH')
 if TBB_PATH is None:
     raise RuntimeError("Environment variable `TBB_PATH` with TBB directory not found.")
@@ -32,22 +30,22 @@ if TBB_PATH is None:
 
 class TBDriverTest(unittest.TestCase):
     def setUp(self):
-        self.tb_driver = TorBrowserDriver(TBB_PATH)
+        self.tb_driver = TorBrowserDriver(TBB_PATH, start_tor=True)
 
     def tearDown(self):
         self.tb_driver.quit()
 
     def test_tbdriver_simple_visit(self):
         """Visiting checktor.torproject.org with TB driver should detect Tor IP."""
-        self.tb_driver.get(TEST_URL)
-        self.tb_driver.implicitly_wait(WAIT_TIME)
+        self.tb_driver.get(cm.TEST_URL)
+        self.tb_driver.implicitly_wait(TEST_LONG_WAIT)
         h1_on = self.tb_driver.find_element_by_css_selector("h1.on")
         self.assertTrue(h1_on)
 
     def test_tbdriver_profile_not_modified(self):
         """Visiting a site should not modify the original profile contents."""
         profile_hash_before = get_hash_of_directory(cm.DEFAULT_TBB_PROFILE_PATH)
-        self.tb_driver.get(TEST_URL)
+        self.tb_driver.get(cm.TEST_URL)
         profile_hash_after = get_hash_of_directory(cm.DEFAULT_TBB_PROFILE_PATH)
         self.assertEqual(profile_hash_before, profile_hash_after)
 
@@ -56,7 +54,7 @@ class TBDriverTest(unittest.TestCase):
         self.tb_driver.get(HTTP_URL)
         sleep(1)
         try:
-            WebDriverWait(self.tb_driver, WAIT_TIME).until(EC.title_contains("httpbin"))
+            WebDriverWait(self.tb_driver, TEST_LONG_WAIT).until(EC.title_contains("httpbin"))
         except TimeoutException:
             self.fail("The title should contain httpbin")
         self.assertEqual(self.tb_driver.current_url, HTTPS_URL)
@@ -66,11 +64,11 @@ class TBDriverTest(unittest.TestCase):
         webgl_test_url = WEBGL_URL
         self.tb_driver.get(webgl_test_url)
         try:
-            WebDriverWait(self.tb_driver, WAIT_TIME).until(EC.alert_is_present())
+            WebDriverWait(self.tb_driver, TEST_LONG_WAIT).until(EC.alert_is_present())
         except TimeoutException:
             self.fail("WebGL error alert should be present")
         self.tb_driver.switch_to.alert.dismiss()
-        self.tb_driver.implicitly_wait(WAIT_TIME / 2)
+        self.tb_driver.implicitly_wait(TEST_LONG_WAIT / 2)
         el = self.tb_driver.find_element_by_class_name("__noscriptPlaceholder__ ")
         self.assertTrue(el)
         # sanity check for the above test
@@ -88,9 +86,9 @@ class ScreenshotTest(unittest.TestCase):
 
     def test_screen_capture(self):
         """Check for screenshot after visit."""
-        TorBrowserDriver.add_exception(TEST_URL)
+        TorBrowserDriver.add_exception(cm.TEST_URL)
         self.tb_driver = TorBrowserDriver(TBB_PATH)
-        self.tb_driver.get(TEST_URL)
+        self.tb_driver.get(cm.TEST_URL)
         sleep(1)
         try:
             self.tb_driver.get_screenshot_as_file(self.temp_file)
