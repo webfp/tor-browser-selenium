@@ -110,8 +110,3 @@ def extract_tarball(tarball_path, parent_path, flags='xvf'):
     if status:
         Exception("Error extracting TBB tarball %s: (%s: %s)"
                   % (tar_cmd, status, txt))
-
-
-def get_tld_names():
-    import tld
-    return tld.utils.tld_names

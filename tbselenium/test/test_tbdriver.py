@@ -24,8 +24,8 @@ WEBGL_URL = "https://developer.mozilla.org/samples/webgl/sample1/index.html"
 
 TEST_URL = "http://check.torproject.org"
 
+# Environemtn variable that points to TBB directory:
 TBB_PATH = environ.get('TBB_PATH')
-TBB_PATH = '/home/mjuarezm/downloads/tor-browser_en-US'
 if TBB_PATH is None:
     raise RuntimeError("Environment variable `TBB_PATH` with TBB directory not found.")
 

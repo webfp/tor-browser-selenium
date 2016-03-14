@@ -49,10 +49,6 @@ class UtilsTest(unittest.TestCase):
             self.assertEqual(get_tld(pub_suf_test_url),
                              "foo.org")
 
-    def test_get_tld_names(self):
-        tld_names = ut.get_tld_names()
-        self.assertIn('.com', tld_names)
-
 
 if __name__ == "__main__":
     unittest.main()
