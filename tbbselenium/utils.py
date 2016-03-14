@@ -1,11 +1,12 @@
-import os
-import signal
-import re
 import commands
-from time import strftime
 import distutils.dir_util as du
-from urllib2 import urlopen
+import re
+import signal
 from hashlib import sha256
+from os import walk, makedirs
+from os.path import join, exists
+from time import strftime
+from urllib2 import urlopen
 
 
 class TimeExceededError(Exception):
@@ -16,9 +17,9 @@ def get_hash_of_directory(path):
     """Return md5 hash of the directory pointed by path."""
     from hashlib import md5
     m = md5()
-    for root, _, files in os.walk(path):
+    for root, _, files in walk(path):
         for f in files:
-            full_path = os.path.join(root, f)
+            full_path = join(root, f)
             for line in open(full_path).readlines():
                 m.update(line)
     return m.digest()
@@ -26,8 +27,8 @@ def get_hash_of_directory(path):
 
 def create_dir(dir_path):
     """Create a directory if it doesn't exist."""
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
+    if not exists(dir_path):
+        makedirs(dir_path)
     return dir_path
 
 
@@ -36,10 +37,10 @@ def append_timestamp(_str=''):
     return _str + strftime('%y%m%d_%H%M%S')
 
 
-def clone_dir_with_timestap(orig_dir_path):
+def clone_dir_with_timestap(dir_path):
     """Copy a folder into the same directory and append a timestamp."""
-    new_dir = create_dir(append_timestamp(orig_dir_path))
-    du.copy_tree(orig_dir_path, new_dir)
+    new_dir = create_dir(append_timestamp(dir_path))
+    du.copy_tree(dir_path, new_dir)
 
 
 def raise_signal(signum, frame):
@@ -102,20 +103,9 @@ def download_file(uri, file_path):
     write_to_file(file_path, read_url(uri))
 
 
-def extract_tbb_tarball(archive_path):
-    arch_dir = os.path.dirname(archive_path)
-    extracted_dir = os.path.join(arch_dir, "tor-browser_en-US")
-    tar_cmd = "tar xvf %s -C %s" % (archive_path, arch_dir)
+def extract_tarball(tarball_path, parent_path, flags='xvf'):
+    tar_cmd = "tar %s %s -C %s" % (flags, tarball_path, parent_path)
     status, txt = commands.getstatusoutput(tar_cmd)
-    if status or not os.path.isdir(extracted_dir):
-        print("Error extracting TBB tarball %s: (%s: %s)"
-              % (tar_cmd, status, txt))
-        return False
-    dest_dir = archive_path.split(".tar")[0]
-    mv_cmd = "mv %s %s" % (extracted_dir, dest_dir)
-    status, txt = commands.getstatusoutput(mv_cmd)
-    if status or not os.path.isdir(dest_dir):
-        print("Error moving extracted TBB with the command %s: (%s: %s)"
-              % (mv_cmd, status, txt))
-        return False
-    return True
+    if status:
+        Exception("Error extracting TBB tarball %s: (%s: %s)"
+                  % (tar_cmd, status, txt))
