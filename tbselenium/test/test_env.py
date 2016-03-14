@@ -21,6 +21,9 @@ class EnvironmentTest(unittest.TestCase):
                          Install it with sudo apt-get install %s" %
                          (pkg_name, pkg_name))
 
+    def test_tld(self):
+        self.assert_py_pkg_installed('tld')
+
     def test_stem(self):
         self.assert_py_pkg_installed('stem')
 

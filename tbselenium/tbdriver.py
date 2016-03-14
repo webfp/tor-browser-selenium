@@ -10,6 +10,7 @@ from selenium.common.exceptions import WebDriverException
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.firefox.webdriver import WebDriver as Firefox
+from tld import get_tld
 
 import common as cm
 from utils import clone_dir_with_timestap
@@ -111,6 +112,10 @@ class TorBrowserDriver(Firefox):
         tbb_binary = FirefoxBinary(firefox_path=self.tbb_binary_path,
                                    log_file=tbb_logfile)
         return tbb_binary
+
+    @classmethod
+    def add_exception(cls, url):
+        cls.exceptions.append(get_tld(url))
 
     def add_canvas_permission(self):
         """Create a permission db (permissions.sqlite) and add an
