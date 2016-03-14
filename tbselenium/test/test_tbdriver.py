@@ -8,9 +8,9 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from tbbselenium import common as cm
-from tbbselenium.tbdriver import TorBrowserDriver
-from tbbselenium.utils import get_hash_of_directory
+from tbselenium import common as cm
+from tbselenium.tbdriver import TorBrowserDriver
+from tbselenium.utils import get_hash_of_directory
 
 WAIT_TIME = 60
 

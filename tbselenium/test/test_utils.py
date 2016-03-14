@@ -3,7 +3,7 @@ from time import sleep
 
 from tld import get_tld
 
-import tbbselenium.utils as ut
+import tbselenium.utils as ut
 
 
 class UtilsTest(unittest.TestCase):
@@ -48,6 +48,10 @@ class UtilsTest(unittest.TestCase):
         for pub_suf_test_url in urls:
             self.assertEqual(get_tld(pub_suf_test_url),
                              "foo.org")
+
+    def test_get_tld_names(self):
+        tld_names = ut.get_tld_names()
+        self.assertIn('.com', tld_names)
 
 
 if __name__ == "__main__":

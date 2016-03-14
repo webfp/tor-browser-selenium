@@ -1,9 +1,9 @@
 import time
 import unittest
 
-import tbbselenium.common as cm
-from tbbselenium.tbdriver import TorBrowserDriver
-from tbbselenium.tor_controller import TorController
+import tbselenium.common as cm
+from tbselenium.tbdriver import TorBrowserDriver
+from tbselenium.torcontroller import TorController
 
 # Test URLs are taken from the TBB test suit
 # https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/tree/mozmill-tests/tbb-tests/https-everywhere.js

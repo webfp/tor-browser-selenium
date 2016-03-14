@@ -2,35 +2,27 @@ import commands
 import unittest
 
 
-class Test(unittest.TestCase):
+class EnvironmentTest(unittest.TestCase):
     def assert_py_pkg_installed(self, pkg_name):
         try:
             __import__(pkg_name)
-        except:
-            self.fail('Cannot find python package.\
-                        Install it by sudo pip install %s' % pkg_name)
+        except ImportError:
+            self.fail('Cannot find python package. \
+                       Install it by sudo pip install %s' % pkg_name)
 
     def run_cmd(self, cmd):
         return commands.getstatusoutput('%s ' % cmd)
 
-    def assert_installed(self, pkg_name, msg=""):
+    def assert_installed(self, pkg_name):
         cmd = 'which %s' % pkg_name
         status, _ = self.run_cmd(cmd)
-        self.assertFalse(status, "%s is not installed."
-                                 "Install it with sudo apt-get install %s" %
+        self.assertFalse(status,
+                         "%s is not installed. \
+                         Install it with sudo apt-get install %s" %
                          (pkg_name, pkg_name))
-
-    def test_dumpcap(self):
-        self.assert_installed('dumpcap')
-
-    def test_xvfb(self):
-        self.assert_installed('Xvfb')
 
     def test_stem(self):
         self.assert_py_pkg_installed('stem')
-
-    def test_xvfbwrapper(self):
-        self.assert_py_pkg_installed('xvfbwrapper')
 
     def test_argparse(self):
         self.assert_py_pkg_installed('argparse')

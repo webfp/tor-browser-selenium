@@ -1,4 +1,2 @@
 stem
-xvfbwrapper
-selenium>=2.46.0
-tld
+selenium>=2.45.0
