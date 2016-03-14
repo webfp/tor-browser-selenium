@@ -30,7 +30,7 @@ if TBB_PATH is None:
 
 class TBDriverTest(unittest.TestCase):
     def setUp(self):
-        self.tb_driver = TorBrowserDriver(TBB_PATH, capture_screen=True)
+        self.tb_driver = TorBrowserDriver(TBB_PATH)
 
     def tearDown(self):
         self.tb_driver.quit()

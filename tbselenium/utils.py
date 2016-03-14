@@ -41,6 +41,7 @@ def clone_dir_with_timestap(dir_path):
     """Copy a folder into the same directory and append a timestamp."""
     new_dir = create_dir(append_timestamp(dir_path))
     du.copy_tree(dir_path, new_dir)
+    return new_dir
 
 
 def raise_signal(signum, frame):

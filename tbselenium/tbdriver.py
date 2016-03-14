@@ -32,11 +32,15 @@ class TorBrowserDriver(Firefox):
         # or the path to the binary and profile are passed.
         assert (tbb_path or tbb_binary_path and tbb_profile_path)
         if tbb_path:
+            tbb_path = tbb_path.rstrip('/')
             tbb_binary_path = join(tbb_path, cm.DEFAULT_TBB_BINARY_PATH)
             tbb_profile_path = join(tbb_path, cm.DEFAULT_TBB_PROFILE_PATH)
 
         # Make sure the paths exist
         assert (isfile(tbb_binary_path) and isdir(tbb_profile_path))
+        self.tbb_binary_path = tbb_binary_path
+        self.tbb_profile_path = tbb_profile_path
+        self.temp_profile_path = None
 
         # Initialize Tor Browser's profile
         self.profile = self.init_tbb_profile()
@@ -44,6 +48,7 @@ class TorBrowserDriver(Firefox):
         # Initialize Tor Browser's binary
         self.binary = self.get_tbb_binary(logfile=tbb_logfile_path)
         self.update_prefs(pref_dict)
+
         # Initialize capabilities
         self.capabilities = DesiredCapabilities.FIREFOX
         self.capabilities.update({'handlesAlerts': True,
