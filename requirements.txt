@@ -1,3 +1,0 @@
-tld
-stem
-selenium>=2.45.0
