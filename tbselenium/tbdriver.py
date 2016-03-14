@@ -10,7 +10,6 @@ from selenium.common.exceptions import WebDriverException
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.firefox.webdriver import WebDriver as Firefox
-from tld import get_tld_names
 
 import common as cm
 from utils import clone_dir_with_timestap
@@ -20,13 +19,13 @@ class TorBrowserDriver(Firefox):
     """
     Extends Selenium's Firefox driver to implement a Selenium driver for the Tor Browser.
     """
+    exceptions = []
 
     def __init__(self,
                  tbb_path=None,
                  tbb_binary_path=None,
                  tbb_profile_path=None,
                  tbb_logfile_path=None,
-                 capture_screen=False,
                  pref_dict={}):
 
         # Check that either the TBB directory of the latest TBB version
@@ -38,14 +37,6 @@ class TorBrowserDriver(Firefox):
 
         # Make sure the paths exist
         assert (isfile(tbb_binary_path) and isdir(tbb_profile_path))
-
-        # Initialize object attributes
-        self.tbb_binary_path = tbb_binary_path
-        self.tbb_profile_path = tbb_profile_path
-        self.capture_screen = capture_screen
-        self.is_running = False
-        self.temp_profile_path = None
-        self.export_lib_path()
 
         # Initialize Tor Browser's profile
         self.profile = self.init_tbb_profile()
@@ -122,7 +113,6 @@ class TorBrowserDriver(Firefox):
         taken by Selenium will be just blank images due to the canvas
         fingerprinting defense in the Tor Browser.
         """
-        tld_names = get_tld_names()
         connect_to_db = sqlite3.connect
         perm_db = connect_to_db(join(self.temp_profile_path, "permissions.sqlite"))
         cursor = perm_db.cursor()
@@ -137,7 +127,7 @@ class TorBrowserDriver(Firefox):
           expireTime INTEGER,
           appId INTEGER,
           isInBrowserElement INTEGER)""")
-        for domain in tld_names:
+        for domain in self.exceptions:
             print("Adding canvas/extractData permission for %s" % domain)
             qry = """INSERT INTO 'moz_hosts'
             VALUES(NULL,'%s','canvas/extractData',1,0,0,0,0);""" % domain
@@ -148,8 +138,7 @@ class TorBrowserDriver(Firefox):
     def init_tbb_profile(self):
         """Make a copy of profile dir and create a Firefox profile pointing to it."""
         self.temp_profile_path = clone_dir_with_timestap(self.tbb_profile_path)
-        if self.capture_screen:
-            self.add_canvas_permission()
+        self.add_canvas_permission()
         try:
             tbb_profile = webdriver.FirefoxProfile(self.temp_profile_path)
         except Exception as exc:
