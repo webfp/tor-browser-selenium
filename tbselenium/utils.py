@@ -1,12 +1,9 @@
-import commands
 import distutils.dir_util as du
 import re
 import signal
-from hashlib import sha256
 from os import walk, makedirs
 from os.path import join, exists
 from time import strftime
-from urllib2 import urlopen
 
 
 class TimeExceededError(Exception):
@@ -66,47 +63,3 @@ def get_filename_from_url(url, prefix):
     url = url.replace('www.', '')
     dashed = re.sub(r'[^A-Za-z0-9._]', '-', url)
     return '%s-%s' % (prefix, re.sub(r'-+', '-', dashed))
-
-
-def read_file(path, binary=False):
-    """Read and return the file content."""
-    options = 'rb' if binary else 'rU'
-    with open(path, options) as f:
-        return f.read()
-
-
-def sha_256_sum_file(path, binary=True):
-    """Return the SHA-256 sum of the file."""
-    return sha256(read_file(path, binary=binary)).hexdigest()
-
-
-def gen_read_lines(path):
-    """Generator for reading the lines in a file."""
-    with open(path, 'rU') as f:
-        for line in f:
-            yield line
-
-
-def read_url(uri):
-    """Fetch and return a URI content."""
-    w = urlopen(uri)
-    return w.read()
-
-
-def write_to_file(file_path, data):
-    """Write data to file and close."""
-    with open(file_path, 'w') as ofile:
-        ofile.write(data)
-
-
-def download_file(uri, file_path):
-    print("Will download %s to %s" % (uri, file_path))
-    write_to_file(file_path, read_url(uri))
-
-
-def extract_tarball(tarball_path, parent_path, flags='xvf'):
-    tar_cmd = "tar %s %s -C %s" % (flags, tarball_path, parent_path)
-    status, txt = commands.getstatusoutput(tar_cmd)
-    if status:
-        Exception("Error extracting TBB tarball %s: (%s: %s)"
-                  % (tar_cmd, status, txt))

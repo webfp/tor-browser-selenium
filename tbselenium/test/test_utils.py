@@ -7,20 +7,6 @@ import tbselenium.utils as ut
 
 
 class UtilsTest(unittest.TestCase):
-    def test_get_filename_from_url(self):
-        filename = ut.get_filename_from_url("http://google.com", 0)
-        self.assertEqual("0-google.com", filename)
-        filename = ut.get_filename_from_url("https://yahoo.com", 99)
-        self.assertEqual("99-yahoo.com", filename)
-        filename = ut.get_filename_from_url("https://123abc.com/somepath", 999)
-        self.assertEqual("999-123abc.com-somepath", filename)
-        filename = ut.get_filename_from_url(
-                "https://123abc.com/somepath/", 123)
-        self.assertEqual("123-123abc.com-somepath-", filename)
-        filename = ut.get_filename_from_url(
-                "https://123abc.com/somepath/q=query&q2=q2", 234)
-        self.assertEqual("234-123abc.com-somepath-q-query-q2-q2", filename)
-
     def test_timeout(self):
         ut.timeout(1)
         try:
