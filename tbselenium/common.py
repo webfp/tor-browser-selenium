@@ -8,10 +8,12 @@ DEFAULT_TOR_BINARY_PATH = join('Browser', 'TorBrowser', 'Tor', 'tor')
 DEFAULT_TOR_DATA_PATH = join('Browser', 'TorBrowser', 'Data', 'Tor')
 
 # TOR PORTS
-SOCKS_PORT = 9050
-CONTROLLER_PORT = 9051
+DEFAULT_SOCKS_PORT = 9050
+REFACTOR_CONTROL_PORT = 9051
 
 # TOR CONTROLLER
 STREAM_CLOSE_TIMEOUT = 20  # wait 20 seconds before raising an alarm signal
 # otherwise we had many cases where get_streams hanged
+
+# Test constants
 TEST_URL = "http://check.torproject.org"

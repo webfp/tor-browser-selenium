@@ -15,7 +15,7 @@ class TorController(object):
                  tbb_path=None,
                  tor_binary_path=None,
                  tor_data_path=None,
-                 torrc_dict={'SocksPort': str(cm.SOCKS_PORT)},
+                 torrc_dict={'SocksPort': str(cm.DEFAULT_SOCKS_PORT)},
                  tor_log='/dev/null'):
         assert (tbb_path or tor_binary_path and tor_data_path)
         if tbb_path:
@@ -60,7 +60,7 @@ class TorController(object):
         self.log_file = logfile
         self.tmp_tor_data_dir = ut.clone_dir_with_timestap(self.tor_data_path)
 
-        self.torrc_dict.update({'ControlPort': str(cm.CONTROLLER_PORT),
+        self.torrc_dict.update({'ControlPort': str(cm.REFACTOR_CONTROL_PORT),
                                 'DataDirectory': self.tmp_tor_data_dir,
                                 'Log': ['INFO file %s' % logfile]})
 
@@ -72,10 +72,10 @@ class TorController(object):
             tor_cmd=self.tor_binary_path,
             timeout=270
         )
-        self.controller = Controller.from_port(port=cm.CONTROLLER_PORT)
+        self.controller = Controller.from_port(port=cm.REFACTOR_CONTROL_PORT)
         self.controller.authenticate()
         print("Tor running at port {0} & controller port {1}."
-              .format(cm.SOCKS_PORT, cm.CONTROLLER_PORT))
+              .format(cm.DEFAULT_SOCKS_PORT, cm.REFACTOR_CONTROL_PORT))
         return self.tor_process
 
     def close_all_streams(self):

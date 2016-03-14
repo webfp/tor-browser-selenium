@@ -28,7 +28,7 @@ class TorBrowserDriver(Firefox):
                  tbb_profile_path=None,
                  tbb_logfile_path=None,
                  pref_dict={},
-                 socks_port=cm.SOCKS_PORT):
+                 socks_port=cm.DEFAULT_SOCKS_PORT):
 
         # Check that either the TBB directory of the latest TBB version
         # or the path to the binary and profile are passed.
