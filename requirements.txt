@@ -1,4 +1,4 @@
 stem
 xvfbwrapper
-selenium>=2.45.0
+selenium>=2.46.0
 tld
