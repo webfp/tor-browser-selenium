@@ -178,3 +178,9 @@ class TorBrowserDriver(Firefox):
                 print(str(e))
         except Exception as exc:
             print("Exception while quitting TorBrowserDriver %s" % exc)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.quit()
