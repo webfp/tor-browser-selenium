@@ -1,6 +1,6 @@
 import tempfile
 import unittest
-from os import environ, remove
+from os import remove
 from os.path import getsize, exists
 from time import sleep
 
@@ -11,6 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from tbselenium import common as cm
 from tbselenium.tbdriver import TorBrowserDriver
+from tbselenium.test import TBB_PATH
 from tbselenium.utils import get_hash_of_directory
 
 TEST_LONG_WAIT = 60
@@ -21,11 +22,6 @@ HTTP_URL = "http://httpbin.org/"
 HTTPS_URL = "https://httpbin.org/"
 
 WEBGL_URL = "https://developer.mozilla.org/samples/webgl/sample1/index.html"
-
-# Environment variable that points to TBB directory:
-TBB_PATH = environ.get('TBB_PATH')
-if TBB_PATH is None:
-    raise RuntimeError("Environment variable `TBB_PATH` with TBB directory not found.")
 
 
 class TBDriverTest(unittest.TestCase):
