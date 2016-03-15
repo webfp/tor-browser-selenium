@@ -9,6 +9,7 @@ setup(
     packages=['tbselenium'],
     install_requires=[
         'selenium >= 2.45.0',
+        'xvfbwrapper',
         'tld'
     ]
 )
