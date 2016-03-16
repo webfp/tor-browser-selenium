@@ -47,6 +47,8 @@ where `TBB_PATH` is the path to the Tor Browser Bundle directory.
 
 ## Examples
 
+In the following examples we assume the `TorBrowserDriver` class has been imported, and the `TBB_PATH` variable is the path to the Tor Browser Bundle directory.
+
 ### Simple visit to a page
 
 ```python
