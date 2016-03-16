@@ -3,22 +3,26 @@ Automate Tor Browser with Selenium.
 
 ## Requirements
 
-It has been tested with Debian Wheezy and Ubuntu Trusty and Wily and the following versions of the [Tor Browser](https://www.torproject.org/projects/torbrowser.html.en):
+It has been tested on the following versions of the [Tor Browser](https://www.torproject.org/projects/torbrowser.html.en):
 
 * 2.4.7-alpha-1
 * 4.0.8
 * 3.5
 * 5.5.3
 
+It has been tested on Debian Wheezy and Ubuntu Trusty and Wily. It has not been tested in non-Linux systems, but most of the code should be compatible with Windows and Mac OSX.
+
 Make sure your [Selenium](http://www.seleniumhq.org/) version supports the Firefox version on which the Tor Browser you are using is based.
 
-Also, the system (OS, libraries, etc.) should support the Tor Browser versions used and have `Python` installed.
+Also, the system (OS, libraries, etc.) should support the Tor Browser versions being used and have `python` and `easy_install` installed. In Linux you can do this with:
+
+`sudo apt-get install python python-setuptools`
 
 ## Installation
 
 Clone this repository:
 
-`git clone git@github.com:gunesacar/tor-browser-selenium.git`
+`git clone git@github.com:webfp/tor-browser-selenium.git`
 
 Install:
 
@@ -43,7 +47,17 @@ where `TBB_PATH` is the path to the Tor Browser Bundle directory.
 
 ## Examples
 
+In the following examples we assume the `TorBrowserDriver` class has been imported, and the `TBB_PATH` variable is the path to the Tor Browser Bundle directory.
+
+
 ### Simple visit to a page
+```python
+driver = TorBrowserDriver(TBB_PATH)
+driver.get('https://check.torproject.org')
+driver.quit()
+```
+
+### Simple visit using the contextmanager
 
 ```python
 with TorBrowserDriver(TBB_PATH) as driver:
@@ -53,7 +67,7 @@ with TorBrowserDriver(TBB_PATH) as driver:
 
 ### Take a screenshot
 
-Currently, we need to add an exception to access de canvas in the Tor Browser permission database. We need to do this beforehand for all the URLs that we plan to visit.
+Currently, we need to add an exception to access the canvas in the Tor Browser permission database. We need to do this beforehand for all the URLs that we plan to visit.
 
 ```python
 TorBrowserDriver.add_exception(cm.TEST_URL)
@@ -68,7 +82,7 @@ This prevents the browser window from popping up:
 
 ```python
 with TorBrowserDriver(TBB_PATH, xvfb=True) as driver:
-    driver.get(cm.TEST_URL)  # this won't pop up the browser window.
+    driver.get('https://check.torproject.org')  # this won't show the browser window.
     sleep(1)
 ```
 
@@ -78,7 +92,7 @@ This will make a temporary copy of the Tor Browser profile, so that we do not po
 
 ```python
 with TorBrowserDriver(TBB_PATH, pollute=False) as driver:
-    driver.get(cm.TEST_URL)
+    driver.get('https://check.torproject.org')
     sleep(1)
     # the temporary profile is wiped when driver quits
 ```
@@ -96,12 +110,12 @@ tb_profile = join(tbb_3_5, "Data", "Browser", "profile.default")
 with TorBrowserDriver(tbb_binary_path=tb_binary,
                       tbb_profile_path=tb_profile,
                       tbb_logfile_path="ff.log") as driver:
-    driver.get(cm.TEST_URL)
+    driver.get('https://check.torproject.org')
 ```
     
 This example also shows how to indicate a log file for the Tor Browser (`ff.log`).
 
-### Use stem + TorBrowserDriver
+### Visit with stem + TorBrowserDriver
 
 This example shows how to use [stem](https://stem.torproject.org/api/control.html) to launch the `tor` process with our own configuration. We run tor with stem listening to a custom SOCKS and Controller ports, and use a particular tor binary instead of the one installed in the system.
 
@@ -111,7 +125,7 @@ from stem.process import launch_tor_with_config
 
 # If you're running tor with the TBB binary, instead
 # of a tor installed in the system, you need to set
-# the path in the LD_LIBRARY_PATH:
+# its path in the LD_LIBRARY_PATH:
 custom_tor_binary = join(TBB_PATH, cm.DEFAULT_TOR_BINARY_PATH)
 environ["LD_LIBRARY_PATH"] = dirname(custom_tor_binary)
 
@@ -129,7 +143,7 @@ with Controller.from_port(port=custom_control_port) as controller:
     controller.authenticate()
     # Visit the page with the TorBrowserDriver
     with TorBrowserDriver(TBB_PATH, socks_port=custom_socks_port) as driver:
-        driver.get(cm.TEST_URL)
+        driver.get('https://check.torproject.org')
         sleep(1)
 
 # Kill tor process
