@@ -68,7 +68,7 @@ This prevents the browser window from popping up:
 
 ```python
 with TorBrowserDriver(TBB_PATH, xvfb=True) as driver:
-    driver.get(cm.TEST_URL)  # this won't pop up the browser window.
+    driver.get('https://check.torproject.org')  # this won't show the browser window.
     sleep(1)
 ```
 
@@ -78,7 +78,7 @@ This will make a temporary copy of the Tor Browser profile, so that we do not po
 
 ```python
 with TorBrowserDriver(TBB_PATH, pollute=False) as driver:
-    driver.get(cm.TEST_URL)
+    driver.get('https://check.torproject.org')
     sleep(1)
     # the temporary profile is wiped when driver quits
 ```
@@ -96,7 +96,7 @@ tb_profile = join(tbb_3_5, "Data", "Browser", "profile.default")
 with TorBrowserDriver(tbb_binary_path=tb_binary,
                       tbb_profile_path=tb_profile,
                       tbb_logfile_path="ff.log") as driver:
-    driver.get(cm.TEST_URL)
+    driver.get('https://check.torproject.org')
 ```
     
 This example also shows how to indicate a log file for the Tor Browser (`ff.log`).
@@ -129,7 +129,7 @@ with Controller.from_port(port=custom_control_port) as controller:
     controller.authenticate()
     # Visit the page with the TorBrowserDriver
     with TorBrowserDriver(TBB_PATH, socks_port=custom_socks_port) as driver:
-        driver.get(cm.TEST_URL)
+        driver.get('https://check.torproject.org')
         sleep(1)
 
 # Kill tor process
