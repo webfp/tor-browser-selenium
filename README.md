@@ -38,7 +38,7 @@ where `TBB_PATH` is the path to the Tor Browser Bundle directory.
 ## Test
 
 - Tests assume there is an instance of  `tor` running.
-- To run all the tests: `./run_tests.py $TBB_PATH
+- To run all the tests: `./run_tests.py $TBB_PATH`
 
 
 ## Examples
