@@ -1,5 +1,6 @@
 # tor-browser-selenium
-Automate Tor Browser with Selenium.
+
+A Python library to automate Tor Browser with Selenium. Our implementation started as a fork of tor-browser-selenium by @isislovecruft.
 
 ## Requirements
 
@@ -167,4 +168,3 @@ path_to_logfile = "ff.log"
 TorBrowserDriver(TBB_PATH, tbb_logfile_path=path_to_logfile)
 ```
 We've found that most of these errors comes from an incompatibility between the OS, Selenium and TorBrowserDriver. We recommend using the latest Tor Browser Bundle on the Ubuntu LTS.
-
