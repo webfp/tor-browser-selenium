@@ -26,7 +26,7 @@ WEBGL_URL = "https://developer.mozilla.org/samples/webgl/sample1/index.html"
 
 class TBDriverTest(unittest.TestCase):
     def setUp(self):
-        self.tb_driver = TorBrowserDriver(TBB_PATH)
+        self.tb_driver = TorBrowserDriver(TBB_PATH, xvfb=True)
 
     def tearDown(self):
         self.tb_driver.quit()
@@ -83,7 +83,7 @@ class ScreenshotTest(unittest.TestCase):
     def test_screen_capture(self):
         """Check for screenshot after visit."""
         TorBrowserDriver.add_exception(cm.TEST_URL)
-        self.tb_driver = TorBrowserDriver(TBB_PATH)
+        self.tb_driver = TorBrowserDriver(TBB_PATH, xvfb=True)
         self.tb_driver.get(cm.TEST_URL)
         sleep(1)
         try:
@@ -104,12 +104,16 @@ class HTTPSEverywhereTest(unittest.TestCase):
         but not because the site is HTTPS by default. See, the following:
         https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/tree/mozmill-tests/tbb-tests/https-everywhere-disabled.js
         """
+        from xvfbwrapper import Xvfb
+        vdisplay = Xvfb()
+        vdisplay.start()
         ff_driver = webdriver.Firefox()
         ff_driver.get(HTTP_URL)
         sleep(1)
         # make sure it doesn't redirect to https
         self.assertEqual(ff_driver.current_url, HTTP_URL)
         ff_driver.quit()
+        vdisplay.stop()
 
 
 if __name__ == "__main__":
