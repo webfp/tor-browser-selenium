@@ -49,7 +49,15 @@ where `TBB_PATH` is the path to the Tor Browser Bundle directory.
 
 In the following examples we assume the `TorBrowserDriver` class has been imported, and the `TBB_PATH` variable is the path to the Tor Browser Bundle directory.
 
+
 ### Simple visit to a page
+```python
+    driver = TorBrowserDriver(TBB_PATH)
+    driver.get('https://check.torproject.org')
+    driver.quit()
+```
+
+### Simple visit using the contextmanager
 
 ```python
 with TorBrowserDriver(TBB_PATH) as driver:
@@ -107,7 +115,7 @@ with TorBrowserDriver(tbb_binary_path=tb_binary,
     
 This example also shows how to indicate a log file for the Tor Browser (`ff.log`).
 
-### Use stem + TorBrowserDriver
+### Visit with stem + TorBrowserDriver
 
 This example shows how to use [stem](https://stem.torproject.org/api/control.html) to launch the `tor` process with our own configuration. We run tor with stem listening to a custom SOCKS and Controller ports, and use a particular tor binary instead of the one installed in the system.
 
