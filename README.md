@@ -125,7 +125,7 @@ from stem.process import launch_tor_with_config
 
 # If you're running tor with the TBB binary, instead
 # of a tor installed in the system, you need to set
-# the path in the LD_LIBRARY_PATH:
+# its path in the LD_LIBRARY_PATH:
 custom_tor_binary = join(TBB_PATH, cm.DEFAULT_TOR_BINARY_PATH)
 environ["LD_LIBRARY_PATH"] = dirname(custom_tor_binary)
 
