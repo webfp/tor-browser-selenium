@@ -57,7 +57,7 @@ with TorBrowserDriver(TBB_PATH) as driver:
 
 ### Take a screenshot
 
-Currently, we need to add an exception to access de canvas in the Tor Browser permission database. We need to do this beforehand for all the URLs that we plan to visit.
+Currently, we need to add an exception to access the canvas in the Tor Browser permission database. We need to do this beforehand for all the URLs that we plan to visit.
 
 ```python
 TorBrowserDriver.add_exception(cm.TEST_URL)
