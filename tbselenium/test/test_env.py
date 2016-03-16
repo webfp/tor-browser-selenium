@@ -21,21 +21,11 @@ class EnvironmentTest(unittest.TestCase):
                          Install it with sudo apt-get install %s" %
                          (pkg_name, pkg_name))
 
-    def test_os(self):
-        from sys import platform as _platform
-        if _platform == "linux" or _platform == "linux2":
-            pass
-        else:
-            self.fail("This module is only supported by linux platforms.")
-
     def test_tld(self):
         self.assert_py_pkg_installed('tld')
 
-    def test_stem(self):
-        self.assert_py_pkg_installed('stem')
-
-    def test_argparse(self):
-        self.assert_py_pkg_installed('argparse')
+    def test_xvfwrapper(self):
+        self.assert_py_pkg_installed('xvfbwrapper')
 
     def test_selenium(self):
         self.assert_py_pkg_installed('selenium')

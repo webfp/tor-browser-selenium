@@ -33,7 +33,7 @@ class TorBrowserDriver(Firefox):
                  pollute=True):
 
         # Check that either the TBB directory of the latest TBB version
-        # or the path to the binary and profile are passed.
+        # or the path to the tor browser binary and profile are passed.
         assert (tbb_path or tbb_binary_path and tbb_profile_path)
         if tbb_path:
             tbb_path = tbb_path.rstrip('/')
@@ -76,12 +76,11 @@ class TorBrowserDriver(Firefox):
             print("Error connecting to Webdriver: %s" % e)
 
     def update_prefs(self, pref_dict):
-        # TODO check if the default prefs make sense
-        # set homepage to a blank tab
+        # Set homepage to a blank tab
         self.profile.set_preference('browser.startup.page', "0")
         self.profile.set_preference('browser.startup.homepage', 'about:newtab')
 
-        # configure Firefox to use Tor SOCKS proxy
+        # Configure Firefox to use Tor SOCKS proxy
         self.profile.set_preference('network.proxy.type', 1)
         self.profile.set_preference('network.proxy.socks', '127.0.0.1')
         self.profile.set_preference('network.proxy.socks_port', self.socks_port)
@@ -95,7 +94,7 @@ class TorBrowserDriver(Firefox):
         # upcoming versions of the Firefox Webdriver
         # https://w3c.github.io/webdriver/webdriver-spec.html#the-page-load-strategy
 
-        # prevent Tor Browser running its own Tor process
+        # Prevent Tor Browser running its own Tor process
         self.profile.set_preference('extensions.torlauncher.start_tor', False)
         self.profile.set_preference('extensions.torbutton.versioncheck_enabled', False)
         self.profile.set_preference('permissions.memory_only', False)
@@ -104,7 +103,7 @@ class TorBrowserDriver(Firefox):
         self.profile.update_preferences()
 
     def export_lib_path(self):
-        """Add the Tor Browser binary to the library path."""
+        """Add the Tor Browser binary path to the library variable."""
         environ["LD_LIBRARY_PATH"] = dirname(self.tbb_binary_path)
 
     def get_tbb_binary(self, logfile=None):
@@ -113,14 +112,16 @@ class TorBrowserDriver(Firefox):
         if logfile:
             tbb_logfile = open(logfile, 'a+')
 
-        # in case you get an error for the unknown log_file, make sure your
+        # In case you get an error for the unknown log_file, make sure your
         # Selenium version is compatible with the Firefox version in TBB.
-        tbb_binary = FirefoxBinary(firefox_path=self.tbb_binary_path,
-                                   log_file=tbb_logfile)
-        return tbb_binary
+        # Another common output in case of incompatibility is an error
+        # for TorBrowserDriver not having a 'session_id' property.
+        return FirefoxBinary(firefox_path=self.tbb_binary_path,
+                             log_file=tbb_logfile)
 
     @classmethod
     def add_exception(cls, url):
+        """Add top level domain of `url` to exceptions list."""
         cls.exceptions.append(get_tld(url))
 
     def add_canvas_permission(self, profile_path):
@@ -152,7 +153,7 @@ class TorBrowserDriver(Firefox):
         cursor.close()
 
     def init_tbb_profile(self):
-        """Make a copy of profile dir and create a Firefox profile pointing to it."""
+        """Create a Firefox profile pointing to a profile dir path."""
         profile_path = self.tbb_profile_path
         if not self.pollute:
             self.temp_profile_path = clone_dir_temporary(self.tbb_profile_path)
