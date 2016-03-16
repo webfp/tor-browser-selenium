@@ -1,5 +1,8 @@
 # tor-browser-selenium
 
+![DISCLAIMER](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "experimental") - **PLEASE BE CAREFUL**
+
+
 A Python library to automate Tor Browser with Selenium. Our implementation started as a fork of [tor-browser-selenium](https://github.com/isislovecruft/tor-browser-selenium) by @isislovecruft.
 
 ## Requirements
