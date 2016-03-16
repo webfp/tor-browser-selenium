@@ -85,7 +85,7 @@ class ScreenshotTest(unittest.TestCase):
         TorBrowserDriver.add_exception(cm.TEST_URL)
         self.tb_driver = TorBrowserDriver(TBB_PATH, xvfb=True)
         self.tb_driver.get(cm.TEST_URL)
-        sleep(1)
+        sleep(3)
         try:
             self.tb_driver.get_screenshot_as_file(self.temp_file)
         except Exception as e:
