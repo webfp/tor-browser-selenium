@@ -22,7 +22,7 @@ Also, the system (OS, libraries, etc.) should support the Tor Browser versions b
 
 Clone this repository:
 
-`git clone git@github.com:gunesacar/tor-browser-selenium.git`
+`git clone git@github.com:webfp/tor-browser-selenium.git`
 
 Install:
 
