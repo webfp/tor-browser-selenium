@@ -26,14 +26,14 @@ WEBGL_URL = "https://developer.mozilla.org/samples/webgl/sample1/index.html"
 
 class TBDriverTest(unittest.TestCase):
     def setUp(self):
-        self.tb_driver = TorBrowserDriver(TBB_PATH, xvfb=True)
+        self.tb_driver = TorBrowserDriver(TBB_PATH, xvfb=cm.DEFAULT_XVFB_WINDOW_SIZE)
 
     def tearDown(self):
         self.tb_driver.quit()
 
     def test_tbdriver_simple_visit(self):
-        """Visiting checktor.torproject.org with TB driver should detect Tor IP."""
-        self.tb_driver.get(cm.TEST_URL)
+        """checktor.torproject.org should detect Tor IP."""
+        self.tb_driver.get(cm.CHECK_TPO_URL)
         self.tb_driver.implicitly_wait(TEST_LONG_WAIT)
         h1_on = self.tb_driver.find_element_by_css_selector("h1.on")
         self.assertTrue(h1_on)
@@ -41,7 +41,7 @@ class TBDriverTest(unittest.TestCase):
     def test_tbdriver_profile_not_modified(self):
         """Visiting a site should not modify the original profile contents."""
         profile_hash_before = get_hash_of_directory(cm.DEFAULT_TBB_PROFILE_PATH)
-        self.tb_driver.get(cm.TEST_URL)
+        self.tb_driver.get(cm.CHECK_TPO_URL)
         profile_hash_after = get_hash_of_directory(cm.DEFAULT_TBB_PROFILE_PATH)
         self.assertEqual(profile_hash_before, profile_hash_after)
 
@@ -57,8 +57,7 @@ class TBDriverTest(unittest.TestCase):
 
     def test_noscript(self):
         """Visiting a WebGL page with NoScript should disable WebGL."""
-        webgl_test_url = WEBGL_URL
-        self.tb_driver.get(webgl_test_url)
+        self.tb_driver.get(WEBGL_URL)
         try:
             WebDriverWait(self.tb_driver, TEST_LONG_WAIT).until(EC.alert_is_present())
         except TimeoutException:
@@ -82,9 +81,9 @@ class ScreenshotTest(unittest.TestCase):
 
     def test_screen_capture(self):
         """Check for screenshot after visit."""
-        TorBrowserDriver.add_exception(cm.TEST_URL)
-        self.tb_driver = TorBrowserDriver(TBB_PATH, xvfb=True)
-        self.tb_driver.get(cm.TEST_URL)
+        TorBrowserDriver.add_exception(cm.CHECK_TPO_URL)
+        self.tb_driver = TorBrowserDriver(TBB_PATH, xvfb=cm.DEFAULT_XVFB_WINDOW_SIZE)
+        self.tb_driver.get(cm.CHECK_TPO_URL)
         sleep(3)
         try:
             self.tb_driver.get_screenshot_as_file(self.temp_file)
