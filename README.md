@@ -112,8 +112,7 @@ tbb_3_5 = join(expanduser('~'), 'tor-browser_en-US')
 tb_binary = join(tbb_3_5, "Browser", "firefox")
 tb_profile = join(tbb_3_5, "Data", "Browser", "profile.default")
 with TorBrowserDriver(tbb_binary_path=tb_binary,
-                      tbb_profile_path=tb_profile,
-                      tbb_logfile_path="ff.log") as driver:
+                      tbb_profile_path=tb_profile) as driver:
     driver.get('https://check.torproject.org')
 ```
     
@@ -163,7 +162,7 @@ If you get an exception with a message like this:
 
 `AttributeError: 'TorBrowserDriver' object has no attribute 'session_id'`,
 
-it is probably because Selenium's command to execute Firefox failed. In order to debug the problem, pass a log file to the TorBrowserDriver to get information about errors that popped out when executing Firefox, you can do that with:
+it probably is because Selenium's command to execute Firefox failed. In order to debug the problem, pass a log file to the TorBrowserDriver to get information about errors that popped out when executing Firefox, you can do that with:
 
 ```python
 path_to_logfile = "ff.log"
