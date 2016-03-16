@@ -25,7 +25,7 @@ class EnvironmentTest(unittest.TestCase):
         self.assert_py_pkg_installed('tld')
 
     def test_xvfwrapper(self):
-        self.assert_py_pkg_installed('xvfbwrapper')
+        self.assert_py_pkg_installed('pyvirtualdisplay')
 
     def test_selenium(self):
         self.assert_py_pkg_installed('selenium')
