@@ -13,7 +13,7 @@ from selenium.webdriver.firefox.webdriver import WebDriver as Firefox
 from tld import get_tld
 
 import common as cm
-from utils import clone_dir_temporary
+from utils import clone_dir_temporary, start_xvfb, stop_xvfb
 
 
 class TorBrowserDriver(Firefox):
@@ -51,8 +51,8 @@ class TorBrowserDriver(Firefox):
         self.pollute = pollute
         self.virt_display = virt_display
         if virt_display:
-            win_w, win_h = (int(dim) for dim in virt_display.split("x"))
-            self.start_xvfb(win_w, win_h)
+            win_w, win_h = (int(dim) for dim in virt_display.lower().split("x"))
+            self.xvfb_display = start_xvfb(win_w, win_h)
         # Initialize Tor Browser's profile
         self.profile = self.init_tbb_profile()
 
@@ -192,8 +192,7 @@ class TorBrowserDriver(Firefox):
             if self.temp_profile_path is not None:
                 shutil.rmtree(self.temp_profile_path)
             # remove virtual display
-            if self.xvfb_display:
-                self.xvfb_display.stop()
+            stop_xvfb(self.xvfb_display)
 
     def __enter__(self):
         return self

@@ -1,6 +1,7 @@
 import distutils.dir_util as du
 from os import walk, makedirs
 from os.path import join, exists
+
 from pyvirtualdisplay import Display
 
 
