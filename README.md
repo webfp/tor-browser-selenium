@@ -115,8 +115,6 @@ with TorBrowserDriver(tbb_binary_path=tb_binary,
                       tbb_profile_path=tb_profile) as driver:
     driver.get('https://check.torproject.org')
 ```
-    
-This example also shows how to indicate a log file for the Tor Browser (`ff.log`).
 
 ### TorBrowserDriver + stem
 
