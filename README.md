@@ -28,6 +28,10 @@ Install:
 
 `sudo easy_install .`
 
+Download the Tor Browser Bundle:
+
+You can find the latest Tor Browser Bundle here: https://www.torproject.org/projects/torbrowser.html.en. Download it and extract the tarball to a directory of your convenience (`TBB_PATH`).
+
 ## Use
 
 ```python
