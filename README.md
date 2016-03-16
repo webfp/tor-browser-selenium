@@ -10,7 +10,7 @@ It has been tested on the following versions of the [Tor Browser](https://www.to
 * 3.5
 * 5.5.3
 
-It has been tested with Debian Wheezy and Ubuntu Trusty and Wily. It has not been tested in non-Linux systems, but most of the code should be compatible with Windows and Mac OSX.
+It has been tested on Debian Wheezy and Ubuntu Trusty and Wily. It has not been tested in non-Linux systems, but most of the code should be compatible with Windows and Mac OSX.
 
 Make sure your [Selenium](http://www.seleniumhq.org/) version supports the Firefox version on which the Tor Browser you are using is based.
 
