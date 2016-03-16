@@ -1,7 +1,6 @@
 import distutils.dir_util as du
 from os import walk, makedirs
 from os.path import join, exists
-from time import strftime
 
 
 def get_hash_of_directory(path):
@@ -23,13 +22,9 @@ def create_dir(dir_path):
     return dir_path
 
 
-def append_timestamp(_str=''):
-    """Append a timestamp to a string and return it."""
-    return _str + strftime('%y%m%d_%H%M%S')
-
-
-def clone_dir_with_timestap(dir_path):
+def clone_dir_temporary(dir_path):
     """Copy a folder in the same directory and append a timestamp."""
-    new_dir = create_dir(append_timestamp(dir_path))
-    du.copy_tree(dir_path, new_dir)
-    return new_dir
+    import tempfile
+    tempdir = tempfile.mkdtemp()
+    du.copy_tree(dir_path, tempdir)
+    return tempdir

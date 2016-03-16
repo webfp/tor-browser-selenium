@@ -13,7 +13,7 @@ from selenium.webdriver.firefox.webdriver import WebDriver as Firefox
 from tld import get_tld
 
 import common as cm
-from utils import clone_dir_with_timestap
+from utils import clone_dir_temporary
 
 
 class TorBrowserDriver(Firefox):
@@ -28,7 +28,9 @@ class TorBrowserDriver(Firefox):
                  tbb_profile_path=None,
                  tbb_logfile_path=None,
                  pref_dict={},
-                 socks_port=cm.DEFAULT_SOCKS_PORT):
+                 socks_port=cm.DEFAULT_SOCKS_PORT,
+                 xvfb=False,
+                 pollute=True):
 
         # Check that either the TBB directory of the latest TBB version
         # or the path to the binary and profile are passed.
@@ -44,6 +46,8 @@ class TorBrowserDriver(Firefox):
         self.tbb_profile_path = tbb_profile_path
         self.temp_profile_path = None
         self.socks_port = socks_port
+        self.pollute = pollute
+        self.xvfb = xvfb
 
         # Initialize Tor Browser's profile
         self.profile = self.init_tbb_profile()
@@ -119,14 +123,14 @@ class TorBrowserDriver(Firefox):
     def add_exception(cls, url):
         cls.exceptions.append(get_tld(url))
 
-    def add_canvas_permission(self):
+    def add_canvas_permission(self, profile_path):
         """Create a permission db (permissions.sqlite) and add an
         exception for the canvas image extraction. Otherwise screenshots
         taken by Selenium will be just blank images due to the canvas
         fingerprinting defense in the Tor Browser.
         """
         connect_to_db = sqlite3.connect
-        perm_db = connect_to_db(join(self.temp_profile_path, "permissions.sqlite"))
+        perm_db = connect_to_db(join(profile_path, "permissions.sqlite"))
         cursor = perm_db.cursor()
         # http://mxr.mozilla.org/mozilla-esr31/source/build/automation.py.in
         cursor.execute("PRAGMA user_version=3")
@@ -149,10 +153,13 @@ class TorBrowserDriver(Firefox):
 
     def init_tbb_profile(self):
         """Make a copy of profile dir and create a Firefox profile pointing to it."""
-        self.temp_profile_path = clone_dir_with_timestap(self.tbb_profile_path)
-        self.add_canvas_permission()
+        profile_path = self.tbb_profile_path
+        if not self.pollute:
+            self.temp_profile_path = clone_dir_temporary(self.tbb_profile_path)
+            profile_path = self.temp_profile_path
+        self.add_canvas_permission(profile_path)
         try:
-            tbb_profile = webdriver.FirefoxProfile(self.temp_profile_path)
+            tbb_profile = webdriver.FirefoxProfile(profile_path)
         except Exception as exc:
             print("Error creating the TB profile %s" % exc)
         return tbb_profile

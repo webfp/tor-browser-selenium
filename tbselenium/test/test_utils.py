@@ -72,13 +72,6 @@ class CreateDirTest(TestInTemporaryFolder, unittest.TestCase):
         ut.create_dir(test_folder_path)
 
 
-class AddTimestampTest(unittest.TestCase):
-    def test_add_timestamp_to_non_string(self):
-        non_string = 123
-        ut.append_timestamp(1234)
-        self.assertRaises(TypeError, ut.append_timestamp, non_string)
-
-
 class TLDTest(unittest.TestCase):
     """Make sure we get the right domain for all the edge cases."""
 
