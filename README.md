@@ -81,12 +81,12 @@ with TorBrowserDriver(TBB_PATH, ) as driver:
     driver.get_screenshot_as_file("screenshot.png")
 ```
 
-### Visit with Xvfb
+### Visit with a vitual display
 
-This prevents the browser window from popping up:
+The browser window is placed in a virtual display of dimension 1280x800.
 
 ```python
-with TorBrowserDriver(TBB_PATH, xvfb=True) as driver:
+with TorBrowserDriver(TBB_PATH, virt_display="1280X800") as driver:
     driver.get('https://check.torproject.org')  # this won't show the browser window.
     sleep(1)
 ```

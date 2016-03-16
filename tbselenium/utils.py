@@ -32,7 +32,9 @@ def clone_dir_temporary(dir_path):
 
 
 def start_xvfb(win_width, win_height):
-    print("Starting XVFB with dimensions: %dx%d" % (win_width, win_height))
+    # TODO: commented logging lines because if tbselenium is used as a library it might be confusing where these prints come from...
+    # TODO: think about a way to log without annoying too much the library users? Maybe print only errors?
+    # print("Starting XVFB with dimensions: %dx%d" % (win_width, win_height))
     xvfb_display = Display(visible=0, size=(win_width, win_height))
     xvfb_display.start()
     return xvfb_display
@@ -40,5 +42,5 @@ def start_xvfb(win_width, win_height):
 
 def stop_xvfb(xvfb_display):
     if xvfb_display:
-        print("Stopping XVFB")
+        # print("Stopping XVFB")
         xvfb_display.stop()

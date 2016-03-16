@@ -18,7 +18,7 @@ from utils import clone_dir_temporary
 
 class TorBrowserDriver(Firefox):
     """
-    Extend Firefox webdriver to implement to automate Tor Browser.
+    Extend Firefox webdriver to automate Tor Browser.
     """
     canvas_exceptions = []
 
@@ -73,11 +73,11 @@ class TorBrowserDriver(Firefox):
                                                    capabilities=self.capabilities)
             self.is_running = True
         except WebDriverException as wd_exc:
-            print("WebDriverException while connecting to Webdriver: %s" % wd_exc)
+            print("[tbselenium] WebDriverException while connecting to Webdriver: %s" % wd_exc)
         except socket.error as skt_err:
-            print("Socker error connecting to Webdriver: %s" % skt_err.message)
+            print("[tbselenium] Socker error connecting to Webdriver: %s" % skt_err.message)
         except Exception as exc:
-            print("Error connecting to Webdriver: %s" % exc)
+            print("[tbselenium] Error connecting to Webdriver: %s" % exc)
 
     def update_prefs(self, pref_dict):
         # Set homepage to a blank tab
@@ -149,7 +149,7 @@ class TorBrowserDriver(Firefox):
           appId INTEGER,
           isInBrowserElement INTEGER)""")
         for domain in self.canvas_exceptions:
-            print("Adding canvas/extractData permission for %s" % domain)
+            # print("Adding canvas/extractData permission for %s" % domain)
             qry = """INSERT INTO 'moz_hosts'
             VALUES(NULL,'%s','canvas/extractData',1,0,0,0,0);""" % domain
             cursor.execute(qry)
@@ -166,19 +166,16 @@ class TorBrowserDriver(Firefox):
         try:
             tbb_profile = webdriver.FirefoxProfile(profile_path)
         except Exception as exc:
-            print("Error creating the TB profile %s" % exc)
+            print("[tbselenium] Error creating the TB profile %s" % exc)
         return tbb_profile
 
     def quit(self):
-        """Overrides the base class method cleaning the timestamped profile."""
+        """Overrides the base class method. Quits driver and closes virtual display ."""
         self.is_running = False
         try:
-            print("Quit: Removing profile dir")
-            if self.temp_profile_path is not None:
-                shutil.rmtree(self.temp_profile_path)
             super(TorBrowserDriver, self).quit()
         except CannotSendRequest as exc:
-            print("CannotSendRequest while quitting TorBrowserDriver %s" % exc)
+            print("[tbselenium] CannotSendRequest while quitting TorBrowserDriver %s" % exc)
             # following is copied from webdriver.firefox.webdriver.quit() which
             # was interrupted due to an unhandled CannotSendRequest exception.
             self.binary.kill()  # kill the browser
@@ -187,15 +184,19 @@ class TorBrowserDriver(Firefox):
                 if self.profile.tempfolder is not None:
                     shutil.rmtree(self.profile.tempfolder)
             except Exception as e:
-                print(str(e))
+                print("[tbselenium] " + str(e))
         except Exception as exc:
-            print("Exception while quitting TorBrowserDriver %s" % exc)
+            print("[tbselenium] Exception while quitting TorBrowserDriver %s" % exc)
+        finally:
+            # remove profile dir
+            if self.temp_profile_path is not None:
+                shutil.rmtree(self.temp_profile_path)
+            # remove virtual display
+            if self.xvfb_display:
+                self.xvfb_display.stop()
 
     def __enter__(self):
         return self
 
-    # TODO: type argument triggers a warning  since it's a reserved word?
     def __exit__(self, type, value, traceback):
         self.quit()
-        if self.xvfb_display:
-            self.xvfb_display.stop()

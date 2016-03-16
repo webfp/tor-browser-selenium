@@ -26,7 +26,7 @@ WEBGL_URL = "https://developer.mozilla.org/samples/webgl/sample1/index.html"
 
 class TBDriverTest(unittest.TestCase):
     def setUp(self):
-        self.tb_driver = TorBrowserDriver(TBB_PATH, xvfb=cm.DEFAULT_XVFB_WINDOW_SIZE)
+        self.tb_driver = TorBrowserDriver(TBB_PATH, virt_display=cm.DEFAULT_XVFB_WINDOW_SIZE)
 
     def tearDown(self):
         self.tb_driver.quit()
@@ -82,7 +82,7 @@ class ScreenshotTest(unittest.TestCase):
     def test_screen_capture(self):
         """Check for screenshot after visit."""
         TorBrowserDriver.add_exception(cm.CHECK_TPO_URL)
-        self.tb_driver = TorBrowserDriver(TBB_PATH, xvfb=cm.DEFAULT_XVFB_WINDOW_SIZE)
+        self.tb_driver = TorBrowserDriver(TBB_PATH, virt_display=cm.DEFAULT_XVFB_WINDOW_SIZE)
         self.tb_driver.get(cm.CHECK_TPO_URL)
         sleep(3)
         try:
