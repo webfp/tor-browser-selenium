@@ -20,7 +20,7 @@ class TorBrowserDriverExamples(unittest.TestCase):
         It assumes Tor is already running and SOCKS listening to the
         default port.
         """
-        with TorBrowserDriver(TBB_PATH) as driver:
+        with TorBrowserDriver(TBB_PATH, xvfb="") as driver:
             driver.get(cm.TEST_URL)
             sleep(1)  # stay one second in the page
 
@@ -31,14 +31,14 @@ class TorBrowserDriverExamples(unittest.TestCase):
         # permission database. We need to do this for each site that we
         # plan to visit.
         TorBrowserDriver.add_exception(cm.TEST_URL)
-        with TorBrowserDriver(TBB_PATH, ) as driver:
+        with TorBrowserDriver(TBB_PATH, xvfb="") as driver:
             driver.get(cm.TEST_URL)
             driver.get_screenshot_as_file("screenshot.png")
 
     @unittest.skip("Only for didactic purposes.")
     def test_visit_page_with_xvfb_enabled(self):
         """Visit a page with a virtual buffer."""
-        with TorBrowserDriver(TBB_PATH, xvfb=True) as driver:
+        with TorBrowserDriver(TBB_PATH, xvfb="1280X800") as driver:
             driver.get(cm.TEST_URL)  # this won't pop up the browser window.
             sleep(1)
 

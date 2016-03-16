@@ -15,4 +15,7 @@ STREAM_CLOSE_TIMEOUT = 20  # wait 20 seconds before raising an alarm signal
 # otherwise we had many cases where get_streams hanged
 
 # Test constants
-TEST_URL = "http://check.torproject.org"
+CHECK_TPO_URL = "http://check.torproject.org"
+
+# Default size for the virtual display
+DEFAULT_XVFB_WINDOW_SIZE = "1280x800"

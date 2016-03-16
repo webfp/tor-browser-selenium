@@ -1,6 +1,7 @@
 import distutils.dir_util as du
 from os import walk, makedirs
 from os.path import join, exists
+from pyvirtualdisplay import Display
 
 
 def get_hash_of_directory(path):
@@ -28,3 +29,16 @@ def clone_dir_temporary(dir_path):
     tempdir = tempfile.mkdtemp()
     du.copy_tree(dir_path, tempdir)
     return tempdir
+
+
+def start_xvfb(win_width, win_height):
+    print("Starting XVFB with dimensions: %dx%d" % (win_width, win_height))
+    xvfb_display = Display(visible=0, size=(win_width, win_height))
+    xvfb_display.start()
+    return xvfb_display
+
+
+def stop_xvfb(xvfb_display):
+    if xvfb_display:
+        print("Stopping XVFB")
+        xvfb_display.stop()
