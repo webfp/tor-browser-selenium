@@ -10,6 +10,4 @@ install:
   - easy_install .
   - wget https://www.torproject.org/dist/torbrowser/5.5.3/tor-browser-linux64-5.5.3_en-US.tar.xz
   - tar -xvf tor-browser-linux64-5.5.3_en-US.tar.xz
-before_script:
-  - tor
 script:  python run_tests.py ./tor-browser_en-US
