@@ -160,7 +160,7 @@ If you get an exception with a message like this:
 
 `AttributeError: 'TorBrowserDriver' object has no attribute 'session_id'`,
 
-it probably is because Selenium's command to execute Firefox failed. In order to debug the problem, pass a log file to the TorBrowserDriver to get information about errors that popped out when executing Firefox, you can do that with:
+it probably is because Selenium's command to execute Firefox failed. In order to debug the issue, pass a log file to the TorBrowserDriver to obtain errors messages coming from Firefox. You can indicate the path to the logfile as a parameter to the TorBrowserDriver instance:
 
 ```python
 path_to_logfile = "ff.log"
