@@ -52,9 +52,9 @@ In the following examples we assume the `TorBrowserDriver` class has been import
 
 ### Simple visit to a page
 ```python
-    driver = TorBrowserDriver(TBB_PATH)
-    driver.get('https://check.torproject.org')
-    driver.quit()
+driver = TorBrowserDriver(TBB_PATH)
+driver.get('https://check.torproject.org')
+driver.quit()
 ```
 
 ### Simple visit using the contextmanager
