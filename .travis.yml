@@ -6,8 +6,8 @@ before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
 install:
-  - sudo apt-get install python python-setuptools git xvfb wget xz-utils tor
-  - easy_install .
+  - sudo apt-get -qq install git xvfb wget xz-utils tor
+  - pip install -r requirements.txt
   - wget https://www.torproject.org/dist/torbrowser/5.5.3/tor-browser-linux64-5.5.3_en-US.tar.xz
   - tar -xvf tor-browser-linux64-5.5.3_en-US.tar.xz
 before_script:
