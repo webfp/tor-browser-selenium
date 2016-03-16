@@ -10,8 +10,8 @@ before_install:
 install:
   - sudo apt-get -qq install git xvfb wget xz-utils tor
   - easy_install .
-  - wget https://www.torproject.org/dist/torbrowser/5.5.3/tor-browser-linux64-5.5.3_en-US.tar.xz
-  - tar -xvf tor-browser-linux64-5.5.3_en-US.tar.xz
+  - wget https://archive.torproject.org/tor-package-archive/torbrowser/4.5.1/tor-browser-linux64-4.5.1_en-US.tar.xz
+  - tar -xvf tor-browser-linux64-4.5.1_en-US.tar.xz
 before_script:
   - cd tbselenium/test
   - export TBB_PATH=../../tor-browser_en-US
