@@ -3,16 +3,20 @@ Automate Tor Browser with Selenium.
 
 ## Requirements
 
-It has been tested with Debian Wheezy and Ubuntu Trusty and Wily and the following versions of the [Tor Browser](https://www.torproject.org/projects/torbrowser.html.en):
+It has been tested on the following versions of the [Tor Browser](https://www.torproject.org/projects/torbrowser.html.en):
 
 * 2.4.7-alpha-1
 * 4.0.8
 * 3.5
 * 5.5.3
 
+It has been tested with Debian Wheezy and Ubuntu Trusty and Wily. It has not been tested in non-Linux systems, but most of the code should be compatible with Windows and Mac OSX.
+
 Make sure your [Selenium](http://www.seleniumhq.org/) version supports the Firefox version on which the Tor Browser you are using is based.
 
-Also, the system (OS, libraries, etc.) should support the Tor Browser versions used and have `Python` installed.
+Also, the system (OS, libraries, etc.) should support the Tor Browser versions used and have `python` and `easy_install` installed. In Linux you can do this with:
+
+`sudo apt-get install python python-setuptools`
 
 ## Installation
 
