@@ -12,7 +12,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from tbselenium import common as cm
 from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.test import TBB_PATH
-from tbselenium.utils import get_hash_of_directory
+from tbselenium.utils import get_hash_of_directory, start_xvfb, stop_xvfb
 
 TEST_LONG_WAIT = 60
 
@@ -104,16 +104,14 @@ class HTTPSEverywhereTest(unittest.TestCase):
         but not because the site is HTTPS by default. See, the following:
         https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/tree/mozmill-tests/tbb-tests/https-everywhere-disabled.js
         """
-        from xvfbwrapper import Xvfb
-        vdisplay = Xvfb()
-        vdisplay.start()
+        vdisplay = start_xvfb()
         ff_driver = webdriver.Firefox()
         ff_driver.get(HTTP_URL)
         sleep(1)
         # make sure it doesn't redirect to https
         self.assertEqual(ff_driver.current_url, HTTP_URL)
         ff_driver.quit()
-        vdisplay.stop()
+        stop_xvfb(vdisplay)
 
 
 if __name__ == "__main__":

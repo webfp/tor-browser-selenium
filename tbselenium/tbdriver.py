@@ -18,9 +18,9 @@ from utils import clone_dir_temporary
 
 class TorBrowserDriver(Firefox):
     """
-    Extends Selenium's Firefox driver to implement a Selenium driver for the Tor Browser.
+    Extend Firefox webdriver to implement to automate Tor Browser.
     """
-    exceptions = []
+    canvas_exceptions = []
 
     def __init__(self,
                  tbb_path=None,
@@ -29,7 +29,9 @@ class TorBrowserDriver(Firefox):
                  tbb_logfile_path=None,
                  pref_dict={},
                  socks_port=cm.DEFAULT_SOCKS_PORT,
-                 xvfb=False,
+                 # pass a string in the form of WxH to enable virtual display
+                 # e.g. virt_display="1280x800" or virt_display="800x600"
+                 virt_display="",  # empty string means XVFB is disabled.
                  pollute=True):
 
         # Check that either the TBB directory of the latest TBB version
@@ -47,8 +49,10 @@ class TorBrowserDriver(Firefox):
         self.temp_profile_path = None
         self.socks_port = socks_port
         self.pollute = pollute
-        self.xvfb = xvfb
-
+        self.virt_display = virt_display
+        if virt_display:
+            win_w, win_h = (int(dim) for dim in virt_display.split("x"))
+            self.start_xvfb(win_w, win_h)
         # Initialize Tor Browser's profile
         self.profile = self.init_tbb_profile()
 
@@ -68,12 +72,12 @@ class TorBrowserDriver(Firefox):
                                                    firefox_binary=self.binary,
                                                    capabilities=self.capabilities)
             self.is_running = True
-        except WebDriverException as exc:
-            print("WebDriverException while connecting to Webdriver: %s" % exc)
-        except socket.error as skterr:
-            print("Socker error connecting to Webdriver: %s" % skterr.message)
-        except Exception as e:
-            print("Error connecting to Webdriver: %s" % e)
+        except WebDriverException as wd_exc:
+            print("WebDriverException while connecting to Webdriver: %s" % wd_exc)
+        except socket.error as skt_err:
+            print("Socker error connecting to Webdriver: %s" % skt_err.message)
+        except Exception as exc:
+            print("Error connecting to Webdriver: %s" % exc)
 
     def update_prefs(self, pref_dict):
         # Set homepage to a blank tab
@@ -121,8 +125,8 @@ class TorBrowserDriver(Firefox):
 
     @classmethod
     def add_exception(cls, url):
-        """Add top level domain of `url` to exceptions list."""
-        cls.exceptions.append(get_tld(url))
+        """Add top level domain of `url` to canvas_exceptions list."""
+        cls.canvas_exceptions.append(get_tld(url))
 
     def add_canvas_permission(self, profile_path):
         """Create a permission db (permissions.sqlite) and add an
@@ -144,7 +148,7 @@ class TorBrowserDriver(Firefox):
           expireTime INTEGER,
           appId INTEGER,
           isInBrowserElement INTEGER)""")
-        for domain in self.exceptions:
+        for domain in self.canvas_exceptions:
             print("Adding canvas/extractData permission for %s" % domain)
             qry = """INSERT INTO 'moz_hosts'
             VALUES(NULL,'%s','canvas/extractData',1,0,0,0,0);""" % domain
@@ -190,5 +194,8 @@ class TorBrowserDriver(Firefox):
     def __enter__(self):
         return self
 
+    # TODO: type argument triggers a warning  since it's a reserved word?
     def __exit__(self, type, value, traceback):
         self.quit()
+        if self.xvfb_display:
+            self.xvfb_display.stop()
