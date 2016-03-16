@@ -14,9 +14,9 @@ It has been tested on Debian Wheezy and Ubuntu Trusty and Wily. It has not been 
 
 Make sure your [Selenium](http://www.seleniumhq.org/) version supports the Firefox version on which the Tor Browser you are using is based.
 
-Also, the system (OS, libraries, etc.) should support the Tor Browser versions being used and have `python` and `easy_install` installed. In Linux you can do this with:
+Also, the system (OS, libraries, etc.) should support the Tor Browser versions being used and have `Python` installed. For the installation you may need to install other dependencies. In Linux you can install everything you need by running this command:
 
-`sudo apt-get install python python-setuptools`
+`sudo apt-get install python python-setuptools git xvfb`
 
 ## Installation
 
