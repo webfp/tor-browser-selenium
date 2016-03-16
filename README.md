@@ -10,7 +10,7 @@ It has been tested on the following versions of the [Tor Browser](https://www.to
 * 3.5
 * 5.5.3
 
-It has been tested on Debian Wheezy and Ubuntu Trusty and Wily. It has not been tested in non-Linux systems, but most of the code should be compatible with Windows and Mac OSX.
+It has been tested on Debian Wheezy and Ubuntu Wily. It has not been tested in non-Linux systems, but most of the code should be compatible with Windows and Mac OSX.
 
 Make sure your [Selenium](http://www.seleniumhq.org/) version supports the Firefox version on which the Tor Browser you are using is based.
 
@@ -156,3 +156,18 @@ if tor_process:
 ```
 
 For running examples you can check the `test_examples.py` in the test directory of this repository.
+
+## Known catches
+
+If you get an exception with a message like this:
+
+`AttributeError: 'TorBrowserDriver' object has no attribute 'session_id'`,
+
+it is probably because Selenium's command to execute Firefox failed. In order to debug the problem, pass a log file to the TorBrowserDriver to get information about errors that popped out when executing Firefox, you can do that with:
+
+```python
+path_to_logfile = "ff.log"
+TorBrowserDriver(TBB_PATH, tbb_logfile_path=path_to_logfile)
+```
+We've found that most of these errors comes from an incompatibility between the OS, Selenium and TorBrowserDriver. We recommend using the latest Tor Browser Bundle on the Ubuntu LTS.
+
