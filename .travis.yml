@@ -7,7 +7,7 @@ before_install:
   - "sh -e /etc/init.d/xvfb start"
 install:
   - sudo apt-get -qq install git xvfb wget xz-utils tor
-  - pip install -r requirements.txt
+  - easy_install .
   - wget https://www.torproject.org/dist/torbrowser/5.5.3/tor-browser-linux64-5.5.3_en-US.tar.xz
   - tar -xvf tor-browser-linux64-5.5.3_en-US.tar.xz
 before_script:
