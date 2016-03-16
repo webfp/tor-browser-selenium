@@ -115,7 +115,7 @@ with TorBrowserDriver(tbb_binary_path=tb_binary,
     
 This example also shows how to indicate a log file for the Tor Browser (`ff.log`).
 
-### Visit with stem + TorBrowserDriver
+### TorBrowserDriver + stem
 
 This example shows how to use [stem](https://stem.torproject.org/api/control.html) to launch the `tor` process with our own configuration. We run tor with stem listening to a custom SOCKS and Controller ports, and use a particular tor binary instead of the one installed in the system.
 
