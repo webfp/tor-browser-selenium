@@ -22,13 +22,13 @@ Also, the system (OS, libraries, etc.) should support the Tor Browser versions b
 
 ## Installation
 
-You may need to install the following package:
+You may need to install the following packages:
 
 - python-setuptools
 - git
 - xvfb
 
-In Ubuntu you can install them by running the following command: 
+With `apt-get`, you can install them by running the following command:
 
 `sudo apt-get install python-setuptools git xvfb`
 
