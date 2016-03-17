@@ -12,7 +12,7 @@ install:
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get -y update
   - sudo apt-get -qq install g++-4.8
-  - sudo apt-get -y upgrade
+  - sudo apt-get -o Dpkg::Options::="--force-confnew" -y upgrade
   - easy_install .
   - wget https://archive.torproject.org/tor-package-archive/torbrowser/4.5.1/tor-browser-linux64-4.5.1_en-US.tar.xz
   - tar -xvf tor-browser-linux64-4.5.1_en-US.tar.xz
