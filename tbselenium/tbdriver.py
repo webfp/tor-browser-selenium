@@ -49,7 +49,7 @@ class TorBrowserDriver(Firefox):
         self.temp_profile_path = None
         self.socks_port = socks_port
         self.pollute = pollute
-        self.virt_display = virt_display
+        self.xvfb_display = None
         if virt_display:
             win_w, win_h = (int(dim) for dim in virt_display.lower().split("x"))
             self.xvfb_display = start_xvfb(win_w, win_h)
