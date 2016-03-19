@@ -124,6 +124,11 @@ class TorBrowserDriver(Firefox):
                              log_file=tbb_logfile)
 
     @classmethod
+    def add_exceptions(cls, urls):
+        for url in urls:
+            cls.canvas_exceptions.append(get_tld(url))
+
+    @classmethod
     def add_exception(cls, url):
         """Add top level domain of `url` to canvas_exceptions list."""
         cls.canvas_exceptions.append(get_tld(url))
