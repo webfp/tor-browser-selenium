@@ -1,6 +1,7 @@
 import shutil
 import socket
 import sqlite3
+from contextlib import contextmanager
 from httplib import CannotSendRequest
 from os import environ
 from os.path import isdir, isfile, join, dirname
@@ -204,3 +205,21 @@ class TorBrowserDriver(Firefox):
 
     def __exit__(self, type, value, traceback):
         self.quit()
+
+
+class TorBrowserWrapper(object):
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+        self.driver = None
+
+    def __getattr__(self, item):
+        if item == "launch":
+            return getattr(self, item)
+        return getattr(self.driver, item)
+
+    @contextmanager
+    def launch(self):
+        self.driver = TorBrowserDriver(*self.args, **self.kwargs)
+        yield self.driver
+        self.driver.quit()
