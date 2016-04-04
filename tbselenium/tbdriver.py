@@ -51,25 +51,13 @@ class TorBrowserDriver(Firefox):
         self.temp_profile_path = None
         self.socks_port = socks_port
         self.pollute = pollute
-        self.xvfb_display = None
-        if virt_display:
-            win_w, win_h = (int(dim) for dim in virt_display.lower().split("x"))
-            self.xvfb_display = start_xvfb(win_w, win_h)
+        self.setup_virtual_display(virt_display)
         # Initialize Tor Browser's profile
         self.profile = self.init_tbb_profile()
-
         # Initialize Tor Browser's binary
         self.binary = self.get_tbb_binary(logfile=tbb_logfile_path)
         self.update_prefs(pref_dict)
-
-        # Initialize capabilities
-        self.capabilities = DesiredCapabilities.FIREFOX
-        self.capabilities.update({'handlesAlerts': True,
-                                  'databaseEnabled': True,
-                                  'javascriptEnabled': True,
-                                  'browserConnectionEnabled': True})
-
-        # set up the environment variable to load the right libraries
+        self.setup_capabilities()
         self.export_lib_path()
         try:
             super(TorBrowserDriver, self).__init__(firefox_profile=self.profile,
@@ -125,6 +113,21 @@ class TorBrowserDriver(Firefox):
         # TODO: make sure we don't get strange side effects due to overwriting
         # $HOME environment variable.
         environ["HOME"] = tbb_browser_dir
+
+    def setup_capabilities(self):
+        """Setup the required webdriver capabilities."""
+        self.capabilities = DesiredCapabilities.FIREFOX
+        self.capabilities.update({'handlesAlerts': True,
+                                  'databaseEnabled': True,
+                                  'javascriptEnabled': True,
+                                  'browserConnectionEnabled': True})
+
+    def setup_virtual_display(self, virt_display):
+        """Start a virtual display with the given dimensions (if requested)."""
+        self.xvfb_display = None
+        if virt_display:
+            w, h = (int(dim) for dim in virt_display.lower().split("x"))
+            self.xvfb_display = start_xvfb(w, h)
 
     def get_tbb_binary(self, logfile=None):
         """Return FirefoxBinary pointing to the TBB's firefox binary."""
@@ -218,7 +221,7 @@ class TorBrowserDriver(Firefox):
     def __enter__(self):
         return self
 
-    # TODO avoid using reserved symbol type
+    # TODO avoid using reserved symbol "type"
     def __exit__(self, type, value, traceback):
         self.quit()
 

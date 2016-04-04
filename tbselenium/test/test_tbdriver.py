@@ -106,7 +106,7 @@ class HTTPSEverywhereTest(unittest.TestCase):
         but not because the site is HTTPS by default. See, the following:
         https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/tree/mozmill-tests/tbb-tests/https-everywhere-disabled.js
         """
-        display = start_xvfb(1280, 800)
+        display = start_xvfb()
         ff_driver = webdriver.Firefox()
         ff_driver.get(TEST_HTTP_URL)
         sleep(1)

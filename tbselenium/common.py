@@ -19,5 +19,8 @@ STREAM_CLOSE_TIMEOUT = 20  # wait 20 seconds before raising an alarm signal
 # Test constants
 CHECK_TPO_URL = "http://check.torproject.org"
 TEST_URL = CHECK_TPO_URL
+
 # Default size for the virtual display
-DEFAULT_XVFB_WINDOW_SIZE = "1280x800"
+DEFAULT_XVFB_WIN_W = 1280
+DEFAULT_XVFB_WIN_H = 800
+DEFAULT_XVFB_WINDOW_SIZE = "%sx%s" % (DEFAULT_XVFB_WIN_W, DEFAULT_XVFB_WIN_H)

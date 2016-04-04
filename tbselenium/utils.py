@@ -1,7 +1,7 @@
 import distutils.dir_util as du
 from os import walk, makedirs
 from os.path import join, exists
-
+import common as cm
 from pyvirtualdisplay import Display
 
 
@@ -32,7 +32,8 @@ def clone_dir_temporary(dir_path):
     return tempdir
 
 
-def start_xvfb(win_width, win_height):
+def start_xvfb(win_width=cm.DEFAULT_XVFB_WIN_W,
+               win_height=cm.DEFAULT_XVFB_WIN_H):
     # TODO: commented logging lines because if tbselenium is used as a library it might be confusing where these prints come from...
     # TODO: think about a way to log without annoying too much the library users? Maybe print only errors?
     # print("Starting XVFB with dimensions: %dx%d" % (win_width, win_height))
