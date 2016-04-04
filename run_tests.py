@@ -26,4 +26,3 @@ test_dir = join(file_path, 'tbselenium', 'test')
 
 # Run all tests
 call(["python", "-m", "unittest", "discover", test_dir])
-

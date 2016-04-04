@@ -16,17 +16,20 @@ from tbselenium.utils import get_hash_of_directory, start_xvfb, stop_xvfb
 
 TEST_LONG_WAIT = 60
 
-# Test URLs are taken from the TBB test suit
-# https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/tree/mozmill-tests/tbb-tests/https-everywhere.js
-HTTP_URL = "http://httpbin.org/"
-HTTPS_URL = "https://httpbin.org/"
 
 WEBGL_URL = "https://developer.mozilla.org/samples/webgl/sample1/index.html"
+
+# Test URLs are taken from the TBB test suit
+# https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/tree/marionette/tor_browser_tests/test_https-everywhere.py#n18
+TEST_HTTP_URL = "http://www.freedomboxfoundation.org/thanks/"
+TEST_HTTPS_URL = "https://www.freedomboxfoundation.org/thanks/"
 
 
 class TBDriverTest(unittest.TestCase):
     def setUp(self):
-        self.tb_driver = TorBrowserDriver(TBB_PATH, virt_display=cm.DEFAULT_XVFB_WINDOW_SIZE)
+        self.tb_driver = TorBrowserDriver(TBB_PATH,
+                                          virt_display=cm.DEFAULT_XVFB_WINDOW_SIZE,
+                                          tbb_logfile_path="/tmp/tbblog")
 
     def tearDown(self):
         self.tb_driver.quit()
@@ -47,13 +50,13 @@ class TBDriverTest(unittest.TestCase):
 
     def test_httpseverywhere(self):
         """Visiting an HTTP page with HTTPSEverywhere should force HTTPS version."""
-        self.tb_driver.get(HTTP_URL)
-        sleep(1)
+        self.tb_driver.get(TEST_HTTP_URL)
         try:
-            WebDriverWait(self.tb_driver, TEST_LONG_WAIT).until(EC.title_contains("httpbin"))
+            WebDriverWait(self.tb_driver, TEST_LONG_WAIT).\
+                until(EC.title_contains("thanks"))
         except TimeoutException:
-            self.fail("The title should contain httpbin")
-        self.assertEqual(self.tb_driver.current_url, HTTPS_URL)
+            self.fail("Unexpected page title %s" % self.tb_driver.title)
+        self.assertEqual(self.tb_driver.current_url, TEST_HTTPS_URL)
 
     def test_noscript(self):
         """Visiting a WebGL page with NoScript should disable WebGL."""
@@ -105,10 +108,12 @@ class HTTPSEverywhereTest(unittest.TestCase):
         """
         display = start_xvfb(1280, 800)
         ff_driver = webdriver.Firefox()
-        ff_driver.get(HTTP_URL)
+        ff_driver.get(TEST_HTTP_URL)
         sleep(1)
         # make sure it doesn't redirect to https
-        self.assertEqual(ff_driver.current_url, HTTP_URL)
+        self.assertEqual(ff_driver.current_url, TEST_HTTP_URL,
+                         """This test should be updated to use a site that
+                         doesn't auto-forward HTTP to HTTPS.""")
         ff_driver.quit()
         stop_xvfb(display)
 

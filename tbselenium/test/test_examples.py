@@ -10,7 +10,7 @@ from tbselenium.test import TBB_PATH
 
 class TorBrowserDriverExamples(unittest.TestCase):
     """
-    This class shows examples of how to use the TroBrowserDriver.
+    This class shows examples of how to use the TorBrowserDriver.
     """
 
     @unittest.skip("Only for didactic purposes.")
@@ -22,7 +22,7 @@ class TorBrowserDriverExamples(unittest.TestCase):
         """
         with TorBrowserDriver(TBB_PATH, virt_display="") as driver:
             driver.get(cm.TEST_URL)
-            sleep(1)  # stay one second in the page
+            sleep(1)  # stay one second on the page
 
     @unittest.skip("Only for didactic purposes.")
     def test_take_screenshot(self):

@@ -37,7 +37,8 @@ class TorBrowserDriver(Firefox):
 
         # Check that either the TBB directory of the latest TBB version
         # or the path to the tor browser binary and profile are passed.
-        assert (tbb_path or tbb_binary_path and tbb_profile_path)
+        # TODO: raise an exception with an easy to understand error message
+        assert (tbb_path or (tbb_binary_path and tbb_profile_path))
         if tbb_path:
             tbb_path = tbb_path.rstrip('/')
             tbb_binary_path = join(tbb_path, cm.DEFAULT_TBB_BINARY_PATH)
@@ -68,15 +69,19 @@ class TorBrowserDriver(Firefox):
                                   'javascriptEnabled': True,
                                   'browserConnectionEnabled': True})
 
+        # set up the environment variable to load the right libraries
+        self.export_lib_path()
         try:
             super(TorBrowserDriver, self).__init__(firefox_profile=self.profile,
                                                    firefox_binary=self.binary,
                                                    capabilities=self.capabilities)
             self.is_running = True
+        # TODO we handle (=log) all the exceptions but don't report them to calling
+        # code, which cannot tell if the init went ok or not
         except WebDriverException as wd_exc:
             print("[tbselenium] WebDriverException while connecting to Webdriver: %s" % wd_exc)
         except socket.error as skt_err:
-            print("[tbselenium] Socker error connecting to Webdriver: %s" % skt_err.message)
+            print("[tbselenium] Socket error connecting to Webdriver: %s" % skt_err.message)
         except Exception as exc:
             print("[tbselenium] Error connecting to Webdriver: %s" % exc)
 
@@ -108,8 +113,18 @@ class TorBrowserDriver(Firefox):
         self.profile.update_preferences()
 
     def export_lib_path(self):
-        """Add the Tor Browser binary path to the library variable."""
-        environ["LD_LIBRARY_PATH"] = dirname(self.tbb_binary_path)
+        """Setup LD_LIBRARY_PATH and HOME environment variables."""
+        tbb_root_dir = dirname(dirname(self.tbb_binary_path))
+        tbb_browser_dir = join(tbb_root_dir, cm.DEFAULT_TBB_BROWSER_DIR)
+        tor_binary_dir = join(tbb_root_dir, cm.DEFAULT_TOR_BINARY_DIR)
+        # Add "TBB_DIR/Browser" and dir. of the tor binary to LD_LIBRARY_PATH
+        environ["LD_LIBRARY_PATH"] = "%s:%s" % (tbb_browser_dir,
+                                                tor_binary_dir)
+        # set the home variable to "TBB_DIR/Browser" directory
+        # https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/commit/?id=2e4fb90d4fc019d6680f24089cb1d0b4d4a276a5
+        # TODO: make sure we don't get strange side effects due to overwriting
+        # $HOME environment variable.
+        environ["HOME"] = tbb_browser_dir
 
     def get_tbb_binary(self, logfile=None):
         """Return FirefoxBinary pointing to the TBB's firefox binary."""
@@ -203,6 +218,7 @@ class TorBrowserDriver(Firefox):
     def __enter__(self):
         return self
 
+    # TODO avoid using reserved symbol type
     def __exit__(self, type, value, traceback):
         self.quit()
 
