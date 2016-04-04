@@ -107,7 +107,7 @@ class HTTPSEverywhereTest(unittest.TestCase):
         https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/tree/mozmill-tests/tbb-tests/https-everywhere-disabled.js
         """
         display = start_xvfb()
-        ff_driver = webdriver.Firefox()
+        ff_driver = webdriver.Firefox(timeout=120)
         ff_driver.get(TEST_HTTP_URL)
         sleep(1)
         # make sure it doesn't redirect to https

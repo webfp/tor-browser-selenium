@@ -145,7 +145,7 @@ class TorBrowserDriver(Firefox):
     @classmethod
     def add_exceptions(cls, urls):
         for url in urls:
-            cls.canvas_exceptions.append(get_tld(url))
+            cls.add_exception(get_tld(url))
 
     @classmethod
     def add_exception(cls, url):
