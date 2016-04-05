@@ -5,8 +5,12 @@ from contextlib import contextmanager
 from httplib import CannotSendRequest
 from os import environ
 from os.path import isdir, isfile, join, dirname
+from time import sleep
 
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
@@ -65,8 +69,8 @@ class TorBrowserDriver(Firefox):
                                                    firefox_binary=self.binary,
                                                    capabilities=self.capabilities)
             self.is_running = True
-        # TODO we handle (=log) all the exceptions but don't report them to calling
-        # code, which cannot tell if the init went ok or not
+        # TODO we handle (=log) all the exceptions but don't report them to
+        # calling code, which cannot tell if the init went ok or not
         except WebDriverException as wd_exc:
             print("[tbselenium] WebDriverException while connecting to Webdriver: %s" % wd_exc)
         except socket.error as skt_err:
@@ -74,34 +78,36 @@ class TorBrowserDriver(Firefox):
         except Exception as exc:
             print("[tbselenium] Error connecting to Webdriver: %s" % exc)
 
+    def load_url(self, url, wait_on_page=0):
+        """Load a URL and wait before returning."""
+        self.get(url)
+        sleep(wait_on_page)
+
+    def find_el_by_css(self, css_selector, timeout=30):
+        """Wait until the element matching the selector appears or timeout."""
+        return WebDriverWait(self, timeout).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, css_selector)))
+
     def update_prefs(self, pref_dict):
         # Set homepage to a blank tab
-        self.profile.set_preference('browser.startup.page', "0")
-        self.profile.set_preference('browser.startup.homepage', 'about:newtab')
-
-        # disable auto-update
-        self.profile.set_preference('app.update.enabled', False)
-
+        set_pref = self.profile.set_preference
+        set_pref('browser.startup.page', "0")
+        set_pref('browser.startup.homepage', 'about:newtab')
         # Configure Firefox to use Tor SOCKS proxy
-        self.profile.set_preference('network.proxy.type', 1)
-        self.profile.set_preference('network.proxy.socks', '127.0.0.1')
-        self.profile.set_preference('network.proxy.socks_port', self.socks_port)
-        self.profile.set_preference('extensions.torlauncher.prompt_at_startup', 0)
-        # http://www.w3.org/TR/webdriver/#page-load-strategies-1
-        # wait for all frames to load and make sure there's no
-        # outstanding http requests (except AJAX)
-        # https://code.google.com/p/selenium/wiki/DesiredCapabilities
-        self.profile.set_preference('webdriver.load.strategy', 'conservative')
-        # Note that W3C doesn't mention "conservative", this may change in the
-        # upcoming versions of the Firefox Webdriver
-        # https://w3c.github.io/webdriver/webdriver-spec.html#the-page-load-strategy
-
+        set_pref('network.proxy.type', 1)
+        set_pref('network.proxy.socks', '127.0.0.1')
+        set_pref('network.proxy.socks_port', self.socks_port)
+        set_pref('extensions.torlauncher.prompt_at_startup', 0)
+        set_pref('webdriver.load.strategy', 'normal')
         # Prevent Tor Browser running its own Tor process
-        self.profile.set_preference('extensions.torlauncher.start_tor', False)
-        self.profile.set_preference('extensions.torbutton.versioncheck_enabled', False)
-        self.profile.set_preference('permissions.memory_only', False)
+        set_pref('extensions.torlauncher.start_tor', False)
+        # disable auto-update
+        set_pref('app.update.enabled', False)
+        set_pref('extensions.torbutton.versioncheck_enabled', False)
+        # needed to add canvas permissions for TBB versions < 4.5a3
+        set_pref('permissions.memory_only', False)
         for pref_name, pref_val in pref_dict.iteritems():
-            self.profile.set_preference(pref_name, pref_val)
+            set_pref(pref_name, pref_val)
         self.profile.update_preferences()
 
     def export_lib_path(self):
@@ -138,7 +144,6 @@ class TorBrowserDriver(Firefox):
         tbb_logfile = None
         if logfile:
             tbb_logfile = open(logfile, 'a+')
-
         # In case you get an error for the unknown log_file, make sure your
         # Selenium version is compatible with the Firefox version in TBB.
         # Another common output in case of incompatibility is an error

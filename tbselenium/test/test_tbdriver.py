@@ -26,17 +26,19 @@ TEST_HTTPS_URL = "https://www.freedomboxfoundation.org/thanks/"
 
 class TBDriverTest(unittest.TestCase):
     def setUp(self):
-        self.tb_driver = TorBrowserDriver(TBB_PATH, tbb_logfile_path="tbb.log")
+        self.tb_driver = TorBrowserDriver(TBB_PATH, tbb_logfile_path="tbb.log",
+                                          virt_display="")
 
     def tearDown(self):
         self.tb_driver.quit()
 
     def test_tbdriver_simple_visit(self):
         """checktor.torproject.org should detect Tor IP."""
-        self.tb_driver.get(cm.CHECK_TPO_URL)
-        self.tb_driver.implicitly_wait(TEST_LONG_WAIT)
-        h1_on = self.tb_driver.find_element_by_css_selector("h1.on")
-        self.assertTrue(h1_on)
+        self.tb_driver.load_url(cm.CHECK_TPO_URL)
+        try:
+            self.tb_driver.find_el_by_css("h1.on", 30)
+        except TimeoutException as texc:
+            self.fail("Can't find the network status on the page: %s" % texc)
 
     def test_tbdriver_profile_not_modified(self):
         """Visiting a site should not modify the original profile contents."""
@@ -64,12 +66,10 @@ class TBDriverTest(unittest.TestCase):
         except TimeoutException:
             self.fail("WebGL error alert should be present")
         self.tb_driver.switch_to.alert.dismiss()
-        self.tb_driver.implicitly_wait(TEST_LONG_WAIT / 2)
-        el = self.tb_driver.find_element_by_class_name("__noscriptPlaceholder__ ")
-        self.assertTrue(el)
-        # sanity check for the above test
-        self.assertRaises(NoSuchElementException,
-                          self.tb_driver.find_element_by_class_name, "__nosuch_class_exist")
+        try:
+            self.tb_driver.find_el_by_css(".__noscriptPlaceholder__", 30)
+        except TimeoutException as texc:
+            self.fail("Can't find the __noscriptPlaceholder__: %s" % texc)
 
 
 class ScreenshotTest(unittest.TestCase):
@@ -82,17 +82,13 @@ class ScreenshotTest(unittest.TestCase):
 
     def test_screen_capture(self):
         """Check for screenshot after visit."""
-        self.tb_driver = TorBrowserDriver(TBB_PATH,
-                                          canvas_exceptions=[cm.CHECK_TPO_URL])
-        self.tb_driver.get(cm.CHECK_TPO_URL)
-        sleep(3)
-        try:
-            self.tb_driver.get_screenshot_as_file(self.temp_file)
-        except Exception as e:
-            self.fail("An exception occurred while taking screenshot: %s" % e)
-        self.tb_driver.quit()
-        # A blank page for https://check.torproject.org/ amounts to ~4.8KB.
-        # A real screen capture on the other hand, is ~57KB. If the capture
+        with TorBrowserDriver(TBB_PATH,
+                              canvas_exceptions=[cm.CHECK_TPO_URL]) as driver:
+            # passing canvas_exceptions is not needed for TBB >= 4.5a3
+            driver.load_url(cm.CHECK_TPO_URL, 3)
+            driver.get_screenshot_as_file(self.temp_file)
+        # A blank image for https://check.torproject.org/ amounts to ~4.8KB.
+        # A real screen capture of the same page is ~57KB. If the capture
         # is not blank it should be at least greater than 20KB.
         self.assertGreater(getsize(self.temp_file), 20000)
 
@@ -105,10 +101,7 @@ class HTTPSEverywhereDisabledTest(unittest.TestCase):
         """
         disable_HE_pref = {"extensions.https_everywhere.globalEnabled": False}
         with TorBrowserDriver(TBB_PATH, pref_dict=disable_HE_pref) as driver:
-            driver.get(TEST_HTTP_URL)
-            sleep(1)
-            # make sure it doesn't redirect to https when HTTPEverywhere is disabled
-            self.assertEqual(driver.current_url, TEST_HTTP_URL,
-                             """This test should be updated to use a site that
-                             doesn't auto-forward HTTP to HTTPS. %s """ %
-                             driver.current_url)
+            driver.load_url(TEST_HTTP_URL, 1)
+            err_msg = "Test should be updated to use a site that doesn't \
+                auto-forward HTTP to HTTPS. %s " % driver.current_url
+            self.assertEqual(driver.current_url, TEST_HTTP_URL, err_msg)
