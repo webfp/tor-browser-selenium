@@ -49,3 +49,9 @@ def read_file(path, mode='rU'):
     with open(path, mode) as f:
         content = f.read()
     return content
+
+
+def is_png(path):
+    # Taken from http://stackoverflow.com/a/21555489
+    data = read_file(path, 'rb')
+    return (data[:8] == '\211PNG\r\n\032\n'and (data[12:16] == 'IHDR'))

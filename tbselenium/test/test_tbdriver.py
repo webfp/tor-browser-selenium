@@ -3,14 +3,14 @@ import unittest
 from os import remove
 from os.path import getsize, exists
 
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from tbselenium import common as cm
 from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.test import TBB_PATH
-from tbselenium.utils import get_hash_of_directory, read_file
+from tbselenium.utils import get_hash_of_directory, read_file, is_png
 from tld.exceptions import TldBadUrl
 
 TEST_LONG_WAIT = 60
@@ -147,7 +147,7 @@ class ScreenshotTest(unittest.TestCase):
             remove(self.temp_file)
 
     def test_screen_capture(self):
-        """Check for screenshot after visit."""
+        """Make sure we can capture the screen."""
         with TorBrowserDriver(TBB_PATH,
                               canvas_exceptions=[cm.CHECK_TPO_URL]) as driver:
             # passing canvas_exceptions is not needed for TBB >= 4.5a3
@@ -157,24 +157,47 @@ class ScreenshotTest(unittest.TestCase):
         # A real screen capture of the same page is ~57KB. If the capture
         # is not blank it should be at least greater than 20KB.
         self.assertGreater(getsize(self.temp_file), 20000)
+        self.assertTrue(is_png(self.temp_file), "Doesn't look like a PNG file")
 
 
 class TBDriverOptionalArgs(unittest.TestCase):
+
+    def test_security_slider_settings_hi(self):
+        security_high = {"extensions.torbutton.security_slider": 1}
+        with TorBrowserDriver(TBB_PATH, pref_dict=security_high) as driver:
+            driver.load_url(cm.CHECK_TPO_URL, 1)
+            self.assertRaises(NoSuchElementException,
+                              driver.find_element_by_link_text,
+                              "JavaScript is enabled.")
+
+    def test_security_slider_settings_low_mid(self):
+        for sec_slider_setting in [2, 3, 4]:
+            # 2: medium-high, 3: medium-low, 4: low (default)
+            el = None
+            sec_slider_pref = {"extensions.torbutton.security_slider":
+                               sec_slider_setting}
+            with TorBrowserDriver(TBB_PATH,
+                                  pref_dict=sec_slider_pref) as driver:
+                driver.load_url(cm.CHECK_TPO_URL, 1)
+                el = driver.find_element_by_link_text("JavaScript is enabled.")
+                self.assertTrue(el)
+
     def test_tbb_logfile(self):
         """Make sure log file is populated."""
-        _, temp_log_file = tempfile.mkstemp()
-        log_len = len(read_file(temp_log_file))
+        _, log_file = tempfile.mkstemp()
+        log_len = len(read_file(log_file))
         self.assertEqual(log_len, 0)
-        with TorBrowserDriver(TBB_PATH,
-                              tbb_logfile_path=temp_log_file) as driver:
+
+        with TorBrowserDriver(TBB_PATH, tbb_logfile_path=log_file) as driver:
             driver.load_url(cm.CHECK_TPO_URL, 1)
-        log_txt = read_file(temp_log_file)
+
+        log_txt = read_file(log_file)
         self.assertTrue(len(log_txt))
         # make sure we find the expected strings in the log
         self.assertIn("torbutton@torproject.org", log_txt)
         self.assertIn("addons.manager", log_txt)
-        if exists(temp_log_file):
-            remove(temp_log_file)
+        if exists(log_file):
+            remove(log_file)
 
 
 class HTTPSEverywhereDisabledTest(unittest.TestCase):

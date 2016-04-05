@@ -31,7 +31,7 @@ class HashDirTest(TestInTemporaryFolder, unittest.TestCase):
         if isdir(self.test_folder_path):
             rmtree(self.test_folder_path)
 
-    def test_hashes_of_two_empty_folders_are_the_equal(self):
+    def test_hashes_of_empty_folders_should_be_equal(self):
         """Even though folders have different paths."""
         second_folder_path = join(self.test_dir, "dir1")
         makedirs(second_folder_path)
@@ -39,7 +39,8 @@ class HashDirTest(TestInTemporaryFolder, unittest.TestCase):
         hash_dir2 = ut.get_hash_of_directory(second_folder_path)
         self.assertEqual(hash_dir1, hash_dir2)
 
-    def test_new_empty_file_does_not_alter_hash(self):
+    # TODO: do we really need the following tests
+    def test_new_empty_file_should_not_change_dir_hash(self):
         """Test if after creating a new empty file the hash is the same."""
         hash_before = ut.get_hash_of_directory(self.test_folder_path)
         temp_file = join(self.test_folder_path, 'temp_file')
@@ -48,7 +49,7 @@ class HashDirTest(TestInTemporaryFolder, unittest.TestCase):
         hash_after = ut.get_hash_of_directory(self.test_folder_path)
         self.assertEqual(hash_before, hash_after)
 
-    def test_after_writing_bytes_changes_hash(self):
+    def test_writing_bytes_should_change_dir_hash(self):
         hash_before = ut.get_hash_of_directory(self.test_folder_path)
         temp_file = join(self.test_folder_path, 'temp_file')
         with open(temp_file, 'a') as f:
@@ -84,7 +85,6 @@ class TLDTest(unittest.TestCase):
                 'https://www.subdomain.foo.org:80/subfolder/baefasd==/65')
         for pub_suf_test_url in urls:
             self.assertEqual(get_tld(pub_suf_test_url), "foo.org")
-
 
 if __name__ == "__main__":
     unittest.main()
