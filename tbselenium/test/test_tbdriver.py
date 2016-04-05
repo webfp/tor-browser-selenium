@@ -211,6 +211,6 @@ class HTTPSEverywhereDisabledTest(unittest.TestCase):
             driver.load_url(TEST_HTTP_URL, 1)
             err_msg = "Test should be updated to use a site that doesn't \
                 auto-forward HTTP to HTTPS. %s " % driver.current_url
-            self.failIf(driver.current_url, TEST_HTTPS_URL, err_msg)
+            self.failIfEqual(driver.current_url,  TEST_HTTPS_URL, err_msg)
             self.assertEqual(driver.current_url, TEST_HTTP_URL,
                              "Can't load the test page")
