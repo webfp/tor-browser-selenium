@@ -156,9 +156,9 @@ class TorBrowserDriver(Firefox):
 
         Canvas permission is only needed for TBB < 4.5a3.
 
-        With TBB versions >= 4.5a3, content scripts are exempted from the
+        With TBB versions >= 4.5a3, chrome scripts are exempted from the
         canvas permission, so Selenium code that grabs the canvas image (which
-        should appear as a content script) does not require a separate
+        should appear as a chrome script) does not require a separate
         permission.
 
         See, https://trac.torproject.org/projects/tor/ticket/13439
