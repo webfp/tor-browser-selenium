@@ -15,9 +15,7 @@ install:
   - easy_install .
   - wget https://archive.torproject.org/tor-package-archive/torbrowser/4.5.1/tor-browser-linux64-4.5.1_en-US.tar.xz
   - tar -xvf tor-browser-linux64-4.5.1_en-US.tar.xz
-addons:
-  firefox: "45.0"
 before_script:
   - cd tbselenium/test
   - export TBB_PATH=../../tor-browser_en-US
-script:  py.test
+script:  py.test -s

@@ -58,6 +58,22 @@ class TBDriverTest(unittest.TestCase):
             self.fail("Unexpected page title %s" % self.tb_driver.title)
         self.assertEqual(self.tb_driver.current_url, TEST_HTTPS_URL)
 
+    def test_https_everywhere_disabled(self):
+        """Make sure the HTTP->HTTPS redirection observed in the
+        previous (test_httpseverywhere) test is due to HTTPSEverywhere -
+        not because the site is forwarding to HTTPS by default.
+        """
+        with TorBrowserDriver(TBB_PATH,
+                              virt_display=cm.DEFAULT_XVFB_WINDOW_SIZE,
+                              pref_dict={"extensions.https_everywhere.globalEnabled": False}) as driver:
+            driver.get(TEST_HTTP_URL)
+            sleep(1)
+            # make sure it doesn't redirect to https when HTTPEverywhere is disabled
+            self.assertEqual(driver.current_url, TEST_HTTP_URL,
+                             """This test should be updated to use a site that
+                             doesn't auto-forward HTTP to HTTPS. %s """ %
+                             self.tb_driver.current_url)
+
     def test_noscript(self):
         """Visiting a WebGL page with NoScript should disable WebGL."""
         self.tb_driver.get(WEBGL_URL)
@@ -97,26 +113,3 @@ class ScreenshotTest(unittest.TestCase):
         # A real screen capture on the other hand, is ~57KB. If the capture
         # is not blank it should be at least greater than 20KB.
         self.assertGreater(getsize(self.temp_file), 20000)
-
-
-class HTTPSEverywhereTest(unittest.TestCase):
-    def test_https_everywhere_disabled(self):
-        """Test to make sure the HTTP->HTTPS redirection observed in the
-        previous test (test_tb_extensions) is really due to HTTPSEverywhere -
-        but not because the site is HTTPS by default. See, the following:
-        https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/tree/mozmill-tests/tbb-tests/https-everywhere-disabled.js
-        """
-        display = start_xvfb()
-        ff_driver = webdriver.Firefox(timeout=120)
-        ff_driver.get(TEST_HTTP_URL)
-        sleep(1)
-        # make sure it doesn't redirect to https
-        self.assertEqual(ff_driver.current_url, TEST_HTTP_URL,
-                         """This test should be updated to use a site that
-                         doesn't auto-forward HTTP to HTTPS.""")
-        ff_driver.quit()
-        stop_xvfb(display)
-
-
-if __name__ == "__main__":
-    unittest.main()
