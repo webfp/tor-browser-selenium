@@ -30,15 +30,16 @@ class TorBrowserDriverExamples(unittest.TestCase):
         # We need to add an exception for canvas access in the Tor Browser
         # permission database. We need to do this for each site that we
         # plan to visit.
-        TorBrowserDriver.add_exception(cm.TEST_URL)
-        with TorBrowserDriver(TBB_PATH, virt_display="") as driver:
+        with TorBrowserDriver(TBB_PATH, virt_display="",
+                              canvas_exceptions=[cm.TEST_URL]) as driver:
             driver.get(cm.TEST_URL)
             driver.get_screenshot_as_file("screenshot.png")
 
     @unittest.skip("Only for didactic purposes.")
     def test_visit_page_with_virt_display_enabled(self):
         """Visit a page with a virtual buffer."""
-        with TorBrowserDriver(TBB_PATH, virt_display="1280X800") as driver:
+        with TorBrowserDriver(TBB_PATH,
+                              virt_display="1600x1200") as driver:
             driver.get(cm.TEST_URL)  # this won't pop up the browser window.
             sleep(1)
 

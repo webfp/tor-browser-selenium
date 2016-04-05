@@ -21,36 +21,37 @@ class TorBrowserDriver(Firefox):
     """
     Extend Firefox webdriver to automate Tor Browser.
     """
-    canvas_exceptions = []
-
     def __init__(self,
                  tbb_path=None,
-                 tbb_binary_path=None,
+                 tbb_fx_binary_path=None,
                  tbb_profile_path=None,
                  tbb_logfile_path=None,
                  pref_dict={},
                  socks_port=cm.DEFAULT_SOCKS_PORT,
                  # pass a string in the form of WxH to enable virtual display
                  # e.g. virt_display="1280x800" or virt_display="800x600"
-                 virt_display="",  # empty string means XVFB is disabled.
-                 pollute=True):
+                 # pass empty string or None to disable XVFB
+                 virt_display=cm.DEFAULT_XVFB_WINDOW_SIZE,
+                 pollute=False,
+                 canvas_exceptions=[]):
 
         # Check that either the TBB directory of the latest TBB version
         # or the path to the tor browser binary and profile are passed.
         # TODO: raise an exception with an easy to understand error message
-        assert (tbb_path or (tbb_binary_path and tbb_profile_path))
+        assert (tbb_path or (tbb_fx_binary_path and tbb_profile_path))
         if tbb_path:
             tbb_path = tbb_path.rstrip('/')
-            tbb_binary_path = join(tbb_path, cm.DEFAULT_TBB_BINARY_PATH)
+            tbb_fx_binary_path = join(tbb_path, cm.DEFAULT_TBB_FX_BINARY_PATH)
             tbb_profile_path = join(tbb_path, cm.DEFAULT_TBB_PROFILE_PATH)
 
         # Make sure the paths exist
-        assert (isfile(tbb_binary_path) and isdir(tbb_profile_path))
-        self.tbb_binary_path = tbb_binary_path
+        assert (isfile(tbb_fx_binary_path) and isdir(tbb_profile_path))
+        self.tbb_fx_binary_path = tbb_fx_binary_path
         self.tbb_profile_path = tbb_profile_path
         self.temp_profile_path = None
         self.socks_port = socks_port
         self.pollute = pollute
+        self.canvas_exceptions = [get_tld(url) for url in canvas_exceptions]
         self.setup_virtual_display(virt_display)
         # Initialize Tor Browser's profile
         self.profile = self.init_tbb_profile()
@@ -78,6 +79,9 @@ class TorBrowserDriver(Firefox):
         self.profile.set_preference('browser.startup.page', "0")
         self.profile.set_preference('browser.startup.homepage', 'about:newtab')
 
+        # disable auto-update
+        self.profile.set_preference('app.update.enabled', False)
+
         # Configure Firefox to use Tor SOCKS proxy
         self.profile.set_preference('network.proxy.type', 1)
         self.profile.set_preference('network.proxy.socks', '127.0.0.1')
@@ -102,7 +106,7 @@ class TorBrowserDriver(Firefox):
 
     def export_lib_path(self):
         """Setup LD_LIBRARY_PATH and HOME environment variables."""
-        tbb_root_dir = dirname(dirname(self.tbb_binary_path))
+        tbb_root_dir = dirname(dirname(self.tbb_fx_binary_path))
         tbb_browser_dir = join(tbb_root_dir, cm.DEFAULT_TBB_BROWSER_DIR)
         tor_binary_dir = join(tbb_root_dir, cm.DEFAULT_TOR_BINARY_DIR)
         # Add "TBB_DIR/Browser" and dir. of the tor binary to LD_LIBRARY_PATH
@@ -139,24 +143,24 @@ class TorBrowserDriver(Firefox):
         # Selenium version is compatible with the Firefox version in TBB.
         # Another common output in case of incompatibility is an error
         # for TorBrowserDriver not having a 'session_id' property.
-        return FirefoxBinary(firefox_path=self.tbb_binary_path,
+        return FirefoxBinary(firefox_path=self.tbb_fx_binary_path,
                              log_file=tbb_logfile)
 
-    @classmethod
-    def add_exceptions(cls, urls):
-        for url in urls:
-            cls.add_exception(get_tld(url))
-
-    @classmethod
-    def add_exception(cls, url):
-        """Add top level domain of `url` to canvas_exceptions list."""
-        cls.canvas_exceptions.append(get_tld(url))
-
     def add_canvas_permission(self, profile_path):
-        """Create a permission db (permissions.sqlite) and add an
-        exception for the canvas image extraction. Otherwise screenshots
-        taken by Selenium will be just blank images due to the canvas
-        fingerprinting defense in the Tor Browser.
+        """Create a permission db (permissions.sqlite) and add
+        exceptions for the canvas image extraction for the given domains.
+        If we don't add permissions, screenshots taken by TBB < 4.5a3 will be
+        blank images due to the canvas fingerprinting defense in the Tor
+        Browser.
+
+        Canvas permission is only needed for TBB < 4.5a3.
+
+        With TBB versions >= 4.5a3, content scripts are exempted from the
+        canvas permission, so Selenium code that grabs the canvas image (which
+        should appear as a content script) does not require a separate
+        permission.
+
+        See, https://trac.torproject.org/projects/tor/ticket/13439
         """
         connect_to_db = sqlite3.connect
         perm_db = connect_to_db(join(profile_path, "permissions.sqlite"))
@@ -173,7 +177,6 @@ class TorBrowserDriver(Firefox):
           appId INTEGER,
           isInBrowserElement INTEGER)""")
         for domain in self.canvas_exceptions:
-            # print("Adding canvas/extractData permission for %s" % domain)
             qry = """INSERT INTO 'moz_hosts'
             VALUES(NULL,'%s','canvas/extractData',1,0,0,0,0);""" % domain
             cursor.execute(qry)

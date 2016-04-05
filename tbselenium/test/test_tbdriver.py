@@ -4,7 +4,6 @@ from os import remove
 from os.path import getsize, exists
 from time import sleep
 
-from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -12,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from tbselenium import common as cm
 from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.test import TBB_PATH
-from tbselenium.utils import get_hash_of_directory, start_xvfb, stop_xvfb
+from tbselenium.utils import get_hash_of_directory
 
 TEST_LONG_WAIT = 60
 
@@ -27,9 +26,7 @@ TEST_HTTPS_URL = "https://www.freedomboxfoundation.org/thanks/"
 
 class TBDriverTest(unittest.TestCase):
     def setUp(self):
-        self.tb_driver = TorBrowserDriver(TBB_PATH,
-                                          virt_display=cm.DEFAULT_XVFB_WINDOW_SIZE,
-                                          tbb_logfile_path="/tmp/tbblog")
+        self.tb_driver = TorBrowserDriver(TBB_PATH, tbb_logfile_path="tbb.log")
 
     def tearDown(self):
         self.tb_driver.quit()
@@ -49,7 +46,7 @@ class TBDriverTest(unittest.TestCase):
         self.assertEqual(profile_hash_before, profile_hash_after)
 
     def test_httpseverywhere(self):
-        """Visiting an HTTP page with HTTPSEverywhere should force HTTPS version."""
+        """HTTPSEverywhere should redirect to HTTPS version."""
         self.tb_driver.get(TEST_HTTP_URL)
         try:
             WebDriverWait(self.tb_driver, TEST_LONG_WAIT).\
@@ -58,27 +55,12 @@ class TBDriverTest(unittest.TestCase):
             self.fail("Unexpected page title %s" % self.tb_driver.title)
         self.assertEqual(self.tb_driver.current_url, TEST_HTTPS_URL)
 
-    def test_https_everywhere_disabled(self):
-        """Make sure the HTTP->HTTPS redirection observed in the
-        previous (test_httpseverywhere) test is due to HTTPSEverywhere -
-        not because the site is forwarding to HTTPS by default.
-        """
-        with TorBrowserDriver(TBB_PATH,
-                              virt_display=cm.DEFAULT_XVFB_WINDOW_SIZE,
-                              pref_dict={"extensions.https_everywhere.globalEnabled": False}) as driver:
-            driver.get(TEST_HTTP_URL)
-            sleep(1)
-            # make sure it doesn't redirect to https when HTTPEverywhere is disabled
-            self.assertEqual(driver.current_url, TEST_HTTP_URL,
-                             """This test should be updated to use a site that
-                             doesn't auto-forward HTTP to HTTPS. %s """ %
-                             self.tb_driver.current_url)
-
     def test_noscript(self):
-        """Visiting a WebGL page with NoScript should disable WebGL."""
+        """NoScript should disable WebGL."""
         self.tb_driver.get(WEBGL_URL)
         try:
-            WebDriverWait(self.tb_driver, TEST_LONG_WAIT).until(EC.alert_is_present())
+            WebDriverWait(self.tb_driver, TEST_LONG_WAIT).\
+                until(EC.alert_is_present())
         except TimeoutException:
             self.fail("WebGL error alert should be present")
         self.tb_driver.switch_to.alert.dismiss()
@@ -100,8 +82,8 @@ class ScreenshotTest(unittest.TestCase):
 
     def test_screen_capture(self):
         """Check for screenshot after visit."""
-        TorBrowserDriver.add_exception(cm.CHECK_TPO_URL)
-        self.tb_driver = TorBrowserDriver(TBB_PATH, virt_display=cm.DEFAULT_XVFB_WINDOW_SIZE)
+        self.tb_driver = TorBrowserDriver(TBB_PATH,
+                                          canvas_exceptions=[cm.CHECK_TPO_URL])
         self.tb_driver.get(cm.CHECK_TPO_URL)
         sleep(3)
         try:
@@ -113,3 +95,20 @@ class ScreenshotTest(unittest.TestCase):
         # A real screen capture on the other hand, is ~57KB. If the capture
         # is not blank it should be at least greater than 20KB.
         self.assertGreater(getsize(self.temp_file), 20000)
+
+
+class HTTPSEverywhereDisabledTest(unittest.TestCase):
+    def test_https_everywhere_disabled(self):
+        """Make sure the HTTP->HTTPS redirection observed in the
+        previous (test_httpseverywhere) test is due to HTTPSEverywhere -
+        not because the site is forwarding to HTTPS by default.
+        """
+        disable_HE_pref = {"extensions.https_everywhere.globalEnabled": False}
+        with TorBrowserDriver(TBB_PATH, pref_dict=disable_HE_pref) as driver:
+            driver.get(TEST_HTTP_URL)
+            sleep(1)
+            # make sure it doesn't redirect to https when HTTPEverywhere is disabled
+            self.assertEqual(driver.current_url, TEST_HTTP_URL,
+                             """This test should be updated to use a site that
+                             doesn't auto-forward HTTP to HTTPS. %s """ %
+                             driver.current_url)

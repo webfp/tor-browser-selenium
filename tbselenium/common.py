@@ -2,8 +2,9 @@ from os.path import join
 
 # DEFAULT TBB PATHS: according to latest TBB version (5.3)
 DEFAULT_TBB_BROWSER_DIR = 'Browser'
-DEFAULT_TBB_BINARY_PATH = join('Browser', 'firefox')
-DEFAULT_TBB_PROFILE_PATH = join('Browser', 'TorBrowser', 'Data', 'Browser', 'profile.default')
+DEFAULT_TBB_FX_BINARY_PATH = join('Browser', 'firefox')
+DEFAULT_TBB_PROFILE_PATH = join('Browser', 'TorBrowser', 'Data', 'Browser',
+                                'profile.default')
 DEFAULT_TOR_BINARY_PATH = join('Browser', 'TorBrowser', 'Tor', 'tor')
 DEFAULT_TOR_BINARY_DIR = join('Browser', 'TorBrowser', 'Tor')
 DEFAULT_TOR_DATA_PATH = join('Browser', 'TorBrowser', 'Data', 'Tor')

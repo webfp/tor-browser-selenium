@@ -1,5 +1,6 @@
 import commands
 import unittest
+from tbselenium import common as cm
 
 
 class EnvironmentTest(unittest.TestCase):
@@ -7,8 +8,8 @@ class EnvironmentTest(unittest.TestCase):
         try:
             __import__(pkg_name)
         except ImportError:
-            self.fail('Cannot find python package. \
-                       Install it by sudo pip install %s' % pkg_name)
+            self.fail("Missing python package. Install it by running"
+                      " '(sudo) pip install %s'" % pkg_name)
 
     def run_cmd(self, cmd):
         return commands.getstatusoutput('%s ' % cmd)
@@ -18,8 +19,39 @@ class EnvironmentTest(unittest.TestCase):
         status, _ = self.run_cmd(cmd)
         self.assertFalse(status,
                          "%s is not installed. \
-                         Install it with sudo apt-get install %s" %
+                         Install it by running '(sudo) apt-get install %s'" %
                          (pkg_name, pkg_name))
+
+    def test_tor_daemon_running(self):
+        """Make sure we've a running tor process.
+        The library can be used without having tor installed on the system,
+        using Stem as a replacement.
+        """
+
+        cmd = "ps -ax | grep -w tor | grep -v grep"
+        status, output = self.run_cmd(cmd)
+        self.assertEqual(status, 0, "Can't run the command %s. Status: %s " %
+                         (cmd, status))
+        self.assertIn("/usr/bin/tor", output,
+                      """Can't find the running tor process.
+                      The tests (test_tbdriver) that depend on tor may fail.
+                      You can run '(sudo) service start tor' to start tor.
+
+                      If you don't want to run the tests, you may use Stem
+                      instead of tor installed on the system.
+                      """)
+
+    def test_default_tor_ports(self):
+        """Make sure tor is listening on the port we expect."""
+        cmd = "netstat -atn | grep %s" % cm.DEFAULT_SOCKS_PORT
+        status, output = self.run_cmd(cmd)
+        self.assertEqual(status, 0, "Can't run the command %s. Status: %s " %
+                         (cmd, status))
+        self.assertIn("LISTEN", output,
+                      """No process is listening SOCKS port %s!
+                      If your tor process is using another SOCKS port, please
+                      update the DEFAULT_SOCKS_PORT constant.
+                      """ % cm.DEFAULT_SOCKS_PORT)
 
     def test_tld(self):
         self.assert_py_pkg_installed('tld')
