@@ -1,5 +1,4 @@
 import shutil
-import socket
 import sqlite3
 from contextlib import contextmanager
 from httplib import CannotSendRequest
@@ -11,7 +10,6 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import WebDriverException
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.firefox.webdriver import WebDriver as Firefox
@@ -32,51 +30,49 @@ class TorBrowserDriver(Firefox):
                  tbb_logfile_path=None,
                  pref_dict={},
                  socks_port=cm.DEFAULT_SOCKS_PORT,
-                 # pass a string in the form of WxH to enable virtual display
-                 # e.g. virt_display="1280x800" or virt_display="800x600"
                  # pass empty string or None to disable XVFB
                  virt_display=cm.DEFAULT_XVFB_WINDOW_SIZE,
                  pollute=False,
                  canvas_exceptions=[]):
 
-        # Check that either the TBB directory of the latest TBB version
-        # or the path to the tor browser binary and profile are passed.
-        # TODO: raise an exception with an easy to understand error message
-        assert (tbb_path or (tbb_fx_binary_path and tbb_profile_path))
-        if tbb_path:
-            tbb_path = tbb_path.rstrip('/')
-            tbb_fx_binary_path = join(tbb_path, cm.DEFAULT_TBB_FX_BINARY_PATH)
-            tbb_profile_path = join(tbb_path, cm.DEFAULT_TBB_PROFILE_PATH)
-
-        # Make sure the paths exist
-        assert (isfile(tbb_fx_binary_path) and isdir(tbb_profile_path))
-        self.tbb_fx_binary_path = tbb_fx_binary_path
-        self.tbb_profile_path = tbb_profile_path
+        self.check_tbb_paths(tbb_path, tbb_fx_binary_path, tbb_profile_path)
         self.temp_profile_path = None
         self.socks_port = socks_port
         self.pollute = pollute
         self.canvas_exceptions = [get_tld(url) for url in canvas_exceptions]
         self.setup_virtual_display(virt_display)
-        # Initialize Tor Browser's profile
         self.profile = self.init_tbb_profile()
-        # Initialize Tor Browser's binary
         self.binary = self.get_tbb_binary(logfile=tbb_logfile_path)
         self.update_prefs(pref_dict)
         self.setup_capabilities()
         self.export_lib_path()
-        try:
-            super(TorBrowserDriver, self).__init__(firefox_profile=self.profile,
-                                                   firefox_binary=self.binary,
-                                                   capabilities=self.capabilities)
-            self.is_running = True
-        # TODO we handle (=log) all the exceptions but don't report them to
-        # calling code, which cannot tell if the init went ok or not
-        except WebDriverException as wd_exc:
-            print("[tbselenium] WebDriverException while connecting to Webdriver: %s" % wd_exc)
-        except socket.error as skt_err:
-            print("[tbselenium] Socket error connecting to Webdriver: %s" % skt_err.message)
-        except Exception as exc:
-            print("[tbselenium] Error connecting to Webdriver: %s" % exc)
+        super(TorBrowserDriver, self).__init__(firefox_profile=self.profile,
+                                               firefox_binary=self.binary,
+                                               capabilities=self.capabilities)
+        self.is_running = True
+
+    def check_tbb_paths(self, tbb_path, tbb_fx_binary_path, tbb_profile_path):
+        if not (tbb_path or (tbb_fx_binary_path and tbb_profile_path)):
+            raise cm.TBDriverPathError("Either TBB path or Firefox profile"
+                                       " and binary path should be provided"
+                                       " %s" % tbb_path)
+
+        if tbb_path:
+            if not isdir(tbb_path):
+                raise cm.TBDriverPathError("TBB path is not a directory %s"
+                                           % tbb_path)
+            tbb_path = tbb_path.rstrip('/')
+            tbb_fx_binary_path = join(tbb_path, cm.DEFAULT_TBB_FX_BINARY_PATH)
+            tbb_profile_path = join(tbb_path, cm.DEFAULT_TBB_PROFILE_PATH)
+        if not isfile(tbb_fx_binary_path):
+            raise cm.TBDriverPathError("Invalid Firefox binary %s"
+                                       % tbb_fx_binary_path)
+        if not isdir(tbb_profile_path):
+            raise cm.TBDriverPathError("Invalid Firefox profile dir %s"
+                                       % tbb_profile_path)
+        self.tbb_path = tbb_path
+        self.tbb_profile_path = tbb_profile_path
+        self.tbb_fx_binary_path = tbb_fx_binary_path
 
     def load_url(self, url, wait_on_page=0):
         """Load a URL and wait before returning."""

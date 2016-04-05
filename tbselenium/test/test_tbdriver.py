@@ -2,19 +2,18 @@ import tempfile
 import unittest
 from os import remove
 from os.path import getsize, exists
-from time import sleep
 
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from tbselenium import common as cm
 from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.test import TBB_PATH
-from tbselenium.utils import get_hash_of_directory
+from tbselenium.utils import get_hash_of_directory, read_file
+from tld.exceptions import TldBadUrl
 
 TEST_LONG_WAIT = 60
-
 
 WEBGL_URL = "https://developer.mozilla.org/samples/webgl/sample1/index.html"
 
@@ -23,11 +22,13 @@ WEBGL_URL = "https://developer.mozilla.org/samples/webgl/sample1/index.html"
 TEST_HTTP_URL = "http://www.freedomboxfoundation.org/thanks/"
 TEST_HTTPS_URL = "https://www.freedomboxfoundation.org/thanks/"
 
+MISSING_DIR = "_no_such_directory_"
+MISSING_FILE = "_no_such_file_"
+
 
 class TBDriverTest(unittest.TestCase):
     def setUp(self):
-        self.tb_driver = TorBrowserDriver(TBB_PATH, tbb_logfile_path="tbb.log",
-                                          virt_display="")
+        self.tb_driver = TorBrowserDriver(TBB_PATH)
 
     def tearDown(self):
         self.tb_driver.quit()
@@ -72,6 +73,71 @@ class TBDriverTest(unittest.TestCase):
             self.fail("Can't find the __noscriptPlaceholder__: %s" % texc)
 
 
+class TBDriverFailTest(unittest.TestCase):
+
+    def test_should_raise_for_missing_paths(self):
+        with self.assertRaises(cm.TBDriverPathError) as exc:
+            TorBrowserDriver()
+        exc_msg = exc.exception
+        self.assertEqual(str(exc_msg),
+                         "Either TBB path or Firefox profile and binary path "
+                         "should be provided None")
+
+    def test_should_raise_for_missing_tbb_path(self):
+        with self.assertRaises(cm.TBDriverPathError) as exc:
+            TorBrowserDriver(tbb_path=MISSING_DIR)
+        exc_msg = exc.exception
+        self.assertEqual(str(exc_msg),
+                         "TBB path is not a directory %s" % MISSING_DIR)
+
+    def test_should_raise_for_missing_fx_binary(self):
+        temp_dir = tempfile.mkdtemp()
+        with self.assertRaises(cm.TBDriverPathError) as exc:
+            TorBrowserDriver(tbb_fx_binary_path=MISSING_FILE,
+                             tbb_profile_path=temp_dir)
+        exc_msg = exc.exception
+        self.assertEqual(str(exc_msg),
+                         "Invalid Firefox binary %s" % MISSING_FILE)
+
+    def test_should_raise_for_missing_fx_profile(self):
+        _, temp_file = tempfile.mkstemp()
+        with self.assertRaises(cm.TBDriverPathError) as exc:
+            TorBrowserDriver(tbb_fx_binary_path=temp_file,
+                             tbb_profile_path=MISSING_DIR)
+        exc_msg = exc.exception
+        self.assertEqual(str(exc_msg),
+                         "Invalid Firefox profile dir %s" % MISSING_DIR)
+
+    def test_should_raise_for_invalid_pref_dict(self):
+        with self.assertRaises(AttributeError):
+            TorBrowserDriver(TBB_PATH, pref_dict="foo")
+        with self.assertRaises(AttributeError):
+            TorBrowserDriver(TBB_PATH, pref_dict=[1, 2])
+        with self.assertRaises(AttributeError):
+            TorBrowserDriver(TBB_PATH, pref_dict=(1, 2))
+
+    def test_should_fail_with_wrong_socks_port(self):
+        with TorBrowserDriver(TBB_PATH, socks_port=9999) as driver:
+            driver.load_url(cm.CHECK_TPO_URL)
+            self.assertEqual(driver.title, "Problem loading page")
+
+    def test_should_raise_for_invalid_virtual_display_size(self):
+        with self.assertRaises(ValueError):
+            TorBrowserDriver(TBB_PATH, virt_display="foo")
+        with self.assertRaises(ValueError):
+            TorBrowserDriver(TBB_PATH, virt_display="800y600")
+        with self.assertRaises(ValueError):
+            TorBrowserDriver(TBB_PATH, virt_display="800-600")
+
+    def test_should_raise_for_invalid_canvas_exceptions(self):
+        with self.assertRaises(TldBadUrl):
+            TorBrowserDriver(TBB_PATH, canvas_exceptions=["foo", "bar"])
+        with self.assertRaises(TldBadUrl):
+            TorBrowserDriver(TBB_PATH, canvas_exceptions=["foo.bar"])
+        with self.assertRaises(AttributeError):
+            TorBrowserDriver(TBB_PATH, canvas_exceptions=[1, 2])
+
+
 class ScreenshotTest(unittest.TestCase):
     def setUp(self):
         _, self.temp_file = tempfile.mkstemp()
@@ -93,10 +159,28 @@ class ScreenshotTest(unittest.TestCase):
         self.assertGreater(getsize(self.temp_file), 20000)
 
 
+class TBDriverOptionalArgs(unittest.TestCase):
+    def test_tbb_logfile(self):
+        """Make sure log file is populated."""
+        _, temp_log_file = tempfile.mkstemp()
+        log_len = len(read_file(temp_log_file))
+        self.assertEqual(log_len, 0)
+        with TorBrowserDriver(TBB_PATH,
+                              tbb_logfile_path=temp_log_file) as driver:
+            driver.load_url(cm.CHECK_TPO_URL, 1)
+        log_txt = read_file(temp_log_file)
+        self.assertTrue(len(log_txt))
+        # make sure we find the expected strings in the log
+        self.assertIn("torbutton@torproject.org", log_txt)
+        self.assertIn("addons.manager", log_txt)
+        if exists(temp_log_file):
+            remove(temp_log_file)
+
+
 class HTTPSEverywhereDisabledTest(unittest.TestCase):
     def test_https_everywhere_disabled(self):
-        """Make sure the HTTP->HTTPS redirection observed in the
-        previous (test_httpseverywhere) test is due to HTTPSEverywhere -
+        """Make sure the HTTP->HTTPS redirection in the
+        test_httpseverywhere test is due to HTTPSEverywhere -
         not because the site is forwarding to HTTPS by default.
         """
         disable_HE_pref = {"extensions.https_everywhere.globalEnabled": False}

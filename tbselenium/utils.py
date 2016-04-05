@@ -18,14 +18,14 @@ def get_hash_of_directory(path):
 
 
 def create_dir(dir_path):
-    """Create a directory if it doesn't exist."""
+    """Create directory with the given path if it doesn't exist."""
     if not exists(dir_path):
         makedirs(dir_path)
     return dir_path
 
 
 def clone_dir_temporary(dir_path):
-    """Copy a folder in the same directory and append a timestamp."""
+    """Copy a folder to the same directory and append a timestamp."""
     import tempfile
     tempdir = tempfile.mkdtemp()
     du.copy_tree(dir_path, tempdir)
@@ -34,9 +34,6 @@ def clone_dir_temporary(dir_path):
 
 def start_xvfb(win_width=cm.DEFAULT_XVFB_WIN_W,
                win_height=cm.DEFAULT_XVFB_WIN_H):
-    # TODO: commented logging lines because if tbselenium is used as a library it might be confusing where these prints come from...
-    # TODO: think about a way to log without annoying too much the library users? Maybe print only errors?
-    # print("Starting XVFB with dimensions: %dx%d" % (win_width, win_height))
     xvfb_display = Display(visible=0, size=(win_width, win_height))
     xvfb_display.start()
     return xvfb_display
@@ -44,5 +41,11 @@ def start_xvfb(win_width=cm.DEFAULT_XVFB_WIN_W,
 
 def stop_xvfb(xvfb_display):
     if xvfb_display:
-        # print("Stopping XVFB")
         xvfb_display.stop()
+
+
+def read_file(path, mode='rU'):
+    """Read and return file content."""
+    with open(path, mode) as f:
+        content = f.read()
+    return content
