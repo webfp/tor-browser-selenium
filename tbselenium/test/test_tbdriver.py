@@ -173,7 +173,7 @@ class TBDriverOptionalArgs(unittest.TestCase):
                            sec_slider_setting}
             with TorBrowserDriver(TBB_PATH,
                                   pref_dict=slider_pref) as driver:
-                driver.load_url(cm.CHECK_TPO_URL, 1)
+                driver.load_url(cm.CHECK_TPO_URL)
                 try:
                     el = driver.find_element_by("JavaScript is enabled.",
                                                 find_by=By.LINK_TEXT)
@@ -216,12 +216,6 @@ class TBDriverTestAssumptions(unittest.TestCase):
             self.failIfEqual(driver.current_url, TEST_HTTPS_URL, err_msg)
             self.assertEqual(driver.current_url, TEST_HTTP_URL,
                              "Can't load the test page")
-
-        js_script = """var cvs = document.createElement('canvas');
-                       return cvs.getContext("experimental-webgl");"""
-        self.tb_driver.find_element_by("body", find_by=By.TAG_NAME)
-        webgl_support = self.tb_driver.execute_script(js_script)
-        self.assertIsNone(webgl_support)
 
     def test_noscript_webgl_enabled(self):
         """Make sure that when we disable NoScript's WebGL blocking,
