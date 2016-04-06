@@ -99,7 +99,7 @@ class TorBrowserDriver(Firefox):
         """
         self.get(url)
         if wait_for_page_body:
-            self.find_element_by("body", find_by=By.TAG_NAME)
+            self.find_element_by("body", timeout=60, find_by=By.TAG_NAME)
         sleep(wait_on_page)
 
     def find_element_by(self, selector, timeout=30,
