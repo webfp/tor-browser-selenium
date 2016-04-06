@@ -99,6 +99,7 @@ class TorBrowserDriver(Firefox):
         """
         self.get(url)
         if wait_for_page_body:
+            # if the page can't be loaded this will raise a TimeoutException
             self.find_element_by("body", timeout=60, find_by=By.TAG_NAME)
         sleep(wait_on_page)
 
