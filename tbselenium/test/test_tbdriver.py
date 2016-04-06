@@ -16,7 +16,8 @@ from tld.exceptions import TldBadUrl
 
 TEST_LONG_WAIT = 60
 
-WEBGL_URL = "https://developer.mozilla.org/samples/webgl/sample1/index.html"
+WEBGL_CHECK_JS = "var cvs = document.createElement('canvas');\
+                    return cvs.getContext('experimental-webgl');"
 
 # Test URLs are taken from the TBB test suit
 # https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/tree/marionette/tor_browser_tests/test_https-everywhere.py#n18
@@ -61,17 +62,9 @@ class TBDriverTest(unittest.TestCase):
 
     def test_noscript(self):
         """NoScript should disable WebGL."""
-        self.tb_driver.get(WEBGL_URL)
-        try:
-            WebDriverWait(self.tb_driver, TEST_LONG_WAIT).\
-                until(EC.alert_is_present())
-        except TimeoutException:
-            self.fail("WebGL error alert should be present")
-        self.tb_driver.switch_to.alert.dismiss()
-        try:
-            self.tb_driver.find_element_by(".__noscriptPlaceholder__", 30)
-        except TimeoutException as texc:
-            self.fail("Can't find the __noscriptPlaceholder__: %s" % texc)
+        self.tb_driver.load_url(cm.CHECK_TPO_URL, wait_for_page_body=True)
+        webgl_support = self.tb_driver.execute_script(WEBGL_CHECK_JS)
+        self.assertIsNone(webgl_support)
 
 
 class TBDriverFailTest(unittest.TestCase):
@@ -208,7 +201,8 @@ class TBDriverOptionalArgs(unittest.TestCase):
             remove(log_file)
 
 
-class HTTPSEverywhereDisabledTest(unittest.TestCase):
+class TBDriverTestAssumptions(unittest.TestCase):
+    """Tests for some assumptions we use in the above tests."""
     def test_https_everywhere_disabled(self):
         """Make sure the HTTP->HTTPS redirection in the
         test_httpseverywhere test is due to HTTPSEverywhere -
@@ -222,3 +216,23 @@ class HTTPSEverywhereDisabledTest(unittest.TestCase):
             self.failIfEqual(driver.current_url, TEST_HTTPS_URL, err_msg)
             self.assertEqual(driver.current_url, TEST_HTTP_URL,
                              "Can't load the test page")
+
+        js_script = """var cvs = document.createElement('canvas');
+                       return cvs.getContext("experimental-webgl");"""
+        self.tb_driver.find_element_by("body", find_by=By.TAG_NAME)
+        webgl_support = self.tb_driver.execute_script(js_script)
+        self.assertIsNone(webgl_support)
+
+    def test_noscript_webgl_enabled(self):
+        """Make sure that when we disable NoScript's WebGL blocking,
+        WebGL becomes available. This is to the test method we
+        use in test_noscript is sane.
+        """
+        disable_NS_webgl_pref = {"noscript.forbidWebGL": False}
+        with TorBrowserDriver(TBB_PATH,
+                              pref_dict=disable_NS_webgl_pref) as driver:
+            driver.load_url(cm.CHECK_TPO_URL, wait_for_page_body=True)
+            webgl_support = driver.execute_script(WEBGL_CHECK_JS)
+            self.assertIsNotNone(webgl_support)
+            self.assertIn("activeTexture", webgl_support)
+            self.assertIn("getSupportedExtensions", webgl_support)

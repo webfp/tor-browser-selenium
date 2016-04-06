@@ -85,9 +85,21 @@ class TorBrowserDriver(Firefox):
         self.tbb_profile_path = tbb_profile_path
         self.tbb_fx_binary_path = tbb_fx_binary_path
 
-    def load_url(self, url, wait_on_page=0):
-        """Load a URL and wait before returning."""
+    def load_url(self, url, wait_on_page=0, wait_for_page_body=False):
+        """Load a URL and wait before returning.
+
+        If you query/manipulate DOM or execute a script immediately
+        after the page load, you may get the following error:
+
+            "WebDriverException: Message: waiting for doc.body failed"
+
+        To prevent this, set wait_for_page_body to True, and driver
+        will wait for the page body to become available before it returns.
+
+        """
         self.get(url)
+        if wait_for_page_body:
+            self.find_element_by("body", find_by=By.TAG_NAME)
         sleep(wait_on_page)
 
     def find_element_by(self, selector, timeout=30,
