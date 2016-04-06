@@ -22,6 +22,7 @@ class EnvironmentTest(unittest.TestCase):
                          Install it by running '(sudo) apt-get install %s'" %
                          (pkg_name, pkg_name))
 
+    @unittest.skip("We no longer depend on system tor")
     def test_tor_daemon_running(self):
         """Make sure we've a running tor process.
         The library can be used without having tor installed on the system,
@@ -29,24 +30,21 @@ class EnvironmentTest(unittest.TestCase):
         """
 
         cmd = "ps -ax | grep -w tor | grep -v grep"
-        status, output = self.run_cmd(cmd)
-        self.assertEqual(status, 0, "Can't run the command %s. Status: %s " %
-                         (cmd, status))
+        _, output = self.run_cmd(cmd)
         self.assertIn("/usr/bin/tor", output,
                       """Can't find the running tor process.
                       The tests (test_tbdriver) that depend on tor may fail.
-                      You can run '(sudo) service start tor' to start tor.
+                      You can run '(sudo) service tor start' to start tor.
 
                       If you don't want to run the tests, you may use Stem
                       instead of tor installed on the system.
                       """)
 
+    @unittest.skip("We no longer depend on system tor")
     def test_default_tor_ports(self):
         """Make sure tor is listening on the port we expect."""
         cmd = "netstat -atn | grep %s" % cm.DEFAULT_SOCKS_PORT
-        status, output = self.run_cmd(cmd)
-        self.assertEqual(status, 0, "Can't run the command %s. Status: %s " %
-                         (cmd, status))
+        _, output = self.run_cmd(cmd)
         self.assertIn("LISTEN", output,
                       """No process is listening SOCKS port %s!
                       If your tor process is using another SOCKS port, please

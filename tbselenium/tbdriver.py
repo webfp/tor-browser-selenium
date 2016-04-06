@@ -24,25 +24,31 @@ class TorBrowserDriver(Firefox):
     Extend Firefox webdriver to automate Tor Browser.
     """
     def __init__(self,
-                 tbb_path=None,
-                 tbb_fx_binary_path=None,
-                 tbb_profile_path=None,
-                 tbb_logfile_path=None,
+                 tbb_path="",
+                 tor_cfg=cm.USE_TBB_TOR_LAUNCH_NEW,
+                 tbb_fx_binary_path="",
+                 tbb_profile_path="",
+                 tbb_logfile_path="",
                  pref_dict={},
-                 socks_port=cm.DEFAULT_SOCKS_PORT,
-                 # pass empty string or None to disable XVFB
+                 socks_port=None,
                  virt_display=cm.DEFAULT_XVFB_WINDOW_SIZE,
                  pollute=False,
                  canvas_exceptions=[]):
 
         self.check_tbb_paths(tbb_path, tbb_fx_binary_path, tbb_profile_path)
         self.temp_profile_path = None
-        self.socks_port = socks_port
+        self.tor_cfg = tor_cfg
         self.pollute = pollute
         self.canvas_exceptions = [get_tld(url) for url in canvas_exceptions]
         self.setup_virtual_display(virt_display)
         self.profile = self.init_tbb_profile()
         self.binary = self.get_tbb_binary(logfile=tbb_logfile_path)
+        if socks_port is None:
+            if tor_cfg == cm.USE_SYSTEM_TOR:
+                socks_port = cm.DEFAULT_SOCKS_PORT
+            else:
+                socks_port = cm.TBB_SOCKS_PORT
+        self.socks_port = socks_port
         self.update_prefs(pref_dict)
         self.setup_capabilities()
         self.export_lib_path()
@@ -52,6 +58,12 @@ class TorBrowserDriver(Firefox):
         self.is_running = True
 
     def check_tbb_paths(self, tbb_path, tbb_fx_binary_path, tbb_profile_path):
+        """Update instance variables based on the passed paths.
+
+        TorBrowserDriver can be initialized by passing either
+        1) path to TBB directory, or
+        2) path to TBB's Firefox binary and profile
+        """
         if not (tbb_path or (tbb_fx_binary_path and tbb_profile_path)):
             raise cm.TBDriverPathError("Either TBB path or Firefox profile"
                                        " and binary path should be provided"
@@ -61,7 +73,6 @@ class TorBrowserDriver(Firefox):
             if not isdir(tbb_path):
                 raise cm.TBDriverPathError("TBB path is not a directory %s"
                                            % tbb_path)
-            tbb_path = tbb_path.rstrip('/')
             tbb_fx_binary_path = join(tbb_path, cm.DEFAULT_TBB_FX_BINARY_PATH)
             tbb_profile_path = join(tbb_path, cm.DEFAULT_TBB_PROFILE_PATH)
         if not isfile(tbb_fx_binary_path):
@@ -79,29 +90,36 @@ class TorBrowserDriver(Firefox):
         self.get(url)
         sleep(wait_on_page)
 
-    def find_el_by_css(self, css_selector, timeout=30):
+    def find_element_by(self, selector, timeout=30,
+                        find_by=By.CSS_SELECTOR):
         """Wait until the element matching the selector appears or timeout."""
         return WebDriverWait(self, timeout).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, css_selector)))
+            EC.presence_of_element_located((find_by, selector)))
 
     def update_prefs(self, pref_dict):
         # Set homepage to a blank tab
         set_pref = self.profile.set_preference
         set_pref('browser.startup.page', "0")
         set_pref('browser.startup.homepage', 'about:newtab')
-        # Configure Firefox to use Tor SOCKS proxy
-        set_pref('network.proxy.type', 1)
-        set_pref('network.proxy.socks', '127.0.0.1')
-        set_pref('network.proxy.socks_port', self.socks_port)
         set_pref('extensions.torlauncher.prompt_at_startup', 0)
+        # load strategy normal is equivalent to "onload"
         set_pref('webdriver.load.strategy', 'normal')
-        # Prevent Tor Browser running its own Tor process
-        set_pref('extensions.torlauncher.start_tor', False)
         # disable auto-update
         set_pref('app.update.enabled', False)
         set_pref('extensions.torbutton.versioncheck_enabled', False)
-        # needed to add canvas permissions for TBB versions < 4.5a3
+        # following is only needed for TBB < 4.5a3 to add canvas permissions
         set_pref('permissions.memory_only', False)
+        # Configure Firefox to use Tor SOCKS proxy
+        set_pref('network.proxy.socks_port', self.socks_port)
+        set_pref('extensions.torbutton.socks_port', self.socks_port)
+        # If your control port != socks_port+1, use pref_dict to overwrite
+        set_pref('extensions.torlauncher.control_port', self.socks_port+1)
+        if self.tor_cfg == cm.USE_TBB_TOR_LAUNCH_NEW:
+            set_pref('extensions.torlauncher.start_tor', True)
+        else:  # Prevent Tor Browser running its own Tor process
+            set_pref('extensions.torlauncher.start_tor', False)
+
+        # pref_dict overwrites above preferences
         for pref_name, pref_val in pref_dict.iteritems():
             set_pref(pref_name, pref_val)
         self.profile.update_preferences()
@@ -198,12 +216,15 @@ class TorBrowserDriver(Firefox):
         return tbb_profile
 
     def quit(self):
-        """Overrides the base class method. Quits driver and closes virtual display ."""
+        """Quits driver and closes virtual display.
+        Overrides the base class method.
+        """
         self.is_running = False
         try:
             super(TorBrowserDriver, self).quit()
         except CannotSendRequest as exc:
-            print("[tbselenium] CannotSendRequest while quitting TorBrowserDriver %s" % exc)
+            print("[tbselenium] CannotSendRequest while quitting"
+                  " TorBrowserDriver %s" % exc)
             # following is copied from webdriver.firefox.webdriver.quit() which
             # was interrupted due to an unhandled CannotSendRequest exception.
             self.binary.kill()  # kill the browser
@@ -214,7 +235,8 @@ class TorBrowserDriver(Firefox):
             except Exception as e:
                 print("[tbselenium] " + str(e))
         except Exception as exc:
-            print("[tbselenium] Exception while quitting TorBrowserDriver %s" % exc)
+            print("[tbselenium] Exception while quitting TorBrowserDriver %s"
+                  % exc)
         finally:
             # remove profile dir
             if self.temp_profile_path is not None:
@@ -225,24 +247,5 @@ class TorBrowserDriver(Firefox):
     def __enter__(self):
         return self
 
-    # TODO avoid using reserved symbol "type"
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, value, traceback):
         self.quit()
-
-
-class TorBrowserWrapper(object):
-    def __init__(self, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
-        self.driver = None
-
-    def __getattr__(self, item):
-        if item == "launch":
-            return getattr(self, item)
-        return getattr(self.driver, item)
-
-    @contextmanager
-    def launch(self):
-        self.driver = TorBrowserDriver(*self.args, **self.kwargs)
-        yield self.driver
-        self.driver.quit()

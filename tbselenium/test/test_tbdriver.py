@@ -5,6 +5,7 @@ from os.path import getsize, exists
 
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
 from tbselenium import common as cm
@@ -37,7 +38,7 @@ class TBDriverTest(unittest.TestCase):
         """checktor.torproject.org should detect Tor IP."""
         self.tb_driver.load_url(cm.CHECK_TPO_URL)
         try:
-            self.tb_driver.find_el_by_css("h1.on", 30)
+            self.tb_driver.find_element_by("h1.on")
         except TimeoutException as texc:
             self.fail("Can't find the network status on the page: %s" % texc)
 
@@ -55,7 +56,7 @@ class TBDriverTest(unittest.TestCase):
             WebDriverWait(self.tb_driver, TEST_LONG_WAIT).\
                 until(EC.title_contains("thanks"))
         except TimeoutException:
-            self.fail("Unexpected page title %s" % self.tb_driver.title)
+            self.fail("Can't find expected title %s" % self.tb_driver.title)
         self.assertEqual(self.tb_driver.current_url, TEST_HTTPS_URL)
 
     def test_noscript(self):
@@ -68,7 +69,7 @@ class TBDriverTest(unittest.TestCase):
             self.fail("WebGL error alert should be present")
         self.tb_driver.switch_to.alert.dismiss()
         try:
-            self.tb_driver.find_el_by_css(".__noscriptPlaceholder__", 30)
+            self.tb_driver.find_element_by(".__noscriptPlaceholder__", 30)
         except TimeoutException as texc:
             self.fail("Can't find the __noscriptPlaceholder__: %s" % texc)
 
@@ -81,7 +82,7 @@ class TBDriverFailTest(unittest.TestCase):
         exc_msg = exc.exception
         self.assertEqual(str(exc_msg),
                          "Either TBB path or Firefox profile and binary path "
-                         "should be provided None")
+                         "should be provided ")
 
     def test_should_raise_for_missing_tbb_path(self):
         with self.assertRaises(cm.TBDriverPathError) as exc:
@@ -116,8 +117,9 @@ class TBDriverFailTest(unittest.TestCase):
         with self.assertRaises(AttributeError):
             TorBrowserDriver(TBB_PATH, pref_dict=(1, 2))
 
-    def test_should_fail_with_wrong_socks_port(self):
-        with TorBrowserDriver(TBB_PATH, socks_port=9999) as driver:
+    def test_should_fail_with_wrong_sys_socks_port(self):
+        with TorBrowserDriver(TBB_PATH, socks_port=9999,
+                              tor_cfg=cm.USE_SYSTEM_TOR) as driver:
             driver.load_url(cm.CHECK_TPO_URL)
             self.assertEqual(driver.title, "Problem loading page")
 
@@ -163,8 +165,8 @@ class ScreenshotTest(unittest.TestCase):
 class TBDriverOptionalArgs(unittest.TestCase):
 
     def test_security_slider_settings_hi(self):
-        security_high = {"extensions.torbutton.security_slider": 1}
-        with TorBrowserDriver(TBB_PATH, pref_dict=security_high) as driver:
+        slider_pref = {"extensions.torbutton.security_slider": 1}
+        with TorBrowserDriver(TBB_PATH, pref_dict=slider_pref) as driver:
             driver.load_url(cm.CHECK_TPO_URL, 1)
             self.assertRaises(NoSuchElementException,
                               driver.find_element_by_link_text,
@@ -174,12 +176,18 @@ class TBDriverOptionalArgs(unittest.TestCase):
         for sec_slider_setting in [2, 3, 4]:
             # 2: medium-high, 3: medium-low, 4: low (default)
             el = None
-            sec_slider_pref = {"extensions.torbutton.security_slider":
-                               sec_slider_setting}
+            slider_pref = {"extensions.torbutton.security_slider":
+                           sec_slider_setting}
             with TorBrowserDriver(TBB_PATH,
-                                  pref_dict=sec_slider_pref) as driver:
+                                  pref_dict=slider_pref) as driver:
                 driver.load_url(cm.CHECK_TPO_URL, 1)
-                el = driver.find_element_by_link_text("JavaScript is enabled.")
+                try:
+                    el = driver.find_element_by("JavaScript is enabled.",
+                                                find_by=By.LINK_TEXT)
+                except TimeoutException:
+                    self.fail("Can't confirm if JS is enabled for security "
+                              "slider setting %s, on page %s."
+                              % (sec_slider_setting, driver.title))
                 self.assertTrue(el)
 
     def test_tbb_logfile(self):
@@ -211,6 +219,6 @@ class HTTPSEverywhereDisabledTest(unittest.TestCase):
             driver.load_url(TEST_HTTP_URL, 1)
             err_msg = "Test should be updated to use a site that doesn't \
                 auto-forward HTTP to HTTPS. %s " % driver.current_url
-            self.failIfEqual(driver.current_url,  TEST_HTTPS_URL, err_msg)
+            self.failIfEqual(driver.current_url, TEST_HTTPS_URL, err_msg)
             self.assertEqual(driver.current_url, TEST_HTTP_URL,
                              "Can't load the test page")

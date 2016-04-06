@@ -11,7 +11,10 @@ DEFAULT_TOR_DATA_PATH = join('Browser', 'TorBrowser', 'Data', 'Tor')
 
 # TOR PORTS
 DEFAULT_SOCKS_PORT = 9050
-REFACTOR_CONTROL_PORT = 9051
+DEFAULT_CONTROL_PORT = 9051
+
+TBB_SOCKS_PORT = 9150
+TBB_CONTROL_PORT = 9151
 
 # TOR CONTROLLER
 STREAM_CLOSE_TIMEOUT = 20  # wait 20 seconds before raising an alarm signal
@@ -29,6 +32,12 @@ DEFAULT_XVFB_WIN_H = 800
 # H = height of the virtual display
 # e.g. "1280x800" or "800x600"
 DEFAULT_XVFB_WINDOW_SIZE = "%sx%s" % (DEFAULT_XVFB_WIN_W, DEFAULT_XVFB_WIN_H)
+
+# Which tor process/binary to use
+USE_TBB_TOR_LAUNCH_NEW = 0  # use tor in TBB, launch a new process
+USE_TBB_TOR_DONT_LAUNCH_NEW = 1  # use tor in TBB, don't launch new process
+USE_SYSTEM_TOR = 2  # use the tor installed and running on the system
+USE_STEM = 3  # use Stem library to launch tor
 
 
 class TBDriverPathError(Exception):
