@@ -1,5 +1,4 @@
 import shutil
-import sqlite3
 from httplib import CannotSendRequest
 from os import environ
 from os.path import isdir, isfile, join, dirname
@@ -15,7 +14,7 @@ from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
 from tld import get_tld
 
 import common as cm
-from utils import clone_dir_temporary, start_xvfb, stop_xvfb
+from utils import clone_dir_temporary, start_xvfb, stop_xvfb, add_canvas_permission
 
 
 class TorBrowserDriver(FirefoxDriver):
@@ -167,52 +166,9 @@ class TorBrowserDriver(FirefoxDriver):
 
     def get_tbb_binary(self, logfile=None):
         """Return FirefoxBinary pointing to the TBB's firefox binary."""
-        tbb_logfile = None
-        if logfile:
-            tbb_logfile = open(logfile, 'a+')
-        # In case you get an error for the unknown log_file, make sure your
-        # Selenium version is compatible with the Firefox version in TBB.
-        # Another common output in case of incompatibility is an error
-        # for TorBrowserDriver not having a 'session_id' property.
+        tbb_logfile = open(logfile, 'a+') if logfile else None
         return FirefoxBinary(firefox_path=self.tbb_fx_binary_path,
                              log_file=tbb_logfile)
-
-    def add_canvas_permission(self, profile_path):
-        """Create a permission db (permissions.sqlite) and add
-        exceptions for the canvas image extraction for the given domains.
-        If we don't add permissions, screenshots taken by TBB < 4.5a3 will be
-        blank images due to the canvas fingerprinting defense in the Tor
-        Browser.
-
-        Canvas permission is only needed for TBB < 4.5a3.
-
-        With TBB versions >= 4.5a3, chrome scripts are exempted from the
-        canvas permission, so Selenium code that grabs the canvas image (which
-        should appear as a chrome script) does not require a separate
-        permission.
-
-        See, https://trac.torproject.org/projects/tor/ticket/13439
-        """
-        connect_to_db = sqlite3.connect
-        perm_db = connect_to_db(join(profile_path, "permissions.sqlite"))
-        cursor = perm_db.cursor()
-        # http://mxr.mozilla.org/mozilla-esr31/source/build/automation.py.in
-        cursor.execute("PRAGMA user_version=3")
-        cursor.execute("""CREATE TABLE IF NOT EXISTS moz_hosts (
-          id INTEGER PRIMARY KEY,
-          host TEXT,
-          type TEXT,
-          permission INTEGER,
-          expireType INTEGER,
-          expireTime INTEGER,
-          appId INTEGER,
-          isInBrowserElement INTEGER)""")
-        for domain in self.canvas_exceptions:
-            qry = """INSERT INTO 'moz_hosts'
-            VALUES(NULL,'%s','canvas/extractData',1,0,0,0,0);""" % domain
-            cursor.execute(qry)
-        perm_db.commit()
-        cursor.close()
 
     def init_tbb_profile(self):
         """Create a Firefox profile pointing to a profile dir path."""
@@ -220,7 +176,7 @@ class TorBrowserDriver(FirefoxDriver):
         if not self.pollute:
             self.temp_profile_path = clone_dir_temporary(self.tbb_profile_path)
             profile_path = self.temp_profile_path
-        self.add_canvas_permission(profile_path)
+        add_canvas_permission(profile_path, self.canvas_exceptions)
         return webdriver.FirefoxProfile(profile_path)
 
     def quit(self):

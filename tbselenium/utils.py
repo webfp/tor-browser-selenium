@@ -1,3 +1,4 @@
+import sqlite3
 import distutils.dir_util as du
 from os import walk, makedirs
 from os.path import join, exists
@@ -55,3 +56,41 @@ def is_png(path):
     # Taken from http://stackoverflow.com/a/21555489
     data = read_file(path, 'rb')
     return (data[:8] == '\211PNG\r\n\032\n'and (data[12:16] == 'IHDR'))
+
+
+def add_canvas_permission(profile_path, canvas_exceptions):
+    """Create a permission db (permissions.sqlite) and add
+    exceptions for the canvas image extraction for the given domains.
+    If we don't add permissions, screenshots taken by TBB < 4.5a3 will be
+    blank images due to the canvas fingerprinting defense in the Tor
+    Browser.
+
+    Canvas permission is only needed for TBB < 4.5a3.
+
+    With TBB versions >= 4.5a3, chrome scripts are exempted from the
+    canvas permission, so Selenium code that grabs the canvas image (which
+    should appear as a chrome script) does not require a separate
+    permission.
+
+    See, https://trac.torproject.org/projects/tor/ticket/13439
+    """
+    connect_to_db = sqlite3.connect
+    perm_db = connect_to_db(join(profile_path, "permissions.sqlite"))
+    cursor = perm_db.cursor()
+    # http://mxr.mozilla.org/mozilla-esr31/source/build/automation.py.in
+    cursor.execute("PRAGMA user_version=3")
+    cursor.execute("""CREATE TABLE IF NOT EXISTS moz_hosts (
+      id INTEGER PRIMARY KEY,
+      host TEXT,
+      type TEXT,
+      permission INTEGER,
+      expireType INTEGER,
+      expireTime INTEGER,
+      appId INTEGER,
+      isInBrowserElement INTEGER)""")
+    for domain in canvas_exceptions:
+        qry = """INSERT INTO 'moz_hosts'
+        VALUES(NULL,'%s','canvas/extractData',1,0,0,0,0);""" % domain
+        cursor.execute(qry)
+    perm_db.commit()
+    cursor.close()

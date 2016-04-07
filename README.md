@@ -156,7 +156,7 @@ For running examples you can check the `test_examples.py` in the test directory 
 
 Solutions to some potential issues:
 
-* Outdated (or incompatible) Python Selenium package: `pip install -U selenium`
+* Outdated (or incompatible) Python Selenium package: This is the source of various obscure errors. Run: `pip install -U selenium`
 * Outdated Tor Browser Bundle: Download and use a more recent TBB version.
 * Port conflict with other (`tor`) process: Pick a different SOCKS and controller port using `socks_port` argument.
 * Use `tbb_logfile_path` argument of TorBrowserDriver to debug problems where an exception or traceback is not available or hard to understand. This can help debugging errors due to missing display, missing libraries (e.g. when the LD_LIBRARY_PATH is not set correctly) or other errors that Firefox/Tor Browser logs to standard output.

@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+import pytest
 from os import remove
 from os.path import getsize, exists
 
@@ -49,6 +50,18 @@ class TBDriverTest(unittest.TestCase):
         self.tb_driver.get(cm.CHECK_TPO_URL)
         profile_hash_after = get_hash_of_directory(cm.DEFAULT_TBB_PROFILE_PATH)
         self.assertEqual(profile_hash_before, profile_hash_after)
+
+    @pytest.mark.xfail
+    def test_tbdriver_profile_modified(self):
+        """Visiting a site should modify the original profile if
+        pollute is True. But this doesn't work since Selenium takes a copy of
+        the profile anyway."""
+        self.tb_driver.quit()  # quit the given driver
+        self.tb_driver = TorBrowserDriver(TBB_PATH, pollute=True)
+        profile_hash_before = get_hash_of_directory(cm.DEFAULT_TBB_PROFILE_PATH)
+        self.tb_driver.get(cm.CHECK_TPO_URL)
+        profile_hash_after = get_hash_of_directory(cm.DEFAULT_TBB_PROFILE_PATH)
+        self.assertFalse(profile_hash_before, profile_hash_after)
 
     def test_httpseverywhere(self):
         """HTTPSEverywhere should redirect to HTTPS version."""
