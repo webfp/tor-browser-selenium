@@ -1,6 +1,5 @@
 import shutil
 import sqlite3
-from contextlib import contextmanager
 from httplib import CannotSendRequest
 from os import environ
 from os.path import isdir, isfile, join, dirname
@@ -12,14 +11,14 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
-from selenium.webdriver.firefox.webdriver import WebDriver as Firefox
+from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
 from tld import get_tld
 
 import common as cm
 from utils import clone_dir_temporary, start_xvfb, stop_xvfb
 
 
-class TorBrowserDriver(Firefox):
+class TorBrowserDriver(FirefoxDriver):
     """
     Extend Firefox webdriver to automate Tor Browser.
     """
@@ -222,11 +221,7 @@ class TorBrowserDriver(Firefox):
             self.temp_profile_path = clone_dir_temporary(self.tbb_profile_path)
             profile_path = self.temp_profile_path
         self.add_canvas_permission(profile_path)
-        try:
-            tbb_profile = webdriver.FirefoxProfile(profile_path)
-        except Exception as exc:
-            print("[tbselenium] Error creating the TB profile %s" % exc)
-        return tbb_profile
+        return webdriver.FirefoxProfile(profile_path)
 
     def quit(self):
         """Quits driver and closes virtual display.
