@@ -2,33 +2,21 @@
 
 ![DISCLAIMER](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Dialog-warning-orange.svg/40px-Dialog-warning-orange.svg.png "experimental")  **experimental - PLEASE BE CAREFUL**
 
-
-A Python library to automate Tor Browser with Selenium. Our implementation started as a fork of [tor-browser-selenium](https://github.com/isislovecruft/tor-browser-selenium) by @isislovecruft.
+A Python library to automate Tor Browser with Selenium.
 
 ## Requirements
-
-It has been tested on the following versions of the [Tor Browser](https://www.torproject.org/projects/torbrowser.html.en):
+Tested with the following Tor Browser Bundle versions on Debian (Wheezy) and Ubuntu (14.04 & 15.10):
 
 * 2.4.7-alpha-1
-* 4.0.8
 * 3.5
-* 5.5.3
+* 4.0.8
+* 5.5.4
 
-It has been tested on Debian Wheezy and Ubuntu Wily. It has not been tested in non-Linux systems, but most of the code should be compatible with Windows and Mac OSX.
-
-Make sure your [Selenium](http://www.seleniumhq.org/) version supports the Firefox version on which the Tor Browser you are using is based.
-
-Also, the system (OS, libraries, etc.) should support the Tor Browser versions being used and have `Python` installed.
+Most of code should be compatible with Windows and Mac OS.
 
 ## Installation
 
-You may need to install the following packages:
-
-- python-setuptools
-- git
-- xvfb
-
-With `apt-get`, you can install them by running the following command:
+With `apt-get`, you can install the dependencies by running the following command:
 
 `sudo apt-get install python-setuptools git xvfb`
 
@@ -166,16 +154,23 @@ if tor_process:
 
 For running examples you can check the `test_examples.py` in the test directory of this repository.
 
-## Known catches
+## Troubleshooting
 
-If you get an exception with a message like this:
+Solutions to some potential issues:
 
-`AttributeError: 'TorBrowserDriver' object has no attribute 'session_id'`,
-
-it probably is because Selenium's command to execute Firefox failed. In order to debug the issue, pass a log file to the TorBrowserDriver to obtain errors messages coming from Firefox. You can indicate the path to the logfile as a parameter to the TorBrowserDriver constructor:
+* Outdated (or incompatible) Python Selenium package: `pip install -U selenium`
+* Outdated Tor Browser Bundle: Download and use a more recent TBB version.
+* Port conflict with other (`tor`) process: Pick a different SOCKS and controller port using `socks_port` argument.
+* Use `tbb_logfile_path` argument of TorBrowserDriver to debug problems where an exception or traceback is not available or hard to understand. This can help debugging errors due to missing display, missing libraries (e.g. when the LD_LIBRARY_PATH is not set correctly) or other errors that Firefox/Tor Browser logs to standard output.
 
 ```python
 path_to_logfile = "ff.log"
 TorBrowserDriver(TBB_PATH, tbb_logfile_path=path_to_logfile)
 ```
-We've found that most of these errors comes from an incompatibility between the OS, Selenium and TorBrowserDriver. We recommend using the latest Tor Browser Bundle on the Ubuntu LTS.
+
+* You can disable Xvfb by setting `virt_display` argument to `None`.
+
+## Credits
+Based on FirefoxDriver and [previous code](https://github.com/isislovecruft/tor-browser-selenium) by @isislovecruft.
+Some test are derived from @boklm's [tor-browser-bundle-testsuite](https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/)
+Similar projects: TBD
