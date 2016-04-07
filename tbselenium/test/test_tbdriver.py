@@ -2,7 +2,7 @@ import tempfile
 import unittest
 import pytest
 from os import remove
-from os.path import getsize, exists
+from os.path import getsize, exists, join
 
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
@@ -39,29 +39,15 @@ class TBDriverTest(unittest.TestCase):
     def test_tbdriver_simple_visit(self):
         """checktor.torproject.org should detect Tor IP."""
         self.tb_driver.load_url(cm.CHECK_TPO_URL)
-        try:
-            self.tb_driver.find_element_by("h1.on")
-        except TimeoutException as texc:
-            self.fail("Can't find the network status on the page: %s" % texc)
+        self.tb_driver.find_element_by("h1.on")
 
     def test_tbdriver_profile_not_modified(self):
         """Visiting a site should not modify the original profile contents."""
-        profile_hash_before = get_hash_of_directory(cm.DEFAULT_TBB_PROFILE_PATH)
+        profile_path = join(TBB_PATH, cm.DEFAULT_TBB_PROFILE_PATH)
+        profile_hash_before = get_hash_of_directory(profile_path)
         self.tb_driver.get(cm.CHECK_TPO_URL)
-        profile_hash_after = get_hash_of_directory(cm.DEFAULT_TBB_PROFILE_PATH)
+        profile_hash_after = get_hash_of_directory(profile_path)
         self.assertEqual(profile_hash_before, profile_hash_after)
-
-    @pytest.mark.xfail
-    def test_tbdriver_profile_modified(self):
-        """Visiting a site should modify the original profile if
-        pollute is True. But this doesn't work since Selenium takes a copy of
-        the profile anyway."""
-        self.tb_driver.quit()  # quit the given driver
-        self.tb_driver = TorBrowserDriver(TBB_PATH, pollute=True)
-        profile_hash_before = get_hash_of_directory(cm.DEFAULT_TBB_PROFILE_PATH)
-        self.tb_driver.get(cm.CHECK_TPO_URL)
-        profile_hash_after = get_hash_of_directory(cm.DEFAULT_TBB_PROFILE_PATH)
-        self.assertFalse(profile_hash_before, profile_hash_after)
 
     def test_httpseverywhere(self):
         """HTTPSEverywhere should redirect to HTTPS version."""

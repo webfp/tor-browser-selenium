@@ -14,7 +14,7 @@ from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
 from tld import get_tld
 
 import common as cm
-from utils import clone_dir_temporary, start_xvfb, stop_xvfb, add_canvas_permission
+from utils import start_xvfb, stop_xvfb, add_canvas_permission
 
 
 class TorBrowserDriver(FirefoxDriver):
@@ -30,16 +30,14 @@ class TorBrowserDriver(FirefoxDriver):
                  pref_dict={},
                  socks_port=None,
                  virt_display=cm.DEFAULT_XVFB_WINDOW_SIZE,
-                 pollute=False,
                  canvas_exceptions=[]):
 
         self.check_tbb_paths(tbb_path, tbb_fx_binary_path, tbb_profile_path)
-        self.temp_profile_path = None
         self.tor_cfg = tor_cfg
-        self.pollute = pollute
         self.canvas_exceptions = [get_tld(url) for url in canvas_exceptions]
         self.setup_virtual_display(virt_display)
-        self.profile = self.init_tbb_profile()
+        self.profile = webdriver.FirefoxProfile(self.tbb_profile_path)
+        add_canvas_permission(self.profile.path, self.canvas_exceptions)
         self.binary = self.get_tbb_binary(logfile=tbb_logfile_path)
         if socks_port is None:
             if tor_cfg == cm.USE_SYSTEM_TOR:
@@ -170,15 +168,6 @@ class TorBrowserDriver(FirefoxDriver):
         return FirefoxBinary(firefox_path=self.tbb_fx_binary_path,
                              log_file=tbb_logfile)
 
-    def init_tbb_profile(self):
-        """Create a Firefox profile pointing to a profile dir path."""
-        profile_path = self.tbb_profile_path
-        if not self.pollute:
-            self.temp_profile_path = clone_dir_temporary(self.tbb_profile_path)
-            profile_path = self.temp_profile_path
-        add_canvas_permission(profile_path, self.canvas_exceptions)
-        return webdriver.FirefoxProfile(profile_path)
-
     def quit(self):
         """Quits driver and closes virtual display.
         Overrides the base class method.
@@ -202,10 +191,7 @@ class TorBrowserDriver(FirefoxDriver):
             print("[tbselenium] Exception while quitting TorBrowserDriver %s"
                   % exc)
         finally:
-            # remove profile dir
-            if self.temp_profile_path is not None:
-                shutil.rmtree(self.temp_profile_path)
-            # remove virtual display
+            # stop the virtual display
             stop_xvfb(self.xvfb_display)
 
     def __enter__(self):

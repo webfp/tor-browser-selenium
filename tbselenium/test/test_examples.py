@@ -44,14 +44,6 @@ class TorBrowserDriverExamples(unittest.TestCase):
             sleep(1)
 
     @unittest.skip("Only for didactic purposes.")
-    def test_dont_pollute_profile(self):
-        """This will make a temporary copy of the Tor Browser profile."""
-        with TorBrowserDriver(TBB_PATH, pollute=False) as driver:
-            driver.get(cm.TEST_URL)
-            sleep(1)
-            # the temporary profile is wiped when driver quits
-
-    @unittest.skip("Only for didactic purposes.")
     def test_use_old_tor_browser_bundles(self):
         """Instead of passing the path to the Tor Browser Bundle,
         you can pass your own tor binary and profile. This is helpful
