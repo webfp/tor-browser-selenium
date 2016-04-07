@@ -70,10 +70,17 @@ with TorBrowserDriver(TBB_PATH) as driver:
 
 ### Take a screenshot
 
-Currently, we need to add an exception to access the canvas in the Tor Browser permission database. We need to do this beforehand for all the URLs that we plan to visit.
-
 ```python
 with TorBrowserDriver(TBB_PATH) as driver:
+    driver.get('https://check.torproject.org')
+    driver.get_screenshot_as_file("screenshot.png")
+```
+
+For old versions of Tor Browser (TBB < 4.5a3) you may get a white blank screenshot, due Tor Browser's canvas fingerprinting defenses.
+You may add an exception for the site(s) you want to visit by passing their URLs in `canvas_exceptions` list:
+
+```python
+with TorBrowserDriver(TBB_PATH, canvas_exceptions=["https://torproject.org"]) as driver:
     driver.get('https://check.torproject.org')
     driver.get_screenshot_as_file("screenshot.png")
 ```
@@ -88,25 +95,15 @@ with TorBrowserDriver(TBB_PATH, virt_display=None) as driver:
     sleep(1)
 ```
 
-### Don't copy the profile
-By default we clone the Firefox profile to isolate different sessions.
-The following will not make a temporary copy of the Tor Browser profile, so that we use the same profile in different visits.
-
-```python
-with TorBrowserDriver(TBB_PATH, pollute=True) as driver:
-    driver.get('https://check.torproject.org')
-    sleep(1)
-    # the temporary profile is wiped when driver quits
-```
-
 ### Use old Tor Browser Bundles
 
-We can use the driver with specific Tor Browser bundles by passing paths to the Tor Browser binary and profile. This is helpful for using the driver with old Tor Browser Bundles, where the directory structure is different from the one that is currently used.
+You can use the driver with old TBB versions by passing the paths for Tor Browser binary and profile (instead of the TBB folder).
+This is due to changes in the TBB directory structure; old versions have different directory structure than the current one.
 
-In this example we used Tor Browser Bundle 3.5, which we assume has been extracted in the home directory.
+In this example we used Tor Browser Bundle 3.5.
 
 ```python
-tbb_3_5 = join(expanduser('~'), 'tor-browser_en-US')
+tbb_3_5 = join('/some/path', 'tor-browser_en-US')
 tb_binary = join(tbb_3_5, "Browser", "firefox")
 tb_profile = join(tbb_3_5, "Data", "Browser", "profile.default")
 with TorBrowserDriver(tbb_binary_path=tb_binary,
