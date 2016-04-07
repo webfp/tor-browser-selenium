@@ -73,28 +73,27 @@ with TorBrowserDriver(TBB_PATH) as driver:
 Currently, we need to add an exception to access the canvas in the Tor Browser permission database. We need to do this beforehand for all the URLs that we plan to visit.
 
 ```python
-TorBrowserDriver.add_exception(cm.TEST_URL)
-with TorBrowserDriver(TBB_PATH, ) as driver:
+with TorBrowserDriver(TBB_PATH) as driver:
     driver.get('https://check.torproject.org')
     driver.get_screenshot_as_file("screenshot.png")
 ```
 
-### Visit with a vitual display
+### Visit without a virtual display
 
-The browser window is placed in a virtual display of dimension 1280x800.
+By default browser window is placed in a virtual display of dimension 1280x800.
 
 ```python
-with TorBrowserDriver(TBB_PATH, virt_display="1280X800") as driver:
-    driver.get('https://check.torproject.org')  # this won't show the browser window.
+with TorBrowserDriver(TBB_PATH, virt_display=None) as driver:
+    driver.get('https://check.torproject.org')  # this will show the browser window.
     sleep(1)
 ```
 
-### Don't pollute the profile
-
-This will make a temporary copy of the Tor Browser profile, so that we do not pollute the oiginal profile.
+### Don't copy the profile
+By default we clone the Firefox profile to isolate different sessions.
+The following will not make a temporary copy of the Tor Browser profile, so that we use the same profile in different visits.
 
 ```python
-with TorBrowserDriver(TBB_PATH, pollute=False) as driver:
+with TorBrowserDriver(TBB_PATH, pollute=True) as driver:
     driver.get('https://check.torproject.org')
     sleep(1)
     # the temporary profile is wiped when driver quits
@@ -102,7 +101,7 @@ with TorBrowserDriver(TBB_PATH, pollute=False) as driver:
 
 ### Use old Tor Browser Bundles
 
-We can use the driver with old Tor Browser bundles by passing specific paths to the Tor Browser binary and profile. This is helpful for using the driver with old Tor Browser Bundles, where the directory structure is different from the one that is currently used by Tor developers.
+We can use the driver with specific Tor Browser bundles by passing paths to the Tor Browser binary and profile. This is helpful for using the driver with old Tor Browser Bundles, where the directory structure is different from the one that is currently used.
 
 In this example we used Tor Browser Bundle 3.5, which we assume has been extracted in the home directory.
 
