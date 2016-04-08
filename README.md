@@ -16,17 +16,11 @@ Most of code should be compatible with Windows and Mac OS.
 
 ## Installation
 
-With `apt-get`, you can install the dependencies by running the following command:
-
-`sudo apt-get install python-setuptools git xvfb`
-
-Clone this repository:
-
-`git clone git@github.com:webfp/tor-browser-selenium.git`
-
-Install:
-
-`sudo easy_install .`
+```
+apt-get install python-setuptools git xvfb
+git clone git@github.com:webfp/tor-browser-selenium.git
+sudo easy_install .
+```
 
 Download the Tor Browser Bundle:
 
@@ -76,7 +70,7 @@ with TorBrowserDriver(TBB_PATH) as driver:
     driver.get_screenshot_as_file("screenshot.png")
 ```
 
-For old versions of Tor Browser (TBB < 4.5a3) you may get a white blank screenshot, due Tor Browser's canvas fingerprinting defenses.
+For TBB versions older than 4.5a3 you may get a blank screenshot, due to an issue with Tor Browser's canvas fingerprinting defenses.
 You may add an exception for the site(s) you want to visit by passing their URLs in `canvas_exceptions` list:
 
 ```python
@@ -97,7 +91,7 @@ with TorBrowserDriver(TBB_PATH, virt_display=None) as driver:
 
 ### Use old Tor Browser Bundles
 
-You can use the driver with old TBB versions by passing the paths for Tor Browser binary and profile (instead of the TBB folder).
+If you want to use old TBB versions (<=V4.X) initialize TorBrowserDriver with the paths for Tor Browser binary and profile (instead of the TBB folder).
 This is due to changes in the TBB directory structure; old versions have different directory structure than the current one.
 
 In this example we used Tor Browser Bundle 3.5.
