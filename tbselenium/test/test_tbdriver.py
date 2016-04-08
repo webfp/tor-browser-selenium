@@ -2,7 +2,7 @@ import tempfile
 import unittest
 import re
 from os import remove, environ
-from os.path import getsize, exists, join
+from os.path import getsize, exists, join, abspath
 
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
@@ -204,9 +204,11 @@ class TBDriverOptionalArgs(unittest.TestCase):
         _, log_file = tempfile.mkstemp()
         used_font_files = set()
         bundled_fonts_dir = join(TBB_PATH, cm.DEFAULT_BUNDLED_FONTS_PATH)
+        # join returns a relative path on Travis CI
+        bundled_fonts_dir = abspath(bundled_fonts_dir)
         environ["FC_DEBUG"] = "%d" % (1024 + 8 + 1)
         """
-        We set FC_DEBUG to 1024 + 8 + 2 to make sure we get logs about...
+        We set FC_DEBUG to 1024 + 8 + 1 to make sure we get logs about...
         MATCH            1    Brief information about font matching
         FONTSET          8    Track loading of font information at startup
         CONFIG        1024    Monitor which config files are loaded
