@@ -119,7 +119,7 @@ class TBDriverFailTest(unittest.TestCase):
     def test_should_fail_with_wrong_sys_socks_port(self):
         with TorBrowserDriver(TBB_PATH, socks_port=9999,
                               tor_cfg=cm.USE_SYSTEM_TOR) as driver:
-            driver.load_url_ensure(cm.CHECK_TPO_URL)
+            driver.load_url(cm.CHECK_TPO_URL)
             self.assertEqual(driver.title, "Problem loading page")
 
     def test_should_raise_for_invalid_virtual_display_size(self):

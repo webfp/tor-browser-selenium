@@ -109,7 +109,7 @@ class TorBrowserDriver(FirefoxDriver):
             try:
                 self.load_url(url, wait_on_page, wait_for_page_body)
                 if tries > 1:  # TODO:  for debugging, can be removed
-                    print ("Loaded the page in %s tries. Title: %s URL: %s" %
+                    print ("Try %s. Title: %s URL: %s" %
                            (tries, self.title, self.current_url))
                 if self.current_url != "about:newtab" and \
                         self.title != "Problem loading page":  # TODO i18n?
@@ -117,7 +117,10 @@ class TorBrowserDriver(FirefoxDriver):
             except TimeoutException, exc:
                 continue
         else:
-            raise exc
+            if exc:
+                raise exc
+            else:
+                raise TimeoutException("Can't load the page. %s tries" % tries)
 
     def find_element_by(self, selector, timeout=30,
                         find_by=By.CSS_SELECTOR):
