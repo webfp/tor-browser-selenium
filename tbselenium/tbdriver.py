@@ -1,6 +1,6 @@
 import shutil
 from httplib import CannotSendRequest
-from os import environ
+from os import environ, chdir
 from os.path import isdir, isfile, join, dirname
 from time import sleep
 
@@ -38,7 +38,6 @@ class TorBrowserDriver(FirefoxDriver):
         self.setup_virtual_display(virt_display)
         self.profile = webdriver.FirefoxProfile(self.tbb_profile_path)
         add_canvas_permission(self.profile.path, self.canvas_exceptions)
-        self.binary = self.get_tbb_binary(logfile=tbb_logfile_path)
         if socks_port is None:
             if tor_cfg == cm.USE_SYSTEM_TOR:
                 socks_port = cm.DEFAULT_SOCKS_PORT
@@ -48,6 +47,7 @@ class TorBrowserDriver(FirefoxDriver):
         self.update_prefs(pref_dict)
         self.setup_capabilities()
         self.export_lib_path()
+        self.binary = self.get_tbb_binary(logfile=tbb_logfile_path)
         super(TorBrowserDriver, self).__init__(firefox_profile=self.profile,
                                                firefox_binary=self.binary,
                                                capabilities=self.capabilities)
@@ -139,12 +139,16 @@ class TorBrowserDriver(FirefoxDriver):
         tbb_browser_dir = join(tbb_root_dir, cm.DEFAULT_TBB_BROWSER_DIR)
         tor_binary_dir = join(tbb_root_dir, cm.DEFAULT_TOR_BINARY_DIR)
         # Add "TBB_DIR/Browser" and dir. of the tor binary to LD_LIBRARY_PATH
+        chdir(tbb_browser_dir)
         environ["LD_LIBRARY_PATH"] = "%s:%s" % (tbb_browser_dir,
                                                 tor_binary_dir)
         # set the home variable to "TBB_DIR/Browser" directory
         # https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/commit/?id=2e4fb90d4fc019d6680f24089cb1d0b4d4a276a5
         # TODO: make sure we don't get strange side effects due to overwriting
         # $HOME environment variable.
+        environ["FONTCONFIG_PATH"] = join(tbb_root_dir,
+                                          cm.DEFAULT_FONTCONFIG_PATH)
+        environ["FONTCONFIG_FILE"] = cm.FONTCONFIG_FILE
         environ["HOME"] = tbb_browser_dir
 
     def setup_capabilities(self):

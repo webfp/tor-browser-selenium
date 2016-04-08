@@ -4,6 +4,7 @@ from os import walk, makedirs
 from os.path import join, exists
 import common as cm
 from pyvirtualdisplay import Display
+import fnmatch
 
 
 def get_hash_of_directory(path):
@@ -16,6 +17,15 @@ def get_hash_of_directory(path):
             for line in open(full_path).readlines():
                 m.update(line)
     return m.digest()
+
+
+def gen_find_files(dir_path, pattern="*"):
+    """Returns filenames that matches the given pattern under a given dir
+    http://www.dabeaz.com/generators/
+    """
+    for path, _, filelist in walk(dir_path):
+        for name in fnmatch.filter(filelist, pattern):
+            yield join(path, name)
 
 
 def create_dir(dir_path):

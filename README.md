@@ -89,7 +89,7 @@ with TorBrowserDriver(TBB_PATH, virt_display=None) as driver:
     sleep(1)
 ```
 
-### Use old Tor Browser Bundles
+### Using old Tor Browser Bundles
 
 If you want to use old TBB versions (<=V4.X) initialize TorBrowserDriver with the paths for Tor Browser binary and profile (instead of the TBB folder).
 This is due to changes in the TBB directory structure; old versions have different directory structure than the current one.
