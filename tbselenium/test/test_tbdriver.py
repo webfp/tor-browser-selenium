@@ -14,7 +14,6 @@ from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.test import TBB_PATH
 import tbselenium.utils as ut
 from tld.exceptions import TldBadUrl
-from time import sleep
 
 TEST_LONG_WAIT = 60
 
@@ -32,16 +31,22 @@ MISSING_FILE = "_no_such_file_"
 
 class TBDriverTest(unittest.TestCase):
     def setUp(self):
-        self.tb_driver = TorBrowserDriver(TBB_PATH)
+        for _ in range(3):
+            try:
+                self.tb_driver = TorBrowserDriver(TBB_PATH)
+                break
+            except TimeoutException, exc:
+                continue
+        else:
+            raise exc
 
     def tearDown(self):
         self.tb_driver.quit()
 
     def test_tbdriver_simple_visit(self):
         """checktor.torproject.org should detect Tor IP."""
-        self.tb_driver.load_url(cm.CHECK_TPO_URL)
+        self.tb_driver.load_url_ensure(cm.CHECK_TPO_URL)
         self.tb_driver.find_element_by("h1.on")
-        sleep(100)
 
     def test_tbdriver_profile_not_modified(self):
         """Visiting a site should not modify the original profile contents."""
@@ -63,7 +68,7 @@ class TBDriverTest(unittest.TestCase):
 
     def test_noscript(self):
         """NoScript should disable WebGL."""
-        self.tb_driver.load_url(cm.CHECK_TPO_URL, wait_for_page_body=True)
+        self.tb_driver.load_url_ensure(cm.CHECK_TPO_URL, wait_for_page_body=True)
         webgl_support = self.tb_driver.execute_script(WEBGL_CHECK_JS)
         self.assertIsNone(webgl_support)
 
@@ -114,7 +119,7 @@ class TBDriverFailTest(unittest.TestCase):
     def test_should_fail_with_wrong_sys_socks_port(self):
         with TorBrowserDriver(TBB_PATH, socks_port=9999,
                               tor_cfg=cm.USE_SYSTEM_TOR) as driver:
-            driver.load_url(cm.CHECK_TPO_URL)
+            driver.load_url_ensure(cm.CHECK_TPO_URL)
             self.assertEqual(driver.title, "Problem loading page")
 
     def test_should_raise_for_invalid_virtual_display_size(self):
@@ -147,13 +152,14 @@ class ScreenshotTest(unittest.TestCase):
         with TorBrowserDriver(TBB_PATH,
                               canvas_exceptions=[cm.CHECK_TPO_URL]) as driver:
             # passing canvas_exceptions is not needed for TBB >= 4.5a3
-            driver.load_url(cm.CHECK_TPO_URL, 3)
+            driver.load_url_ensure(cm.CHECK_TPO_URL, 3)
             driver.get_screenshot_as_file(self.temp_file)
         # A blank image for https://check.torproject.org/ amounts to ~4.8KB.
         # A real screen capture of the same page is ~57KB. If the capture
         # is not blank it should be at least greater than 20KB.
         self.assertGreater(getsize(self.temp_file), 20000)
-        self.assertTrue(ut.is_png(self.temp_file), "Doesn't look like a PNG file")
+        self.assertTrue(ut.is_png(self.temp_file),
+                        "Doesn't look like a PNG file")
 
 
 class TBDriverOptionalArgs(unittest.TestCase):
@@ -161,7 +167,7 @@ class TBDriverOptionalArgs(unittest.TestCase):
     def test_security_slider_settings_hi(self):
         slider_pref = {"extensions.torbutton.security_slider": 1}
         with TorBrowserDriver(TBB_PATH, pref_dict=slider_pref) as driver:
-            driver.load_url(cm.CHECK_TPO_URL, 1)
+            driver.load_url_ensure(cm.CHECK_TPO_URL, 1)
             self.assertRaises(NoSuchElementException,
                               driver.find_element_by_link_text,
                               "JavaScript is enabled.")
@@ -174,7 +180,7 @@ class TBDriverOptionalArgs(unittest.TestCase):
                            sec_slider_setting}
             with TorBrowserDriver(TBB_PATH,
                                   pref_dict=slider_pref) as driver:
-                driver.load_url(cm.CHECK_TPO_URL)
+                driver.load_url_ensure(cm.CHECK_TPO_URL)
                 try:
                     el = driver.find_element_by("JavaScript is enabled.",
                                                 find_by=By.LINK_TEXT)
@@ -191,7 +197,7 @@ class TBDriverOptionalArgs(unittest.TestCase):
         self.assertEqual(log_len, 0)
 
         with TorBrowserDriver(TBB_PATH, tbb_logfile_path=log_file) as driver:
-            driver.load_url(cm.CHECK_TPO_URL)
+            driver.load_url_ensure(cm.CHECK_TPO_URL)
 
         log_txt = ut.read_file(log_file)
         # make sure we find the expected strings in the log
@@ -215,7 +221,7 @@ class TBDriverOptionalArgs(unittest.TestCase):
         https://www.freedesktop.org/software/fontconfig/fontconfig-user.html
         """
         with TorBrowserDriver(TBB_PATH, tbb_logfile_path=log_file) as driver:
-            driver.load_url("https://www.wikipedia.org/")
+            driver.load_url_ensure("https://www.wikipedia.org/")
         bundled_font_files = set(ut.gen_find_files(bundled_fonts_dir))
         # make sure we discovered the bundled fonts
         self.assertTrue(len(bundled_font_files) > 0)
@@ -252,7 +258,7 @@ class TBDriverTestAssumptions(unittest.TestCase):
         """
         disable_HE_pref = {"extensions.https_everywhere.globalEnabled": False}
         with TorBrowserDriver(TBB_PATH, pref_dict=disable_HE_pref) as driver:
-            driver.load_url(TEST_HTTP_URL, 1)
+            driver.load_url_ensure(TEST_HTTP_URL, 1)
             err_msg = "Test should be updated to use a site that doesn't \
                 auto-forward HTTP to HTTPS. %s " % driver.current_url
             self.failIfEqual(driver.current_url, TEST_HTTPS_URL, err_msg)
@@ -267,7 +273,7 @@ class TBDriverTestAssumptions(unittest.TestCase):
         disable_NS_webgl_pref = {"noscript.forbidWebGL": False}
         with TorBrowserDriver(TBB_PATH,
                               pref_dict=disable_NS_webgl_pref) as driver:
-            driver.load_url(cm.CHECK_TPO_URL, wait_for_page_body=True)
+            driver.load_url_ensure(cm.CHECK_TPO_URL, wait_for_page_body=True)
             webgl_support = driver.execute_script(WEBGL_CHECK_JS)
             self.assertIsNotNone(webgl_support)
             self.assertIn("activeTexture", webgl_support)

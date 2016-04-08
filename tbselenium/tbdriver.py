@@ -15,6 +15,7 @@ from tld import get_tld
 
 import common as cm
 from utils import start_xvfb, stop_xvfb, add_canvas_permission
+from selenium.common.exceptions import TimeoutException
 
 
 class TorBrowserDriver(FirefoxDriver):
@@ -50,7 +51,9 @@ class TorBrowserDriver(FirefoxDriver):
         self.binary = self.get_tbb_binary(logfile=tbb_logfile_path)
         super(TorBrowserDriver, self).__init__(firefox_profile=self.profile,
                                                firefox_binary=self.binary,
-                                               capabilities=self.capabilities)
+                                               capabilities=self.capabilities,
+                                               # default timeout is 30
+                                               timeout=60)
         self.is_running = True
 
     def check_tbb_paths(self, tbb_path, tbb_fx_binary_path, tbb_profile_path):
@@ -96,8 +99,25 @@ class TorBrowserDriver(FirefoxDriver):
         self.get(url)
         if wait_for_page_body:
             # if the page can't be loaded this will raise a TimeoutException
-            self.find_element_by("body", timeout=60, find_by=By.TAG_NAME)
+            self.find_element_by("body", find_by=By.TAG_NAME)
         sleep(wait_on_page)
+
+    def load_url_ensure(self, url, wait_on_page=0, wait_for_page_body=False,
+                        max_reload_tries=5):
+        """Make sure the requested URL is loaded. Retry if necessary."""
+        for tries in range(1, max_reload_tries+1):
+            try:
+                self.load_url(url, wait_on_page, wait_for_page_body)
+                if tries > 1:  # TODO:  for debugging, can be removed
+                    print ("Loaded the page in %s tries. Title: %s URL: %s" %
+                           (tries, self.title, self.current_url))
+                if self.current_url != "about:newtab" and \
+                        self.title != "Problem loading page":  # TODO i18n?
+                    break
+            except TimeoutException, exc:
+                continue
+        else:
+            raise exc
 
     def find_element_by(self, selector, timeout=30,
                         find_by=By.CSS_SELECTOR):
@@ -180,20 +200,15 @@ class TorBrowserDriver(FirefoxDriver):
         try:
             super(TorBrowserDriver, self).quit()
         except CannotSendRequest as exc:
-            print("[tbselenium] CannotSendRequest while quitting"
-                  " TorBrowserDriver %s" % exc)
-            # following is copied from webdriver.firefox.webdriver.quit() which
-            # was interrupted due to an unhandled CannotSendRequest exception.
-            self.binary.kill()  # kill the browser
+            print("[tbselenium] " + str(exc))
+            # following code is from webdriver.firefox.webdriver.quit()
             try:
+                self.binary.kill()  # kill the browser
                 shutil.rmtree(self.profile.path)
                 if self.profile.tempfolder is not None:
                     shutil.rmtree(self.profile.tempfolder)
             except Exception as e:
                 print("[tbselenium] " + str(e))
-        except Exception as exc:
-            print("[tbselenium] Exception while quitting TorBrowserDriver %s"
-                  % exc)
         finally:
             # stop the virtual display
             stop_xvfb(self.xvfb_display)
