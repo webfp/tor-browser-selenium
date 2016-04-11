@@ -163,8 +163,7 @@ class TorBrowserDriver(FirefoxDriver):
         tor_binary_dir = join(tbb_root_dir, cm.DEFAULT_TOR_BINARY_DIR)
         # Add "TBB_DIR/Browser" and dir. of the tor binary to LD_LIBRARY_PATH
         chdir(tbb_browser_dir)
-        environ["LD_LIBRARY_PATH"] = "%s:%s" % (tbb_browser_dir,
-                                                tor_binary_dir)
+        environ["LD_LIBRARY_PATH"] = join(tbb_browser_dir, tor_binary_dir)
         # set the home variable to "TBB_DIR/Browser" directory
         # https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/commit/?id=2e4fb90d4fc019d6680f24089cb1d0b4d4a276a5
         # TODO: make sure we don't get strange side effects due to overwriting
