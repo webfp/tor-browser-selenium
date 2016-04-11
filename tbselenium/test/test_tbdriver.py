@@ -44,7 +44,7 @@ class TBDriverTest(unittest.TestCase):
         self.tb_driver.quit()
 
     def test_tbdriver_simple_visit(self):
-        """checktor.torproject.org should detect Tor IP."""
+        """check.torproject.org should detect Tor IP."""
         self.tb_driver.load_url_ensure(cm.CHECK_TPO_URL)
         self.tb_driver.find_element_by("h1.on")
 
@@ -163,6 +163,12 @@ class ScreenshotTest(unittest.TestCase):
 
 
 class TBDriverOptionalArgs(unittest.TestCase):
+
+    def test_running_with_system_tor(self):
+        """check.torproject.org should detect Tor IP."""
+        with TorBrowserDriver(TBB_PATH, tor_cfg=cm.USE_SYSTEM_TOR) as driver:
+            driver.load_url_ensure(cm.CHECK_TPO_URL)
+            driver.find_element_by("h1.on")
 
     def test_security_slider_settings_hi(self):
         slider_pref = {"extensions.torbutton.security_slider": 1}
