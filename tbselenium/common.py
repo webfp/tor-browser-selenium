@@ -41,7 +41,7 @@ DEFAULT_XVFB_WINDOW_SIZE = "%sx%s" % (DEFAULT_XVFB_WIN_W, DEFAULT_XVFB_WIN_H)
 
 # Which tor process/binary to use
 LAUNCH_NEW_TBB_TOR = 0  # use tor in TBB, launch a new process
-USE_SYSTEM_TOR = 1  # use the tor installed and running on the system
+USE_RUNNING_TOR = 1  # use the tor installed and running on the system
 
 
 class TBDriverPathError(Exception):

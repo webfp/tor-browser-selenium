@@ -83,6 +83,7 @@ class TorBrowserDriverExamples(unittest.TestCase):
         # Run tor
         custom_control_port, custom_socks_port = 9051, 9050
         torrc = {'ControlPort': str(custom_control_port),
+                 'SOCKSPort': str(custom_socks_port),
                  'DataDirectory': join(TBB_PATH, cm.DEFAULT_TOR_DATA_PATH)}
         # you can add your own settings to this torrc,
         # including the path and the level for logging in tor.

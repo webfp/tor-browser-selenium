@@ -2,7 +2,7 @@ import tempfile
 import unittest
 import re
 from os import remove, environ
-from os.path import getsize, exists, join, abspath
+from os.path import getsize, exists, join, abspath, dirname
 
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
@@ -68,7 +68,8 @@ class TBDriverTest(unittest.TestCase):
 
     def test_noscript(self):
         """NoScript should disable WebGL."""
-        self.tb_driver.load_url_ensure(cm.CHECK_TPO_URL, wait_for_page_body=True)
+        self.tb_driver.load_url_ensure(cm.CHECK_TPO_URL,
+                                       wait_for_page_body=True)
         webgl_support = self.tb_driver.execute_script(WEBGL_CHECK_JS)
         self.assertIsNone(webgl_support)
 
@@ -118,7 +119,7 @@ class TBDriverFailTest(unittest.TestCase):
 
     def test_should_fail_with_wrong_sys_socks_port(self):
         with TorBrowserDriver(TBB_PATH, socks_port=9999,
-                              tor_cfg=cm.USE_SYSTEM_TOR) as driver:
+                              tor_cfg=cm.USE_RUNNING_TOR) as driver:
             driver.load_url(cm.CHECK_TPO_URL)
             self.assertEqual(driver.title, "Problem loading page")
 
@@ -165,10 +166,45 @@ class ScreenshotTest(unittest.TestCase):
 class TBDriverOptionalArgs(unittest.TestCase):
 
     def test_running_with_system_tor(self):
-        """check.torproject.org should detect Tor IP."""
-        with TorBrowserDriver(TBB_PATH, tor_cfg=cm.USE_SYSTEM_TOR) as driver:
+        """Make sure we can run using the tor running on the system.
+        This test requires a system tor process with SOCKS port 9050.
+        """
+        if not ut.is_port_listening(cm.DEFAULT_SOCKS_PORT):
+            print("Skipping system tor test. Start tor to run this test.")
+            return
+        with TorBrowserDriver(TBB_PATH, tor_cfg=cm.USE_RUNNING_TOR) as driver:
             driver.load_url_ensure(cm.CHECK_TPO_URL)
             driver.find_element_by("h1.on")
+
+    def test_running_with_stem(self):
+        """We should be able to run with a tor process started with Stem."""
+        try:
+            from stem.control import Controller
+            from stem.process import launch_tor_with_config
+        except ImportError:
+            print("Skipping Stem test. Install stem to run this test.")
+            return
+        custom_tor_binary = join(TBB_PATH, cm.DEFAULT_TOR_BINARY_PATH)
+        environ["LD_LIBRARY_PATH"] = dirname(custom_tor_binary)
+        # any port number would do, pick 9250 to avoid conflict
+        socks_port = cm.TBB_SOCKS_PORT
+        control_port = cm.TBB_CONTROL_PORT
+        temp_data_dir = tempfile.mkdtemp()
+        torrc = {'ControlPort': str(control_port),
+                 'SOCKSPort': str(socks_port),
+                 'DataDirectory': temp_data_dir}
+        tor_process = launch_tor_with_config(config=torrc,
+                                             tor_cmd=custom_tor_binary)
+        with Controller.from_port(port=control_port) as controller:
+            controller.authenticate()
+            with TorBrowserDriver(TBB_PATH, tor_cfg=cm.USE_RUNNING_TOR,
+                                  socks_port=socks_port) as driver:
+                driver.load_url_ensure(cm.CHECK_TPO_URL)
+                driver.find_element_by("h1.on")
+
+        # Kill tor process
+        if tor_process:
+            tor_process.kill()
 
     def test_security_slider_settings_hi(self):
         slider_pref = {"extensions.torbutton.security_slider": 1}

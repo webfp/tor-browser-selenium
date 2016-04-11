@@ -1,4 +1,4 @@
-import commands
+from tbselenium.utils import is_port_listening, run_cmd
 import unittest
 from tbselenium import common as cm
 
@@ -10,9 +10,6 @@ class EnvironmentTest(unittest.TestCase):
         except ImportError:
             self.fail("Missing python package. Install it by running"
                       " '(sudo) pip install %s'" % pkg_name)
-
-    def run_cmd(self, cmd):
-        return commands.getstatusoutput('%s ' % cmd)
 
     def assert_installed(self, pkg_name):
         cmd = 'which %s' % pkg_name
@@ -30,7 +27,7 @@ class EnvironmentTest(unittest.TestCase):
         """
 
         cmd = "ps -ax | grep -w tor | grep -v grep"
-        _, output = self.run_cmd(cmd)
+        _, output = run_cmd(cmd)
         self.assertIn("/usr/bin/tor", output,
                       """Can't find the running tor process.
                       The tests (test_tbdriver) that depend on tor may fail.
@@ -43,13 +40,9 @@ class EnvironmentTest(unittest.TestCase):
     @unittest.skip("We no longer depend on system tor")
     def test_default_tor_ports(self):
         """Make sure tor is listening on the port we expect."""
-        cmd = "netstat -atn | grep %s" % cm.DEFAULT_SOCKS_PORT
-        _, output = self.run_cmd(cmd)
-        self.assertIn("LISTEN", output,
-                      """No process is listening SOCKS port %s!
-                      If your tor process is using another SOCKS port, please
-                      update the DEFAULT_SOCKS_PORT constant.
-                      """ % cm.DEFAULT_SOCKS_PORT)
+        self.assertTrue(is_port_listening(cm.DEFAULT_SOCKS_PORT),
+                        """No process is listening on SOCKS port %s!""" %
+                        cm.DEFAULT_SOCKS_PORT)
 
     def test_tld(self):
         self.assert_py_pkg_installed('tld')

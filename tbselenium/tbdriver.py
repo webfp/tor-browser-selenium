@@ -40,8 +40,8 @@ class TorBrowserDriver(FirefoxDriver):
         self.profile = webdriver.FirefoxProfile(self.tbb_profile_path)
         add_canvas_permission(self.profile.path, self.canvas_exceptions)
         if socks_port is None:
-            if tor_cfg == cm.USE_SYSTEM_TOR:
-                socks_port = cm.DEFAULT_SOCKS_PORT  # 9050
+            if tor_cfg == cm.USE_RUNNING_TOR:  # 9050 if port isn't specified
+                socks_port = cm.DEFAULT_SOCKS_PORT
             else:
                 socks_port = cm.TBB_SOCKS_PORT  # 9150
         self.socks_port = socks_port
@@ -105,6 +105,7 @@ class TorBrowserDriver(FirefoxDriver):
     def load_url_ensure(self, url, wait_on_page=0, wait_for_page_body=False,
                         max_reload_tries=5):
         """Make sure the requested URL is loaded. Retry if necessary."""
+        last_err = None
         for tries in range(1, max_reload_tries+1):
             try:
                 self.load_url(url, wait_on_page, wait_for_page_body)
@@ -114,11 +115,11 @@ class TorBrowserDriver(FirefoxDriver):
                 if self.current_url != "about:newtab" and \
                         self.title != "Problem loading page":  # TODO i18n?
                     break
-            except TimeoutException, exc:
+            except TimeoutException, last_err:
                 continue
         else:
-            if exc:
-                raise exc
+            if last_err:
+                raise last_err
             else:
                 raise TimeoutException("Can't load the page. %s tries" % tries)
 

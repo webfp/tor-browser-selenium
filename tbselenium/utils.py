@@ -1,3 +1,4 @@
+import commands
 import sqlite3
 import distutils.dir_util as du
 from os import walk, makedirs
@@ -66,6 +67,16 @@ def is_png(path):
     # Taken from http://stackoverflow.com/a/21555489
     data = read_file(path, 'rb')
     return (data[:8] == '\211PNG\r\n\032\n'and (data[12:16] == 'IHDR'))
+
+
+def run_cmd(cmd):
+    return commands.getstatusoutput('%s ' % cmd)
+
+
+def is_port_listening(port_no):
+    cmd = "netstat -atn | grep %s" % port_no
+    _, output = run_cmd(cmd)
+    return "LISTEN" in output
 
 
 def add_canvas_permission(profile_path, canvas_exceptions):
