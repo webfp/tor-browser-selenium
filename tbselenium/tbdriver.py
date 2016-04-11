@@ -48,6 +48,7 @@ class TorBrowserDriver(FirefoxDriver):
         self.update_prefs(pref_dict)
         self.setup_capabilities()
         self.export_lib_path()
+        self.export_path()
         self.binary = self.get_tbb_binary(logfile=tbb_logfile_path)
         super(TorBrowserDriver, self).__init__(firefox_profile=self.profile,
                                                firefox_binary=self.binary,
@@ -173,6 +174,16 @@ class TorBrowserDriver(FirefoxDriver):
                                           cm.DEFAULT_FONTCONFIG_PATH)
         environ["FONTCONFIG_FILE"] = cm.FONTCONFIG_FILE
         environ["HOME"] = tbb_browser_dir
+
+    def export_path(self):
+        """Setup PATH environment variable."""
+        tbb_root_dir = dirname(dirname(self.tbb_fx_binary_path))
+        tbb_browser_dir = join(tbb_root_dir, cm.DEFAULT_TBB_BROWSER_DIR)
+
+        # Add "TBB_DIR/Browser" to the PATH
+        current_path = environ["PATH"]
+        environ["PATH"] = "%s:%s" % (tbb_browser_dir,
+                                                current_path)
 
     def setup_capabilities(self):
         """Setup the required webdriver capabilities."""
