@@ -1,7 +1,7 @@
 import shutil
 from httplib import CannotSendRequest
 from os import environ, chdir
-from os.path import isdir, isfile, join
+from os.path import isdir, isfile, join, abspath
 from time import sleep
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -97,7 +97,8 @@ class TorBrowserDriver(FirefoxDriver):
         if tor_data_dir:
             self.tor_data_dir = tor_data_dir  # only relevant if we launch tor
         else:
-            self.tor_data_dir = join(tbb_path, cm.DEFAULT_TOR_DATA_PATH)
+            self.tor_data_dir = abspath(join(tbb_path,
+                                             cm.DEFAULT_TOR_DATA_PATH))
 
         # TB can't find bundled "fonts" if we don't switch to tbb_browser_dir
         chdir(self.tbb_browser_dir)
