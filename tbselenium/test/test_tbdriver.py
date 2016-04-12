@@ -73,9 +73,12 @@ class TBDriverTest(unittest.TestCase):
         webgl_support = self.tb_driver.execute_script(WEBGL_CHECK_JS)
         self.assertIsNone(webgl_support)
 
+    def test_correct_firefox_binary(self):
+        self.assertTrue(self.tb_driver.binary.which('firefox').
+                        startswith(TBB_PATH))
+
     def test_should_load_tbb_firefox_libs(self):
         """Make sure we load the Firefox libraries from the TBB directories.
-
         We only test libxul (main Firefox/Gecko library) and libstdc++.
         """
         xul_lib_path = abspath(join(self.tb_driver.tbb_browser_dir,
@@ -319,11 +322,6 @@ class TBDriverOptionalArgs(unittest.TestCase):
         # make sure the TBB only loaded and used the bundled fonts
         self.assertEqual(used_font_files, bundled_font_files)
         environ["FC_DEBUG"] = ""
-
-    def test_correct_firefox_binary(self):
-        with TorBrowserDriver(TBB_PATH) as driver:
-            self.assertTrue(driver.binary.which('firefox').
-                            startswith(TBB_PATH))
 
     def test_temp_tor_data_dir(self):
         """If we use a temporary directory as tor_data_dir,

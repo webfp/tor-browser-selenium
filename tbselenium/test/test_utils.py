@@ -1,82 +1,35 @@
 import tempfile
 import unittest
-from os import makedirs, utime
-from os.path import isdir, join
-from shutil import rmtree
-
+from os import makedirs
+from os.path import join
 from tld import get_tld
-
 import tbselenium.utils as ut
 
 
-class TestInTemporaryFolder(object):
-    test_dir = None
-
-    @classmethod
-    def setUpClass(cls):
-        cls.test_dir = tempfile.mkdtemp()
-
-    @classmethod
-    def tearDownClass(cls):
-        if isdir(cls.test_dir):
-            rmtree(cls.test_dir)
-
-
-class HashDirTest(TestInTemporaryFolder, unittest.TestCase):
-    def setUp(self):
-        self.test_folder_path = join(self.test_dir, 'test_folder')
-        makedirs(self.test_folder_path)
-
-    def tearDown(self):
-        if isdir(self.test_folder_path):
-            rmtree(self.test_folder_path)
+class UtilsTest(unittest.TestCase):
 
     def test_hashes_of_empty_folders_should_be_equal(self):
         """Even though folders have different paths."""
-        second_folder_path = join(self.test_dir, "dir1")
-        makedirs(second_folder_path)
-        hash_dir1 = ut.get_hash_of_directory(self.test_folder_path)
-        hash_dir2 = ut.get_hash_of_directory(second_folder_path)
-        self.assertEqual(hash_dir1, hash_dir2)
-
-    # TODO: do we really need the following tests
-    def test_new_empty_file_should_not_change_dir_hash(self):
-        """Test if after creating a new empty file the hash is the same."""
-        hash_before = ut.get_hash_of_directory(self.test_folder_path)
-        temp_file = join(self.test_folder_path, 'temp_file')
-        with open(temp_file, 'a'):
-            utime(temp_file, None)
-        hash_after = ut.get_hash_of_directory(self.test_folder_path)
-        self.assertEqual(hash_before, hash_after)
+        temp_dir = tempfile.mkdtemp()
+        dir1_path = join(temp_dir, "dir1")
+        makedirs(dir1_path)
+        dir2_path = join(temp_dir, "dir2")
+        makedirs(dir2_path)
+        dir1_hash = ut.get_hash_of_directory(dir1_path)
+        dir2_hash = ut.get_hash_of_directory(dir2_path)
+        self.assertEqual(dir1_hash, dir2_hash)
 
     def test_writing_bytes_should_change_dir_hash(self):
-        hash_before = ut.get_hash_of_directory(self.test_folder_path)
-        temp_file = join(self.test_folder_path, 'temp_file')
+        temp_dir = tempfile.mkdtemp()
+        hash_before = ut.get_hash_of_directory(temp_dir)
+        temp_file = join(temp_dir, 'temp_file')
         with open(temp_file, 'a') as f:
             f.write('\0')
-        hash_after = ut.get_hash_of_directory(self.test_folder_path)
+        hash_after = ut.get_hash_of_directory(temp_dir)
         self.assertNotEqual(hash_before, hash_after)
 
-
-class CreateDirTest(TestInTemporaryFolder, unittest.TestCase):
-    def test_directory_already_exists(self):
-        test_folder_path = join(self.test_dir, 'test_folder')
-        makedirs(test_folder_path)
-        try:
-            ut.create_dir(test_folder_path)
-        except:
-            self.fail("Should not raise exception.")
-        rmtree(test_folder_path)
-
-    def test_directory_does_not_exist(self):
-        test_folder_path = join(self.test_dir, 'test_folder')
-        ut.create_dir(test_folder_path)
-
-
-class TLDTest(unittest.TestCase):
-    """Make sure we get the right domain for all the edge cases."""
-
     def test_get_public_suffix(self):
+        """Make sure we get the right domain for all the edge cases."""
         urls = ('http://www.foo.org',
                 'https://www.foo.org',
                 'http://www.subdomain.foo.org',
@@ -85,6 +38,7 @@ class TLDTest(unittest.TestCase):
                 'https://www.subdomain.foo.org:80/subfolder/baefasd==/65')
         for pub_suf_test_url in urls:
             self.assertEqual(get_tld(pub_suf_test_url), "foo.org")
+
 
 if __name__ == "__main__":
     unittest.main()
