@@ -132,8 +132,52 @@ class TorBrowserDriver(FirefoxDriver):
         return WebDriverWait(self, timeout).until(
             EC.presence_of_element_located((find_by, selector)))
 
+    def add_ports_to_fx_banned_ports(self, socks_port, control_port):
+        """By default, ports 9050,9051,9150,9151 are banned in TB.
+        If we use a tor process running on a custom SOCKS port, we add SOCKS
+        and control ports to the following prefs:
+            network.security.ports.banned
+            extensions.torbutton.banned_ports
+        """
+        if socks_port in cm.KNOWN_SOCKS_PORTS:
+            return
+        tb_prefs = self.profile.default_preferences
+        set_pref = self.profile.set_preference
+        DEFAULT_BANNED_PORTS = "9050,9051,9150,9151"
+        for port_ban_pref in cm.PORT_BAN_PREFS:
+            banned_ports = tb_prefs.get(port_ban_pref, DEFAULT_BANNED_PORTS)
+            set_pref(port_ban_pref,
+                     "%s,%s,%s" % (banned_ports,
+                                   socks_port,
+                                   control_port))
+
+    def set_tb_prefs_for_using_system_tor(self):
+        """Set the preferences suggested by start-tor-browser script
+        to run TB with system-installed Tor.
+
+        We set these prefs for running with Tor started with Stem as well.
+        """
+        set_pref = self.profile.set_preference
+        # Prevent Tor Browser running its own Tor process
+        set_pref('extensions.torlauncher.start_tor', False)
+        # TODO: investigate why we're asked to disable 'block_disk'
+        set_pref('extensions.torbutton.block_disk', False)
+        set_pref('extensions.torbutton.custom.socks_host', '127.0.0.1')
+        set_pref('extensions.torbutton.custom.socks_port', self.socks_port)
+        set_pref('extensions.torbutton.inserted_button', True)
+        set_pref('extensions.torbutton.launch_warning', False)
+        set_pref('extensions.torbutton.loglevel', 2)
+        set_pref('extensions.torbutton.logmethod', 0)
+        set_pref('extensions.torbutton.settings_method', 'custom')
+        set_pref('extensions.torbutton.use_privoxy', False)
+        set_pref('extensions.torlauncher.control_port', self.socks_port+1)
+        set_pref('extensions.torlauncher.loglevel', 2)
+        set_pref('extensions.torlauncher.logmethod', 0)
+        set_pref('extensions.torlauncher.prompt_at_startup', False)
+
     def update_prefs(self, pref_dict):
-        # Set homepage to a blank tab
+        control_port = self.socks_port + 1
+        self.add_ports_to_fx_banned_ports(self.socks_port, control_port)
         set_pref = self.profile.set_preference
         set_pref('browser.startup.page', "0")
         set_pref('browser.startup.homepage', 'about:newtab')
@@ -149,30 +193,13 @@ class TorBrowserDriver(FirefoxDriver):
         set_pref('network.proxy.socks_port', self.socks_port)
         set_pref('extensions.torbutton.socks_port', self.socks_port)
         # If your control port != socks_port+1, use pref_dict to overwrite
-        set_pref('extensions.torlauncher.control_port', self.socks_port+1)
+        set_pref('extensions.torlauncher.control_port', control_port)
         if self.tor_cfg == cm.LAUNCH_NEW_TBB_TOR:
             set_pref('extensions.torlauncher.start_tor', True)
             set_pref('extensions.torlauncher.tordatadir_path',
                      self.tor_data_dir)
-        else:  # Prevent Tor Browser running its own Tor process
-            # start-tor-browser script suggests that "if using a
-            # system-installed Tor, the following about:config options should
-            # be set":
-            set_pref('extensions.torlauncher.start_tor', False)
-            set_pref('extensions.torbutton.block_disk', False)
-            set_pref('extensions.torbutton.custom.socks_host', '127.0.0.1')
-            set_pref('extensions.torbutton.custom.socks_port', self.socks_port)
-            set_pref('extensions.torbutton.inserted_button', True)
-            set_pref('extensions.torbutton.launch_warning', False)
-            set_pref('extensions.torbutton.loglevel', 2)
-            set_pref('extensions.torbutton.logmethod', 0)
-            set_pref('extensions.torbutton.settings_method', 'custom')
-            set_pref('extensions.torbutton.use_privoxy', False)
-            set_pref('extensions.torlauncher.control_port', self.socks_port+1)
-            set_pref('extensions.torlauncher.loglevel', 2)
-            set_pref('extensions.torlauncher.logmethod', 0)
-            set_pref('extensions.torlauncher.prompt_at_startup', False)
-
+        else:
+            self.set_tb_prefs_for_using_system_tor()
         # pref_dict overwrites above preferences
         for pref_name, pref_val in pref_dict.iteritems():
             set_pref(pref_name, pref_val)
