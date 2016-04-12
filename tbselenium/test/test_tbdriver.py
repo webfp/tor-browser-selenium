@@ -52,13 +52,13 @@ class TBDriverTest(unittest.TestCase):
         """Visiting a site should not modify the original profile contents."""
         profile_path = join(TBB_PATH, cm.DEFAULT_TBB_PROFILE_PATH)
         profile_hash_before = ut.get_hash_of_directory(profile_path)
-        self.tb_driver.get(cm.CHECK_TPO_URL)
+        self.tb_driver.load_url_ensure(cm.CHECK_TPO_URL)
         profile_hash_after = ut.get_hash_of_directory(profile_path)
         self.assertEqual(profile_hash_before, profile_hash_after)
 
     def test_httpseverywhere(self):
         """HTTPSEverywhere should redirect to HTTPS version."""
-        self.tb_driver.get(TEST_HTTP_URL)
+        self.tb_driver.load_url_ensure(TEST_HTTP_URL)
         try:
             WebDriverWait(self.tb_driver, TEST_LONG_WAIT).\
                 until(EC.title_contains("thanks"))
@@ -218,8 +218,9 @@ class TBDriverOptionalArgs(unittest.TestCase):
         try:
             from stem.control import Controller
             from stem.process import launch_tor_with_config
-        except ImportError:
-            print("Skipping Stem test. Install stem to run this test.")
+        except ImportError as err:
+            print("Skipping Stem test. Install stem to run this test: %s" %
+                  err)
             return
         custom_tor_binary = join(TBB_PATH, cm.DEFAULT_TOR_BINARY_PATH)
         environ["LD_LIBRARY_PATH"] = dirname(custom_tor_binary)
