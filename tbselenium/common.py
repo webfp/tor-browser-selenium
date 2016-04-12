@@ -22,6 +22,10 @@ DEFAULT_CONTROL_PORT = 9051
 TBB_SOCKS_PORT = 9150
 TBB_CONTROL_PORT = 9151
 
+KNOWN_SOCKS_PORTS = [DEFAULT_SOCKS_PORT, TBB_SOCKS_PORT]
+PORT_BAN_PREFS = ["extensions.torbutton.banned_ports",
+                  "network.security.ports.banned"]
+
 # TOR CONTROLLER
 STREAM_CLOSE_TIMEOUT = 20  # wait 20 seconds before raising an alarm signal
 # otherwise we had many cases where get_streams hanged

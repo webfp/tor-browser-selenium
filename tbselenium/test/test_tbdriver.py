@@ -197,6 +197,15 @@ class ScreenshotTest(unittest.TestCase):
 
 class TBDriverOptionalArgs(unittest.TestCase):
 
+    def test_add_ports_to_fx_banned_ports(self):
+        test_socks_port = 9999
+        # No Tor process is listening on 9999, we just test the pref
+        with TorBrowserDriver(TBB_PATH, tor_cfg=cm.USE_RUNNING_TOR,
+                              socks_port=test_socks_port) as driver:
+            for pref in cm.PORT_BAN_PREFS:
+                banned_ports = driver.profile.default_preferences[pref]
+                self.assertIn(str(test_socks_port), banned_ports)
+
     def test_running_with_system_tor(self):
         """Make sure we can run using the tor running on the system.
         This test requires a system tor process with SOCKS port 9050.
