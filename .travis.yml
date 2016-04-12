@@ -9,7 +9,7 @@ before_install:
   - "sh -e /etc/init.d/xvfb start"
 install:
   - sudo apt-get -qq install tor
-  - sudo pip install stem
+  - sudo -H pip install stem
   - easy_install .
   - wget https://archive.torproject.org/tor-package-archive/torbrowser/5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz
   - tar -xvf tor-browser-linux64-5.5.4_en-US.tar.xz
