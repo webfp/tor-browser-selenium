@@ -20,7 +20,7 @@ class TorBrowserDriverExamples(unittest.TestCase):
         It assumes Tor is already running and SOCKS listening to the
         default port.
         """
-        with TorBrowserDriver(TBB_PATH, virt_display="") as driver:
+        with TorBrowserDriver(TBB_PATH) as driver:
             driver.get(cm.TEST_URL)
             sleep(1)  # stay one second on the page
 
@@ -30,18 +30,10 @@ class TorBrowserDriverExamples(unittest.TestCase):
         # We need to add an exception for canvas access in the Tor Browser
         # permission database. We need to do this for each site that we
         # plan to visit.
-        with TorBrowserDriver(TBB_PATH, virt_display="",
+        with TorBrowserDriver(TBB_PATH,
                               canvas_exceptions=[cm.TEST_URL]) as driver:
             driver.get(cm.TEST_URL)
             driver.get_screenshot_as_file("screenshot.png")
-
-    @unittest.skip("Only for didactic purposes.")
-    def test_visit_page_with_virt_display_enabled(self):
-        """Visit a page with a virtual buffer."""
-        with TorBrowserDriver(TBB_PATH,
-                              virt_display="1600x1200") as driver:
-            driver.get(cm.TEST_URL)  # this won't pop up the browser window.
-            sleep(1)
 
     @unittest.skip("Only for didactic purposes.")
     def test_use_old_tor_browser_bundles(self):
@@ -90,7 +82,8 @@ class TorBrowserDriverExamples(unittest.TestCase):
         # you can also use the DataDirectory property in torrc
         # to set a custom data directory for tor.
         # For other options see: https://www.torproject.org/docs/tor-manual.html.en
-        tor_process = launch_tor_with_config(config=torrc, tor_cmd=custom_tor_binary)
+        tor_process = launch_tor_with_config(config=torrc,
+                                             tor_cmd=custom_tor_binary)
 
         with Controller.from_port(port=custom_control_port) as controller:
             controller.authenticate()

@@ -3,8 +3,6 @@ import sqlite3
 import distutils.dir_util as du
 from os import walk, makedirs
 from os.path import join, exists
-import common as cm
-from pyvirtualdisplay import Display
 import fnmatch
 
 
@@ -42,18 +40,6 @@ def clone_dir_temporary(dir_path):
     tempdir = tempfile.mkdtemp()
     du.copy_tree(dir_path, tempdir)
     return tempdir
-
-
-def start_xvfb(win_width=cm.DEFAULT_XVFB_WIN_W,
-               win_height=cm.DEFAULT_XVFB_WIN_H):
-    xvfb_display = Display(visible=0, size=(win_width, win_height))
-    xvfb_display.start()
-    return xvfb_display
-
-
-def stop_xvfb(xvfb_display):
-    if xvfb_display:
-        xvfb_display.stop()
 
 
 def read_file(path, mode='rU'):

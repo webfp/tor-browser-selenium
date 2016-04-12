@@ -160,14 +160,6 @@ class TBDriverFailTest(unittest.TestCase):
             driver.load_url(cm.CHECK_TPO_URL)
             self.assertEqual(driver.title, "Problem loading page")
 
-    def test_should_raise_for_invalid_virtual_display_size(self):
-        with self.assertRaises(ValueError):
-            TorBrowserDriver(TBB_PATH, virt_display="foo")
-        with self.assertRaises(ValueError):
-            TorBrowserDriver(TBB_PATH, virt_display="800y600")
-        with self.assertRaises(ValueError):
-            TorBrowserDriver(TBB_PATH, virt_display="800-600")
-
     def test_should_raise_for_invalid_canvas_exceptions(self):
         with self.assertRaises(TldBadUrl):
             TorBrowserDriver(TBB_PATH, canvas_exceptions=["foo", "bar"])
