@@ -78,10 +78,11 @@ class TBDriverTest(unittest.TestCase):
 
         We only test libxul (main Firefox/Gecko library) and libstdc++.
         """
-        xul_lib_path = join(self.tb_driver.tbb_browser_dir, "libxul.so")
-        std_c_lib_path = join(self.tb_driver.tbb_path,
-                              cm.DEFAULT_TOR_BINARY_DIR,
-                              "libstdc++.so.6")
+        xul_lib_path = abspath(join(self.tb_driver.tbb_browser_dir,
+                                    "libxul.so"))
+        std_c_lib_path = abspath(join(self.tb_driver.tbb_path,
+                                      cm.DEFAULT_TOR_BINARY_DIR,
+                                      "libstdc++.so.6"))
 
         self.failUnless(self.tb_driver.binary.process,
                         "TorBrowserDriver process doesn't exist")
