@@ -2,7 +2,7 @@ import tempfile
 import unittest
 import re
 from os import remove, environ
-from os.path import getsize, exists, join, abspath, dirname
+from os.path import getsize, exists, join, abspath, dirname, isfile, basename
 
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
@@ -72,6 +72,42 @@ class TBDriverTest(unittest.TestCase):
                                        wait_for_page_body=True)
         webgl_support = self.tb_driver.execute_script(WEBGL_CHECK_JS)
         self.assertIsNone(webgl_support)
+
+    def test_should_load_tbb_firefox_libs(self):
+        """Make sure we load the Firefox libraries from the TBB directories.
+
+        We only test libxul (main Firefox/Gecko library) and libstdc++.
+        """
+        xul_lib_path = join(self.tb_driver.tbb_browser_dir, "libxul.so")
+        std_c_lib_path = join(self.tb_driver.tbb_path,
+                              cm.DEFAULT_TOR_BINARY_DIR,
+                              "libstdc++.so.6")
+
+        self.failUnless(self.tb_driver.binary.process,
+                        "TorBrowserDriver process doesn't exist")
+        pid = self.tb_driver.binary.process.pid
+
+        for lib_path in [xul_lib_path, std_c_lib_path]:
+            lib_loaded_from_tbb = False
+            self.failUnless(isfile(lib_path),
+                            "Can't find the library %s" % lib_path)
+            lib_name = basename(lib_path)
+            lib_escaped = lib_name.replace(".", "\.")  # to use with grep
+
+            cmd = "lsof -p %d | awk '{print $9}' | grep '%s'"\
+                % (pid, lib_escaped)
+            status, out = ut.run_cmd(cmd)
+            self.assertFalse(int(status),
+                             "Error running command: %s\nStatus: %s\nOut: %s" %
+                             (cmd, status, out))
+            for out_line in out.split("\n"):
+                if lib_name in out_line:  # remove potential lsof warning msgs
+                    if lib_path == out_line:
+                        lib_loaded_from_tbb = True
+
+            self.assertTrue(lib_loaded_from_tbb,
+                            "Can't find the loaded lib: %s\nCmd output: %s" %
+                            (xul_lib_path, out))
 
 
 class TBDriverFailTest(unittest.TestCase):
@@ -293,6 +329,7 @@ class TBDriverOptionalArgs(unittest.TestCase):
     def test_correct_firefox_binary(self):
         with TorBrowserDriver(TBB_PATH) as driver:
             self.assertTrue(driver.binary.which('firefox').startswith(TBB_PATH))
+
 
 class TBDriverTestAssumptions(unittest.TestCase):
     """Tests for some assumptions we use in the above tests."""
