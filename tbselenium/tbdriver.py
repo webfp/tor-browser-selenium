@@ -1,7 +1,7 @@
 import shutil
 from httplib import CannotSendRequest
 from os import environ, chdir
-from os.path import isdir, isfile, join, dirname
+from os.path import isdir, isfile, join
 from time import sleep
 
 from selenium import webdriver
@@ -33,7 +33,7 @@ class TorBrowserDriver(FirefoxDriver):
                  virt_display=cm.DEFAULT_XVFB_WINDOW_SIZE,
                  canvas_exceptions=[]):
 
-        self.check_tbb_paths(tbb_path, tbb_fx_binary_path, tbb_profile_path)
+        self.setup_tbb_paths(tbb_path, tbb_fx_binary_path, tbb_profile_path)
         self.tor_cfg = tor_cfg
         self.canvas_exceptions = [get_tld(url) for url in canvas_exceptions]
         self.setup_virtual_display(virt_display)
@@ -47,8 +47,7 @@ class TorBrowserDriver(FirefoxDriver):
         self.socks_port = socks_port
         self.update_prefs(pref_dict)
         self.setup_capabilities()
-        self.export_lib_path()
-        self.export_path()
+        self.export_env_vars()
         self.binary = self.get_tbb_binary(logfile=tbb_logfile_path)
         super(TorBrowserDriver, self).__init__(firefox_profile=self.profile,
                                                firefox_binary=self.binary,
@@ -57,7 +56,7 @@ class TorBrowserDriver(FirefoxDriver):
                                                timeout=60)
         self.is_running = True
 
-    def check_tbb_paths(self, tbb_path, tbb_fx_binary_path, tbb_profile_path):
+    def setup_tbb_paths(self, tbb_path, tbb_fx_binary_path, tbb_profile_path):
         """Update instance variables based on the passed paths.
 
         TorBrowserDriver can be initialized by passing either
@@ -84,6 +83,9 @@ class TorBrowserDriver(FirefoxDriver):
         self.tbb_path = tbb_path
         self.tbb_profile_path = tbb_profile_path
         self.tbb_fx_binary_path = tbb_fx_binary_path
+        self.tbb_browser_dir = join(tbb_path, cm.DEFAULT_TBB_BROWSER_DIR)
+        # TB can't find bundled "fonts" if we don't switch to tbb_browser_dir
+        chdir(self.tbb_browser_dir)
 
     def load_url(self, url, wait_on_page=0, wait_for_page_body=False):
         """Load a URL and wait before returning.
@@ -174,33 +176,24 @@ class TorBrowserDriver(FirefoxDriver):
             set_pref(pref_name, pref_val)
         self.profile.update_preferences()
 
-    def export_lib_path(self):
+    def export_env_vars(self):
         """Setup LD_LIBRARY_PATH and HOME environment variables."""
-        tbb_root_dir = dirname(dirname(self.tbb_fx_binary_path))
-        tbb_browser_dir = join(tbb_root_dir, cm.DEFAULT_TBB_BROWSER_DIR)
-        tor_binary_dir = join(tbb_root_dir, cm.DEFAULT_TOR_BINARY_DIR)
-        # Set LD_LIBRARY_PATH to point to "TBB_DIR/Browser/Tor" like to
+        tor_binary_dir = join(self.tbb_path, cm.DEFAULT_TOR_BINARY_DIR)
+        # Set LD_LIBRARY_PATH to point to "TBB_DIR/Browser/Tor" like the
         # start-tor-browser shell script does
-        chdir(tbb_browser_dir)
         environ["LD_LIBRARY_PATH"] = tor_binary_dir
         # set the home variable to "TBB_DIR/Browser" directory
         # https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/commit/?id=2e4fb90d4fc019d6680f24089cb1d0b4d4a276a5
         # TODO: make sure we don't get strange side effects due to overwriting
         # $HOME environment variable.
-        environ["FONTCONFIG_PATH"] = join(tbb_root_dir,
+        environ["FONTCONFIG_PATH"] = join(self.tbb_path,
                                           cm.DEFAULT_FONTCONFIG_PATH)
         environ["FONTCONFIG_FILE"] = cm.FONTCONFIG_FILE
-        environ["HOME"] = tbb_browser_dir
-
-    def export_path(self):
-        """Setup PATH environment variable."""
-        tbb_root_dir = dirname(dirname(self.tbb_fx_binary_path))
-        tbb_browser_dir = join(tbb_root_dir, cm.DEFAULT_TBB_BROWSER_DIR)
-
-        # Add "TBB_DIR/Browser" to the PATH
+        environ["HOME"] = self.tbb_browser_dir
+        # Add "TBB_DIR/Browser" to the PATH to make sure Selenium discovers
+        # TB's binary if it needs to. See, issue #10.
         current_path = environ["PATH"]
-        environ["PATH"] = "%s:%s" % (tbb_browser_dir,
-                                                current_path)
+        environ["PATH"] = "%s:%s" % (self.tbb_browser_dir, current_path)
 
     def setup_capabilities(self):
         """Setup the required webdriver capabilities."""
