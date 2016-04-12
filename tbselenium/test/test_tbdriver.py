@@ -330,7 +330,29 @@ class TBDriverOptionalArgs(unittest.TestCase):
 
     def test_correct_firefox_binary(self):
         with TorBrowserDriver(TBB_PATH) as driver:
-            self.assertTrue(driver.binary.which('firefox').startswith(TBB_PATH))
+            self.assertTrue(driver.binary.which('firefox').
+                            startswith(TBB_PATH))
+
+    def test_temp_tor_data_dir(self):
+        """If we use a temporary directory as tor_data_dir,
+        tor datadir in TBB should stay unchanged.
+        """
+        tmp_dir = tempfile.mkdtemp()
+        tbb_tor_data_path = join(TBB_PATH, cm.DEFAULT_TOR_DATA_PATH)
+        hash_before = ut.get_hash_of_directory(tbb_tor_data_path)
+        with TorBrowserDriver(TBB_PATH, tor_data_dir=tmp_dir) as driver:
+            driver.load_url_ensure(cm.CHECK_TPO_URL)
+        hash_after = ut.get_hash_of_directory(tbb_tor_data_path)
+        self.assertEqual(hash_before, hash_after)
+
+    def test_non_temp_tor_data_dir(self):
+        """Tor data dir in TBB should change if we don't use tor_data_dir."""
+        tbb_tor_data_path = join(TBB_PATH, cm.DEFAULT_TOR_DATA_PATH)
+        hash_before = ut.get_hash_of_directory(tbb_tor_data_path)
+        with TorBrowserDriver(TBB_PATH) as driver:
+            driver.load_url_ensure(cm.CHECK_TPO_URL)
+        hash_after = ut.get_hash_of_directory(tbb_tor_data_path)
+        self.assertNotEqual(hash_before, hash_after)
 
 
 class TBDriverTestAssumptions(unittest.TestCase):

@@ -28,11 +28,13 @@ class TorBrowserDriver(FirefoxDriver):
                  tbb_fx_binary_path="",
                  tbb_profile_path="",
                  tbb_logfile_path="",
+                 tor_data_dir="",
                  pref_dict={},
                  socks_port=None,
                  virt_display=cm.DEFAULT_XVFB_WINDOW_SIZE,
                  canvas_exceptions=[]):
 
+        self.tor_data_dir = tor_data_dir  # only relevant if we launch tor
         self.setup_tbb_paths(tbb_path, tbb_fx_binary_path, tbb_profile_path)
         self.tor_cfg = tor_cfg
         self.canvas_exceptions = [get_tld(url) for url in canvas_exceptions]
@@ -152,6 +154,8 @@ class TorBrowserDriver(FirefoxDriver):
         set_pref('extensions.torlauncher.control_port', self.socks_port+1)
         if self.tor_cfg == cm.LAUNCH_NEW_TBB_TOR:
             set_pref('extensions.torlauncher.start_tor', True)
+            set_pref('extensions.torlauncher.tordatadir_path',
+                     self.tor_data_dir)
         else:  # Prevent Tor Browser running its own Tor process
             # start-tor-browser script suggests that "if using a
             # system-installed Tor, the following about:config options should
