@@ -290,6 +290,9 @@ class TBDriverOptionalArgs(unittest.TestCase):
         self.assertEqual(used_font_files, bundled_font_files)
         environ["FC_DEBUG"] = ""
 
+    def test_correct_firefox_binary(self):
+        with TorBrowserDriver(TBB_PATH) as driver:
+            self.assertTrue(driver.binary.which('firefox').startswith(TBB_PATH))
 
 class TBDriverTestAssumptions(unittest.TestCase):
     """Tests for some assumptions we use in the above tests."""
