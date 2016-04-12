@@ -1,24 +1,21 @@
 import commands
 import sqlite3
-from os import walk, makedirs
-from os.path import join, exists
+from os import walk
+from os.path import join
 import fnmatch
+from hashlib import sha256
 
 
-def get_hash_of_directory(path):
-    """Return md5 hash of the directory pointed by path."""
-    from hashlib import md5
-    m = md5()
-    for root, _, files in walk(path):
-        for f in files:
-            full_path = join(root, f)
-            for line in open(full_path).readlines():
-                m.update(line)
+def get_hash_of_directory(dir_path):
+    """Return sha256 hash of the directory pointed by path."""
+    m = sha256()
+    for file_path in gen_find_files(dir_path):
+        m.update(read_file(file_path))
     return m.digest()
 
 
 def gen_find_files(dir_path, pattern="*"):
-    """Returns filenames that matches the given pattern under a given dir
+    """Return filenames that matches the given pattern under a given dir
     http://www.dabeaz.com/generators/
     """
     for path, _, filelist in walk(dir_path):
@@ -26,9 +23,9 @@ def gen_find_files(dir_path, pattern="*"):
             yield join(path, name)
 
 
-def read_file(path, mode='rU'):
+def read_file(file_path, mode='rU'):
     """Read and return file content."""
-    with open(path, mode) as f:
+    with open(file_path, mode) as f:
         content = f.read()
     return content
 

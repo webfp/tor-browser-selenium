@@ -157,6 +157,11 @@ class TBDriverFailTest(unittest.TestCase):
         with self.assertRaises(AttributeError):
             TorBrowserDriver(TBB_PATH, pref_dict=(1, 2))
 
+    def test_should_fail_launching_tor_on_custom_socks_port(self):
+        with self.assertRaises(cm.TBDriverPortError):
+            TorBrowserDriver(TBB_PATH, socks_port=10001,
+                             tor_cfg=cm.LAUNCH_NEW_TBB_TOR)
+
     def test_should_fail_with_wrong_sys_socks_port(self):
         with TorBrowserDriver(TBB_PATH, socks_port=9999,
                               tor_cfg=cm.USE_RUNNING_TOR) as driver:
@@ -228,9 +233,9 @@ class TBDriverOptionalArgs(unittest.TestCase):
             return
         custom_tor_binary = join(TBB_PATH, cm.DEFAULT_TOR_BINARY_PATH)
         environ["LD_LIBRARY_PATH"] = dirname(custom_tor_binary)
-        # any port number would do, pick 9250 to avoid conflict
-        socks_port = cm.TBB_SOCKS_PORT
-        control_port = cm.TBB_CONTROL_PORT
+        # any port would do, pick 9250, 9251 to avoid conflict
+        socks_port = 9250
+        control_port = 9251
         temp_data_dir = tempfile.mkdtemp()
         torrc = {'ControlPort': str(control_port),
                  'SOCKSPort': str(socks_port),
