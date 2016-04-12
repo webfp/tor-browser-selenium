@@ -11,6 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
+from selenium.webdriver.firefox.options import Options
 from tld import get_tld
 
 import common as cm
@@ -52,6 +53,7 @@ class TorBrowserDriver(FirefoxDriver):
         super(TorBrowserDriver, self).__init__(firefox_profile=self.profile,
                                                firefox_binary=self.binary,
                                                capabilities=self.capabilities,
+                                               firefox_options=Options(),
                                                # default timeout is 30
                                                timeout=60)
         self.is_running = True
