@@ -14,7 +14,7 @@ from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
 from tld import get_tld
 
 import common as cm
-from utils import start_xvfb, stop_xvfb, add_canvas_permission
+from utils import add_canvas_permission
 from selenium.common.exceptions import TimeoutException
 
 
@@ -31,14 +31,12 @@ class TorBrowserDriver(FirefoxDriver):
                  tor_data_dir="",
                  pref_dict={},
                  socks_port=None,
-                 virt_display=cm.DEFAULT_XVFB_WINDOW_SIZE,
                  canvas_exceptions=[]):
 
         self.tor_data_dir = tor_data_dir  # only relevant if we launch tor
         self.setup_tbb_paths(tbb_path, tbb_fx_binary_path, tbb_profile_path)
         self.tor_cfg = tor_cfg
         self.canvas_exceptions = [get_tld(url) for url in canvas_exceptions]
-        self.setup_virtual_display(virt_display)
         self.profile = webdriver.FirefoxProfile(self.tbb_profile_path)
         add_canvas_permission(self.profile.path, self.canvas_exceptions)
         if socks_port is None:
@@ -207,13 +205,6 @@ class TorBrowserDriver(FirefoxDriver):
                                   'javascriptEnabled': True,
                                   'browserConnectionEnabled': True})
 
-    def setup_virtual_display(self, virt_display):
-        """Start a virtual display with the given dimensions (if requested)."""
-        self.xvfb_display = None
-        if virt_display:
-            w, h = (int(dim) for dim in virt_display.lower().split("x"))
-            self.xvfb_display = start_xvfb(w, h)
-
     def get_tbb_binary(self, logfile=None):
         """Return FirefoxBinary pointing to the TBB's firefox binary."""
         tbb_logfile = open(logfile, 'a+') if logfile else None
@@ -221,9 +212,7 @@ class TorBrowserDriver(FirefoxDriver):
                              log_file=tbb_logfile)
 
     def quit(self):
-        """Quits driver and closes virtual display.
-        Overrides the base class method.
-        """
+        """Quit the driver. Override the method of the base class."""
         self.is_running = False
         try:
             super(TorBrowserDriver, self).quit()
@@ -237,9 +226,6 @@ class TorBrowserDriver(FirefoxDriver):
                     shutil.rmtree(self.profile.tempfolder)
             except Exception as e:
                 print("[tbselenium] " + str(e))
-        finally:
-            # stop the virtual display
-            stop_xvfb(self.xvfb_display)
 
     def __enter__(self):
         return self

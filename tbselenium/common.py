@@ -30,14 +30,6 @@ STREAM_CLOSE_TIMEOUT = 20  # wait 20 seconds before raising an alarm signal
 CHECK_TPO_URL = "http://check.torproject.org"
 TEST_URL = CHECK_TPO_URL
 ABOUT_TOR_URL = "about:tor"
-# Default size for the virtual display
-DEFAULT_XVFB_WIN_W = 1280
-DEFAULT_XVFB_WIN_H = 800
-# virt_display is a string in the form of WxH
-# W = width of the virtual display
-# H = height of the virtual display
-# e.g. "1280x800" or "800x600"
-DEFAULT_XVFB_WINDOW_SIZE = "%sx%s" % (DEFAULT_XVFB_WIN_W, DEFAULT_XVFB_WIN_H)
 
 # Which tor process/binary to use
 LAUNCH_NEW_TBB_TOR = 0  # use tor in TBB, launch a new process
