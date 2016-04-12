@@ -1,6 +1,5 @@
 import commands
 import sqlite3
-import distutils.dir_util as du
 from os import walk, makedirs
 from os.path import join, exists
 import fnmatch
@@ -25,21 +24,6 @@ def gen_find_files(dir_path, pattern="*"):
     for path, _, filelist in walk(dir_path):
         for name in fnmatch.filter(filelist, pattern):
             yield join(path, name)
-
-
-def create_dir(dir_path):
-    """Create directory with the given path if it doesn't exist."""
-    if not exists(dir_path):
-        makedirs(dir_path)
-    return dir_path
-
-
-def clone_dir_temporary(dir_path):
-    """Copy a folder to the same directory and append a timestamp."""
-    import tempfile
-    tempdir = tempfile.mkdtemp()
-    du.copy_tree(dir_path, tempdir)
-    return tempdir
 
 
 def read_file(path, mode='rU'):
