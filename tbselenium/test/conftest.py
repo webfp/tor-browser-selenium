@@ -1,6 +1,10 @@
 import pytest
-from pyvirtualdisplay import Display
 from os import environ
+try:
+    from pyvirtualdisplay import Display
+except ImportError:  # we don't need/install it when running CI tests
+    pass
+
 # Default size for the virtual display
 DEFAULT_XVFB_WIN_W = 1280
 DEFAULT_XVFB_WIN_H = 800
