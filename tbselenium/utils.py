@@ -1,9 +1,24 @@
-import commands
+from subprocess import STDOUT, check_output, CalledProcessError
 import sqlite3
 from os import walk
 from os.path import join
 import fnmatch
 from hashlib import sha256
+try:
+    from subprocess import getstatusoutput  # added in Python 3
+except ImportError:
+    # Taken from https://hg.python.org/cpython/file/3.4/Lib/subprocess.py#l694
+    def getstatusoutput(cmd):
+        try:
+            data = check_output(cmd, shell=True, universal_newlines=True,
+                                stderr=STDOUT)
+            status = 0
+        except CalledProcessError as ex:
+            data = ex.output
+            status = ex.returncode
+        if data[-1:] == '\n':
+            data = data[:-1]
+        return status, data
 
 
 def get_hash_of_directory(dir_path):
@@ -37,7 +52,7 @@ def is_png(path):
 
 
 def run_cmd(cmd):
-    return commands.getstatusoutput('%s ' % cmd)
+    return getstatusoutput('%s ' % cmd)
 
 
 def add_canvas_permission(profile_path, canvas_allowed_hosts):
