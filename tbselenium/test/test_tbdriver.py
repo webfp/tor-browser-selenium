@@ -217,10 +217,6 @@ class TBDriverOptionalArgs(unittest.TestCase):
             from stem.process import launch_tor_with_config
         except ImportError as err:
             print("Can't import Stem. Skipping test: %s" % err)
-            try:
-                import stem
-            except ImportError as err:
-                print("Can't import Stem (2nd). Skipping test: %s" % err)
             return
         custom_tor_binary = join(TBB_PATH, cm.DEFAULT_TOR_BINARY_PATH)
         environ["LD_LIBRARY_PATH"] = dirname(custom_tor_binary)
