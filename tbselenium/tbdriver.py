@@ -1,9 +1,8 @@
 import shutil
 from httplib import CannotSendRequest
 from os import environ, chdir
-from os.path import isdir, isfile, join
+from os.path import isdir, isfile, join, abspath
 from time import sleep
-
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -14,7 +13,7 @@ from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
 from tld import get_tld
 
 import common as cm
-from utils import add_canvas_permission
+from tbselenium.utils import add_canvas_permission
 from selenium.common.exceptions import TimeoutException
 
 
@@ -33,18 +32,28 @@ class TorBrowserDriver(FirefoxDriver):
                  socks_port=None,
                  canvas_exceptions=[]):
 
-        self.tor_data_dir = tor_data_dir  # only relevant if we launch tor
-        self.setup_tbb_paths(tbb_path, tbb_fx_binary_path, tbb_profile_path)
         self.tor_cfg = tor_cfg
+        self.setup_tbb_paths(tbb_path, tbb_fx_binary_path,
+                             tbb_profile_path, tor_data_dir)
         self.canvas_exceptions = [get_tld(url) for url in canvas_exceptions]
         self.profile = webdriver.FirefoxProfile(self.tbb_profile_path)
         add_canvas_permission(self.profile.path, self.canvas_exceptions)
         if socks_port is None:
-            if tor_cfg == cm.USE_RUNNING_TOR:  # 9050 if port isn't specified
-                socks_port = cm.DEFAULT_SOCKS_PORT
+            if tor_cfg == cm.USE_RUNNING_TOR:
+                socks_port = cm.DEFAULT_SOCKS_PORT  # 9050
             else:
                 socks_port = cm.TBB_SOCKS_PORT  # 9150
         self.socks_port = socks_port
+        if tor_cfg == cm.LAUNCH_NEW_TBB_TOR and\
+                socks_port != cm.TBB_SOCKS_PORT:
+            # No support for launching TBB's Tor on a custom port
+            # Managing/editing torrc would be messy
+            # TorBrowserDriver can connect to a running Tor process on any port
+            # This is limitation is about launching Tor.
+            # You can use Stem to launch Tor on the port you like and have
+            # TorBrowserDriver connect to it.
+            raise cm.TBDriverPortError("Error: Use Stem if you need to launch"
+                                       " Tor on a custom SOCKS port")
         self.update_prefs(pref_dict)
         self.setup_capabilities()
         self.export_env_vars()
@@ -56,7 +65,8 @@ class TorBrowserDriver(FirefoxDriver):
                                                timeout=60)
         self.is_running = True
 
-    def setup_tbb_paths(self, tbb_path, tbb_fx_binary_path, tbb_profile_path):
+    def setup_tbb_paths(self, tbb_path, tbb_fx_binary_path, tbb_profile_path,
+                        tor_data_dir):
         """Update instance variables based on the passed paths.
 
         TorBrowserDriver can be initialized by passing either
@@ -84,6 +94,12 @@ class TorBrowserDriver(FirefoxDriver):
         self.tbb_profile_path = tbb_profile_path
         self.tbb_fx_binary_path = tbb_fx_binary_path
         self.tbb_browser_dir = join(tbb_path, cm.DEFAULT_TBB_BROWSER_DIR)
+        if tor_data_dir:
+            self.tor_data_dir = tor_data_dir  # only relevant if we launch tor
+        else:
+            self.tor_data_dir = abspath(join(tbb_path,
+                                             cm.DEFAULT_TOR_DATA_PATH))
+
         # TB can't find bundled "fonts" if we don't switch to tbb_browser_dir
         chdir(self.tbb_browser_dir)
 

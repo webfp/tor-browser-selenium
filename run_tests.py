@@ -3,7 +3,8 @@ import sys
 from subprocess import call
 from os import environ
 from os.path import isdir, realpath, dirname, join
-
+# TODO: Do we still need this module or can we do all of that with py.test
+# Alternatively we can call py.test from this module
 # Validate input
 if len(sys.argv) != 2:
     print "ERROR: the path to the Tor Browser Bundle directory is a required argument."

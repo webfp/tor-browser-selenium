@@ -42,3 +42,7 @@ USE_RUNNING_TOR = 1  # use the tor installed and running on the system
 
 class TBDriverPathError(Exception):
     pass
+
+
+class TBDriverPortError(Exception):
+    pass
