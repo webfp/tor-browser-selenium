@@ -5,6 +5,7 @@ import pytest
 import unittest
 from os import remove, environ
 from os.path import getsize, exists, join, dirname, isfile
+from distutils.version import LooseVersion
 
 from selenium.common.exceptions import (TimeoutException,
                                         NoSuchElementException,
@@ -287,41 +288,39 @@ class TBDriverOptionalArgs(unittest.TestCase):
         used_font_files = set()
         bundled_fonts_dir = join(TBB_PATH, cm.DEFAULT_BUNDLED_FONTS_PATH)
         bundled_fonts_dir = bundled_fonts_dir
+        # https://www.freedesktop.org/software/fontconfig/fontconfig-user.html
         environ["FC_DEBUG"] = "%d" % (1024 + 8 + 1)
-        """
-        We set FC_DEBUG to 1024 + 8 + 1 to make sure we get logs about...
-        MATCH            1    Brief information about font matching
-        FONTSET          8    Track loading of font information at startup
-        CONFIG        1024    Monitor which config files are loaded
-        https://www.freedesktop.org/software/fontconfig/fontconfig-user.html
-        """
+
         with TorBrowserDriver(TBB_PATH, tbb_logfile_path=log_file) as driver:
+            driver.load_url_ensure("about:tor")
+            ver = ut.get_tbb_version(driver.page_source)
+            if not ver or (LooseVersion(ver) <= LooseVersion('4.5')):
+                print ("TBB version doesn't support font bundling %s" % ver)
+                return
             driver.load_url_ensure("https://www.wikipedia.org/")
+
         bundled_font_files = set(ut.gen_find_files(bundled_fonts_dir))
-        # make sure we discovered the bundled fonts
         self.assertTrue(len(bundled_font_files) > 0)
         log_txt = ut.read_file(log_file)
 
-        expected_load_cfg_log = "Loading config file %s" %\
-                                join(TBB_PATH, cm.DEFAULT_FONTS_CONF_PATH)
-        self.assertIn(expected_load_cfg_log, log_txt)
+        fonts_conf_path = join(TBB_PATH, cm.DEFAULT_FONTS_CONF_PATH)
+        expected_log = "Loading config file %s" % fonts_conf_path
+        self.assertIn(expected_log, log_txt)
+
+        # We get the following log if Firefox cannot find any fonts at startup
+        self.assertNotIn("failed to choose a font, expect ugly output",
+                         log_txt)
 
         expected_load_fonts_log = "adding fonts from%s" % bundled_fonts_dir
         self.assertIn(expected_load_fonts_log, log_txt)
 
-        # We get the following log if Firefox cannot find any fonts at startup
-        #     (firefox:5611): Pango-WARNING **: failed to choose a font, expect ugly output. engine-type='PangoRenderFc', script='common'  # noqa
-        self.assertNotIn("failed to choose a font, expect ugly output",
-                         log_txt)
         for _, font_path, _ in re.findall(r"(file: \")(.*)(\".*)", log_txt):
-            # make sure all fonts are loaded from the bundled font directory
             # fontconfig logs include path to the font file, e.g.
             # file: "/path/to/tbb/Browser/fonts/Arimo-Bold.ttf"(w)
             self.assertIn(bundled_fonts_dir, font_path)
             used_font_files.add(font_path)
         # make sure the TBB only loaded and used the bundled fonts
         self.assertEqual(used_font_files, bundled_font_files)
-        environ["FC_DEBUG"] = ""
 
     def test_temp_tor_data_dir(self):
         """If we use a temporary directory as tor_data_dir,

@@ -1,3 +1,4 @@
+import re
 import sqlite3
 from os import walk
 from os.path import join, getmtime
@@ -16,6 +17,14 @@ def gen_find_files(dir_path, pattern="*"):
     for path, _, filelist in walk(dir_path):
         for name in fnmatch.filter(filelist, pattern):
             yield join(path, name)
+
+
+def get_tbb_version(src):
+    match = re.search(r'Tor Browser.([^<]*)', src,
+                      flags=re.MULTILINE | re.DOTALL)
+    if not match:
+        return ""
+    return match.group(0)
 
 
 def read_file(file_path, mode='rU'):
