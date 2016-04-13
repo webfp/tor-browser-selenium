@@ -6,7 +6,9 @@ import unittest
 from os import remove, environ
 from os.path import getsize, exists, join, dirname, isfile
 
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import (TimeoutException,
+                                        NoSuchElementException,
+                                        WebDriverException)
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -37,7 +39,7 @@ class TBDriverTest(unittest.TestCase):
             try:
                 self.tb_driver = TorBrowserDriver(TBB_PATH)
                 break
-            except TimeoutException as exc:
+            except (TimeoutException, WebDriverException) as exc:
                 continue
         else:
             raise exc
