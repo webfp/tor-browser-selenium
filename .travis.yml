@@ -23,5 +23,4 @@ install:
   - tar -xvf tor-browser-linux64-6.0a4_en-US.tar.xz -C $HOME/tbb60a4
 before_script:
   - cd tbselenium/test
-  - export TBB_PATH=../../tor-browser_en-US
 script:  py.test -s
