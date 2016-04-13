@@ -1,8 +1,10 @@
-import tempfile
-import unittest
 import re
+import sys
+import tempfile
+import pytest
+import unittest
 from os import remove, environ
-from os.path import getsize, exists, join, dirname, isfile, basename
+from os.path import getsize, exists, join, dirname, isfile
 
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
@@ -77,6 +79,8 @@ class TBDriverTest(unittest.TestCase):
         self.assertTrue(self.tb_driver.binary.which('firefox').
                         startswith(TBB_PATH))
 
+    @pytest.mark.skipif(sys.platform == 'win32',
+                        reason="Test does not support Windows")
     def test_should_load_tbb_firefox_libs(self):
         """Make sure we load the Firefox libraries from the TBB directories.
         We only test libxul (main Firefox/Gecko library) and libstdc++.
@@ -91,26 +95,17 @@ class TBDriverTest(unittest.TestCase):
         pid = self.tb_driver.binary.process.pid
 
         for lib_path in [xul_lib_path, std_c_lib_path]:
-            lib_loaded_from_tbb = False
             self.failUnless(isfile(lib_path),
                             "Can't find the library %s" % lib_path)
-            lib_name = basename(lib_path)
-            lib_escaped = lib_name.replace(".", "\.")  # to use with grep
-
-            cmd = "lsof -p %d | awk '{print $9}' | grep '%s'"\
-                % (pid, lib_escaped)
-            status, out = ut.run_cmd(cmd)
-            self.assertFalse(int(status),
-                             "Error running command: %s\nStatus: %s\nOut: %s" %
-                             (cmd, status, out))
-            for out_line in out.split("\n"):
-                if lib_name in out_line:  # remove potential lsof warning msgs
-                    if lib_path == out_line:
-                        lib_loaded_from_tbb = True
-
-            self.assertTrue(lib_loaded_from_tbb,
-                            "Can't find the loaded lib: %s\nCmd output: %s" %
-                            (xul_lib_path, out))
+            # We read the memory map of the process
+            # http://man7.org/linux/man-pages/man5/proc.5.html
+            proc_mem_map_file = "/proc/%d/maps" % (pid)
+            self.assertTrue(isfile(proc_mem_map_file))
+            for map_line in open(proc_mem_map_file).readlines():
+                if lib_path in map_line:
+                    break  # Found the loaded library in the memory map
+            else:
+                self.fail("Can't find the loaded lib: %s" % (xul_lib_path))
 
 
 class TBDriverFailTest(unittest.TestCase):
