@@ -1,6 +1,7 @@
-from tbselenium.utils import is_port_listening, run_cmd
 import unittest
+from selenium.webdriver.common.utils import is_connectable
 from tbselenium import common as cm
+from tbselenium.utils import run_cmd
 
 
 class EnvironmentTest(unittest.TestCase):
@@ -40,7 +41,7 @@ class EnvironmentTest(unittest.TestCase):
     @unittest.skip("We no longer depend on system tor")
     def test_default_tor_ports(self):
         """Make sure tor is listening on the port we expect."""
-        self.assertTrue(is_port_listening(cm.DEFAULT_SOCKS_PORT),
+        self.assertTrue(is_connectable(cm.DEFAULT_SOCKS_PORT),
                         """No process is listening on SOCKS port %s!""" %
                         cm.DEFAULT_SOCKS_PORT)
 
