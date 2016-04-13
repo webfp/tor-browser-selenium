@@ -1,5 +1,4 @@
 import shutil
-from httplib import CannotSendRequest
 from os import environ, chdir
 from os.path import isdir, isfile, join, abspath
 from time import sleep
@@ -10,10 +9,15 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
-
-import common as cm
-from tbselenium.utils import add_canvas_permission
 from selenium.common.exceptions import TimeoutException
+
+import tbselenium.common as cm
+from tbselenium.utils import add_canvas_permission
+
+try:
+    from httplib import CannotSendRequest
+except ImportError:
+    from http.client import CannotSendRequest
 
 
 class TorBrowserDriver(FirefoxDriver):
@@ -135,7 +139,7 @@ class TorBrowserDriver(FirefoxDriver):
                 if self.current_url != "about:newtab" and \
                         self.title != "Problem loading page":  # TODO i18n?
                     break
-            except TimeoutException, last_err:
+            except TimeoutException as last_err:
                 continue
         else:
             if last_err:
@@ -218,7 +222,7 @@ class TorBrowserDriver(FirefoxDriver):
         else:
             self.set_tb_prefs_for_using_system_tor(control_port)
         # pref_dict overwrites above preferences
-        for pref_name, pref_val in pref_dict.iteritems():
+        for pref_name, pref_val in pref_dict.items():
             set_pref(pref_name, pref_val)
         self.profile.update_preferences()
 
@@ -261,7 +265,7 @@ class TorBrowserDriver(FirefoxDriver):
         try:
             super(TorBrowserDriver, self).quit()
         except CannotSendRequest as exc:
-            print("[tbselenium] " + str(exc))
+            print("[tbselenium] %s" % exc)
             # following code is from webdriver.firefox.webdriver.quit()
             try:
                 self.binary.kill()  # kill the browser
@@ -269,7 +273,7 @@ class TorBrowserDriver(FirefoxDriver):
                 if self.profile.tempfolder is not None:
                     shutil.rmtree(self.profile.tempfolder)
             except Exception as e:
-                print("[tbselenium] " + str(e))
+                print("[tbselenium] %s" % e)
 
     def __enter__(self):
         return self

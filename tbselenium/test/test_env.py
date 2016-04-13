@@ -28,7 +28,7 @@ class EnvironmentTest(unittest.TestCase):
         min_v = 2
         min_minor_v = 45
         min_micro_v = 0
-        version, minor_v, micro_v = pkg_ver.split('.')
+        version, minor_v, micro_v = [int(v) for v in pkg_ver.split('.')]
         self.assertGreaterEqual(version, min_v, err_msg)
         if version == min_v:
             self.assertGreaterEqual(minor_v, min_minor_v, err_msg)
