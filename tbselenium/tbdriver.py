@@ -90,15 +90,17 @@ class TorBrowserDriver(FirefoxDriver):
         if not isdir(tbb_profile_path):
             raise cm.TBDriverPathError("Invalid Firefox profile dir %s"
                                        % tbb_profile_path)
-        self.tbb_path = tbb_path
-        self.tbb_profile_path = tbb_profile_path
-        self.tbb_fx_binary_path = tbb_fx_binary_path
+        # Convert all the paths to absolute. We set Fx prefs and env. vars
+        # based on these paths (e.g. tor_data_dir, FONTCONFIG_PATH), which
+        # won't work if paths are relative.
+        self.tbb_path = abspath(tbb_path)
+        self.tbb_profile_path = abspath(tbb_profile_path)
+        self.tbb_fx_binary_path = abspath(tbb_fx_binary_path)
         self.tbb_browser_dir = join(tbb_path, cm.DEFAULT_TBB_BROWSER_DIR)
         if tor_data_dir:
             self.tor_data_dir = tor_data_dir  # only relevant if we launch tor
         else:
-            self.tor_data_dir = abspath(join(tbb_path,
-                                             cm.DEFAULT_TOR_DATA_PATH))
+            self.tor_data_dir = join(tbb_path, cm.DEFAULT_TOR_DATA_PATH)
 
         # TB can't find bundled "fonts" if we don't switch to tbb_browser_dir
         chdir(self.tbb_browser_dir)
