@@ -125,7 +125,7 @@ class TorBrowserDriver(FirefoxDriver):
                         max_reload_tries=5):
         """Make sure the requested URL is loaded. Retry if necessary."""
         last_err = None
-        for tries in range(1, max_reload_tries+1):
+        for tries in range(1, max_reload_tries + 1):
             try:
                 self.load_url(url, wait_on_page, wait_for_page_body)
                 if tries > 1:  # TODO:  for debugging, can be removed
@@ -167,7 +167,7 @@ class TorBrowserDriver(FirefoxDriver):
                                    socks_port,
                                    control_port))
 
-    def set_tb_prefs_for_using_system_tor(self):
+    def set_tb_prefs_for_using_system_tor(self, control_port):
         """Set the preferences suggested by start-tor-browser script
         to run TB with system-installed Tor.
 
@@ -186,7 +186,7 @@ class TorBrowserDriver(FirefoxDriver):
         set_pref('extensions.torbutton.logmethod', 0)
         set_pref('extensions.torbutton.settings_method', 'custom')
         set_pref('extensions.torbutton.use_privoxy', False)
-        set_pref('extensions.torlauncher.control_port', self.socks_port+1)
+        set_pref('extensions.torlauncher.control_port', control_port)
         set_pref('extensions.torlauncher.loglevel', 2)
         set_pref('extensions.torlauncher.logmethod', 0)
         set_pref('extensions.torlauncher.prompt_at_startup', False)
@@ -215,7 +215,7 @@ class TorBrowserDriver(FirefoxDriver):
             set_pref('extensions.torlauncher.tordatadir_path',
                      self.tor_data_dir)
         else:
-            self.set_tb_prefs_for_using_system_tor()
+            self.set_tb_prefs_for_using_system_tor(control_port)
         # pref_dict overwrites above preferences
         for pref_name, pref_val in pref_dict.iteritems():
             set_pref(pref_name, pref_val)
