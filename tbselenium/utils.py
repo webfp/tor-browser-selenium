@@ -40,12 +40,6 @@ def run_cmd(cmd):
     return commands.getstatusoutput('%s ' % cmd)
 
 
-def is_port_listening(port_no):
-    cmd = "netstat -atn | grep %s" % port_no
-    _, output = run_cmd(cmd)
-    return "LISTEN" in output
-
-
 def add_canvas_permission(profile_path, canvas_allowed_hosts):
     """Create a permission db (permissions.sqlite) and add
     exceptions for the canvas image extraction for the given domains.

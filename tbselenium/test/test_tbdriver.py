@@ -8,6 +8,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.utils import is_connectable
 
 from tbselenium import common as cm
 from tbselenium.tbdriver import TorBrowserDriver
@@ -207,7 +208,7 @@ class TBDriverOptionalArgs(unittest.TestCase):
         """Make sure we can run using the tor running on the system.
         This test requires a system tor process with SOCKS port 9050.
         """
-        if not ut.is_port_listening(cm.DEFAULT_SOCKS_PORT):
+        if not is_connectable(cm.DEFAULT_SOCKS_PORT):
             print("Skipping system tor test. Start tor to run this test.")
             return
         with TorBrowserDriver(TBB_PATH, tor_cfg=cm.USE_RUNNING_TOR) as driver:
