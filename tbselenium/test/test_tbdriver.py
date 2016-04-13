@@ -2,7 +2,7 @@ import tempfile
 import unittest
 import re
 from os import remove, environ
-from os.path import getsize, exists, join, abspath, dirname, isfile, basename
+from os.path import getsize, exists, join, dirname, isfile, basename
 
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
@@ -81,11 +81,10 @@ class TBDriverTest(unittest.TestCase):
         """Make sure we load the Firefox libraries from the TBB directories.
         We only test libxul (main Firefox/Gecko library) and libstdc++.
         """
-        xul_lib_path = abspath(join(self.tb_driver.tbb_browser_dir,
-                                    "libxul.so"))
-        std_c_lib_path = abspath(join(self.tb_driver.tbb_path,
-                                      cm.DEFAULT_TOR_BINARY_DIR,
-                                      "libstdc++.so.6"))
+        xul_lib_path = join(self.tb_driver.tbb_browser_dir, "libxul.so")
+        std_c_lib_path = join(self.tb_driver.tbb_path,
+                              cm.DEFAULT_TOR_BINARY_DIR,
+                              "libstdc++.so.6")
 
         self.failUnless(self.tb_driver.binary.process,
                         "TorBrowserDriver process doesn't exist")
@@ -299,8 +298,7 @@ class TBDriverOptionalArgs(unittest.TestCase):
         _, log_file = tempfile.mkstemp()
         used_font_files = set()
         bundled_fonts_dir = join(TBB_PATH, cm.DEFAULT_BUNDLED_FONTS_PATH)
-        # join returns a relative path on Travis CI
-        bundled_fonts_dir = abspath(bundled_fonts_dir)
+        bundled_fonts_dir = bundled_fonts_dir
         environ["FC_DEBUG"] = "%d" % (1024 + 8 + 1)
         """
         We set FC_DEBUG to 1024 + 8 + 1 to make sure we get logs about...
