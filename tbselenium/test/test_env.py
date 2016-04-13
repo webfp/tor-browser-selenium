@@ -1,7 +1,8 @@
+import pytest
 import unittest
+from os import environ
 from selenium.webdriver.common.utils import is_connectable
 from tbselenium import common as cm
-from tbselenium.utils import run_cmd
 
 
 class EnvironmentTest(unittest.TestCase):
@@ -12,38 +13,10 @@ class EnvironmentTest(unittest.TestCase):
             self.fail("Missing python package. Install it by running"
                       " '(sudo) pip install %s'" % pkg_name)
 
-    def assert_installed(self, pkg_name):
-        cmd = 'which %s' % pkg_name
-        status, _ = self.run_cmd(cmd)
-        self.assertFalse(status,
-                         "%s is not installed. \
-                         Install it by running '(sudo) apt-get install %s'" %
-                         (pkg_name, pkg_name))
-
-    @unittest.skip("We no longer depend on system tor")
-    def test_tor_daemon_running(self):
-        """Make sure we've a running tor process.
-        The library can be used without having tor installed on the system,
-        using Stem as a replacement.
-        """
-
-        cmd = "ps -ax | grep -w tor | grep -v grep"
-        _, output = run_cmd(cmd)
-        self.assertIn("/usr/bin/tor", output,
-                      """Can't find the running tor process.
-                      The tests (test_tbdriver) that depend on tor may fail.
-                      You can run '(sudo) service tor start' to start tor.
-
-                      If you don't want to run the tests, you may use Stem
-                      instead of tor installed on the system.
-                      """)
-
-    @unittest.skip("We no longer depend on system tor")
+    @pytest.mark.skipif("CI" not in environ, reason="Only runs on CI")
     def test_default_tor_ports(self):
         """Make sure tor is listening on the port we expect."""
-        self.assertTrue(is_connectable(cm.DEFAULT_SOCKS_PORT),
-                        """No process is listening on SOCKS port %s!""" %
-                        cm.DEFAULT_SOCKS_PORT)
+        self.assertTrue(is_connectable(cm.DEFAULT_SOCKS_PORT))
 
     def test_selenium(self):
         self.assert_py_pkg_installed('selenium')
