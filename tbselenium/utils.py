@@ -1,16 +1,12 @@
 import sqlite3
 from os import walk
-from os.path import join
+from os.path import join, getmtime
 import fnmatch
-from hashlib import sha256
 
 
-def get_hash_of_directory(dir_path):
-    """Return sha256 hash of the directory pointed by path."""
-    m = sha256()
-    for file_path in gen_find_files(dir_path):
-        m.update(read_file(file_path))
-    return m.digest()
+def get_last_modified_of_dir(dir_path):
+    """Recursively get the last modified time of a directory."""
+    return max(getmtime(_dir) for _dir, _, _ in walk(dir_path))
 
 
 def gen_find_files(dir_path, pattern="*"):
@@ -27,12 +23,6 @@ def read_file(file_path, mode='rU'):
     with open(file_path, mode) as f:
         content = f.read()
     return content
-
-
-def is_png(path):
-    # Taken from http://stackoverflow.com/a/21555489
-    data = read_file(path, 'rb')
-    return (data[:8] == '\211PNG\r\n\032\n'and (data[12:16] == 'IHDR'))
 
 
 def add_canvas_permission(profile_path, canvas_allowed_hosts):

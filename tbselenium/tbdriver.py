@@ -1,5 +1,4 @@
 import shutil
-from six import iteritems
 from os import environ, chdir
 from os.path import isdir, isfile, join, abspath
 from time import sleep
@@ -223,7 +222,7 @@ class TorBrowserDriver(FirefoxDriver):
         else:
             self.set_tb_prefs_for_using_system_tor(control_port)
         # pref_dict overwrites above preferences
-        for pref_name, pref_val in iteritems(pref_dict):
+        for pref_name, pref_val in pref_dict.items():
             set_pref(pref_name, pref_val)
         self.profile.update_preferences()
 

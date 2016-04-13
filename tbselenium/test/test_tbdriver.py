@@ -53,10 +53,10 @@ class TBDriverTest(unittest.TestCase):
     def test_tbdriver_profile_not_modified(self):
         """Visiting a site should not modify the original profile contents."""
         profile_path = join(TBB_PATH, cm.DEFAULT_TBB_PROFILE_PATH)
-        profile_hash_before = ut.get_hash_of_directory(profile_path)
+        last_mod_time_before = ut.get_last_modified_of_dir(profile_path)
         self.tb_driver.load_url_ensure(cm.CHECK_TPO_URL)
-        profile_hash_after = ut.get_hash_of_directory(profile_path)
-        self.assertEqual(profile_hash_before, profile_hash_after)
+        last_mod_time_after = ut.get_last_modified_of_dir(profile_path)
+        self.assertEqual(last_mod_time_before, last_mod_time_after)
 
     def test_httpseverywhere(self):
         """HTTPSEverywhere should redirect to HTTPS version."""
@@ -184,8 +184,6 @@ class ScreenshotTest(unittest.TestCase):
         # A real screen capture of the same page is ~57KB. If the capture
         # is not blank it should be at least greater than 20KB.
         self.assertGreater(getsize(self.temp_file), 20000)
-        self.assertTrue(ut.is_png(self.temp_file),
-                        "Doesn't look like a PNG file")
 
 
 class TBDriverOptionalArgs(unittest.TestCase):
@@ -329,20 +327,20 @@ class TBDriverOptionalArgs(unittest.TestCase):
         """
         tmp_dir = tempfile.mkdtemp()
         tbb_tor_data_path = join(TBB_PATH, cm.DEFAULT_TOR_DATA_PATH)
-        hash_before = ut.get_hash_of_directory(tbb_tor_data_path)
+        last_mod_time_before = ut.get_last_modified_of_dir(tbb_tor_data_path)
         with TorBrowserDriver(TBB_PATH, tor_data_dir=tmp_dir) as driver:
             driver.load_url_ensure(cm.CHECK_TPO_URL)
-        hash_after = ut.get_hash_of_directory(tbb_tor_data_path)
-        self.assertEqual(hash_before, hash_after)
+        last_mod_time_after = ut.get_last_modified_of_dir(tbb_tor_data_path)
+        self.assertEqual(last_mod_time_before, last_mod_time_after)
 
     def test_non_temp_tor_data_dir(self):
         """Tor data dir in TBB should change if we don't use tor_data_dir."""
         tbb_tor_data_path = join(TBB_PATH, cm.DEFAULT_TOR_DATA_PATH)
-        hash_before = ut.get_hash_of_directory(tbb_tor_data_path)
+        last_mod_time_before = ut.get_last_modified_of_dir(tbb_tor_data_path)
         with TorBrowserDriver(TBB_PATH) as driver:
             driver.load_url_ensure(cm.CHECK_TPO_URL)
-        hash_after = ut.get_hash_of_directory(tbb_tor_data_path)
-        self.assertNotEqual(hash_before, hash_after)
+        last_mod_time_after = ut.get_last_modified_of_dir(tbb_tor_data_path)
+        self.assertNotEqual(last_mod_time_before, last_mod_time_after)
 
 
 class TBDriverTestAssumptions(unittest.TestCase):
