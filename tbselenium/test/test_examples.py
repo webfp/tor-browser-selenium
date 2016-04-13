@@ -30,8 +30,9 @@ class TorBrowserDriverExamples(unittest.TestCase):
         # We need to add an exception for canvas access in the Tor Browser
         # permission database. We need to do this for each site that we
         # plan to visit.
+        canvas_allowed = [cm.CHECK_TPO_HOST]
         with TorBrowserDriver(TBB_PATH,
-                              canvas_exceptions=[cm.TEST_URL]) as driver:
+                              canvas_allowed_hosts=canvas_allowed) as driver:
             driver.get(cm.TEST_URL)
             driver.get_screenshot_as_file("screenshot.png")
 

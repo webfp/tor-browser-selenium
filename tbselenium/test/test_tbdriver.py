@@ -13,7 +13,6 @@ from tbselenium import common as cm
 from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.test import TBB_PATH
 import tbselenium.utils as ut
-from tld.exceptions import TldBadUrl
 
 TEST_LONG_WAIT = 60
 
@@ -167,14 +166,6 @@ class TBDriverFailTest(unittest.TestCase):
             driver.load_url(cm.CHECK_TPO_URL)
             self.assertEqual(driver.title, "Problem loading page")
 
-    def test_should_raise_for_invalid_canvas_exceptions(self):
-        with self.assertRaises(TldBadUrl):
-            TorBrowserDriver(TBB_PATH, canvas_exceptions=["foo", "bar"])
-        with self.assertRaises(TldBadUrl):
-            TorBrowserDriver(TBB_PATH, canvas_exceptions=["foo.bar"])
-        with self.assertRaises(AttributeError):
-            TorBrowserDriver(TBB_PATH, canvas_exceptions=[1, 2])
-
 
 class ScreenshotTest(unittest.TestCase):
     def setUp(self):
@@ -185,10 +176,12 @@ class ScreenshotTest(unittest.TestCase):
             remove(self.temp_file)
 
     def test_screen_capture(self):
-        """Make sure we can capture the screen."""
+        """Make sure we can capture the screen.
+        Passing canvas_allowed_hosts is not needed for TBB >= 4.5a3
+        """
+        canvas_allowed = [cm.CHECK_TPO_HOST]
         with TorBrowserDriver(TBB_PATH,
-                              canvas_exceptions=[cm.CHECK_TPO_URL]) as driver:
-            # passing canvas_exceptions is not needed for TBB >= 4.5a3
+                              canvas_allowed_hosts=canvas_allowed) as driver:
             driver.load_url_ensure(cm.CHECK_TPO_URL, 3)
             driver.get_screenshot_as_file(self.temp_file)
         # A blank image for https://check.torproject.org/ amounts to ~4.8KB.

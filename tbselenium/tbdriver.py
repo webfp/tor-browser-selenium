@@ -10,7 +10,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
-from tld import get_tld
 
 import common as cm
 from tbselenium.utils import add_canvas_permission
@@ -30,14 +29,14 @@ class TorBrowserDriver(FirefoxDriver):
                  tor_data_dir="",
                  pref_dict={},
                  socks_port=None,
-                 canvas_exceptions=[]):
+                 canvas_allowed_hosts=[]):
 
         self.tor_cfg = tor_cfg
         self.setup_tbb_paths(tbb_path, tbb_fx_binary_path,
                              tbb_profile_path, tor_data_dir)
-        self.canvas_exceptions = [get_tld(url) for url in canvas_exceptions]
+        self.canvas_allowed_hosts = canvas_allowed_hosts
         self.profile = webdriver.FirefoxProfile(self.tbb_profile_path)
-        add_canvas_permission(self.profile.path, self.canvas_exceptions)
+        add_canvas_permission(self.profile.path, self.canvas_allowed_hosts)
         if socks_port is None:
             if tor_cfg == cm.USE_RUNNING_TOR:
                 socks_port = cm.DEFAULT_SOCKS_PORT  # 9050
