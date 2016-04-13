@@ -37,7 +37,7 @@ class TBDriverTest(unittest.TestCase):
             try:
                 self.tb_driver = TorBrowserDriver(TBB_PATH)
                 break
-            except TimeoutException, exc:
+            except TimeoutException as exc:
                 continue
         else:
             raise exc
@@ -216,8 +216,7 @@ class TBDriverOptionalArgs(unittest.TestCase):
             from stem.control import Controller
             from stem.process import launch_tor_with_config
         except ImportError as err:
-            print("Skipping Stem test. Install stem to run this test: %s" %
-                  err)
+            print("Can't import Stem. Skipping test: %s" % err)
             return
         custom_tor_binary = join(TBB_PATH, cm.DEFAULT_TOR_BINARY_PATH)
         environ["LD_LIBRARY_PATH"] = dirname(custom_tor_binary)
