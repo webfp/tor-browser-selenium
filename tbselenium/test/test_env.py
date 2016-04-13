@@ -44,9 +44,6 @@ class EnvironmentTest(unittest.TestCase):
                         """No process is listening on SOCKS port %s!""" %
                         cm.DEFAULT_SOCKS_PORT)
 
-    def test_tld(self):
-        self.assert_py_pkg_installed('tld')
-
     def test_selenium(self):
         self.assert_py_pkg_installed('selenium')
 

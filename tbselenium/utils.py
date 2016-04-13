@@ -46,7 +46,7 @@ def is_port_listening(port_no):
     return "LISTEN" in output
 
 
-def add_canvas_permission(profile_path, canvas_exceptions):
+def add_canvas_permission(profile_path, canvas_allowed_hosts):
     """Create a permission db (permissions.sqlite) and add
     exceptions for the canvas image extraction for the given domains.
     If we don't add permissions, screenshots taken by TBB < 4.5a3 will be
@@ -76,9 +76,9 @@ def add_canvas_permission(profile_path, canvas_exceptions):
       expireTime INTEGER,
       appId INTEGER,
       isInBrowserElement INTEGER)""")
-    for domain in canvas_exceptions:
+    for host in canvas_allowed_hosts:
         qry = """INSERT INTO 'moz_hosts'
-        VALUES(NULL,'%s','canvas/extractData',1,0,0,0,0);""" % domain
+        VALUES(NULL,'%s','canvas/extractData',1,0,0,0,0);""" % host
         cursor.execute(qry)
     perm_db.commit()
     cursor.close()

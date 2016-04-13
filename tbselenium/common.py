@@ -32,6 +32,7 @@ STREAM_CLOSE_TIMEOUT = 20  # wait 20 seconds before raising an alarm signal
 
 # Test constants
 CHECK_TPO_URL = "http://check.torproject.org"
+CHECK_TPO_HOST = "check.torproject.org"
 TEST_URL = CHECK_TPO_URL
 ABOUT_TOR_URL = "about:tor"
 
