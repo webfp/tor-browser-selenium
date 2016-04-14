@@ -14,6 +14,8 @@ DEFAULT_FONTCONFIG_PATH = join(DEFAULT_TBB_DATA_DIR, 'fontconfig')
 FONTCONFIG_FILE = "fonts.conf"
 DEFAULT_FONTS_CONF_PATH = join(DEFAULT_FONTCONFIG_PATH, FONTCONFIG_FILE)
 DEFAULT_BUNDLED_FONTS_PATH = join('Browser', 'fonts')
+TB_VERSIONS_PATH = join('Browser', 'TorBrowser', 'Docs', 'sources', 'versions')
+
 
 # TOR PORTS
 DEFAULT_SOCKS_PORT = 9050

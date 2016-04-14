@@ -233,6 +233,10 @@ class TBDriverOptionalArgs(unittest.TestCase):
     def test_security_slider_settings_hi(self):
         slider_pref = {"extensions.torbutton.security_slider": 1}
         with TBDTestFixture(TBB_PATH, pref_dict=slider_pref) as driver:
+            ver = driver.get_tbb_version()
+            if not ver or (LooseVersion(ver) < LooseVersion('4.5')):
+                print ("TBB version doesn't support security slider %s" % ver)
+                return
             driver.load_url_ensure(cm.CHECK_TPO_URL, 1)
             self.assertRaises(NoSuchElementException,
                               driver.find_element_by_link_text,
@@ -246,6 +250,10 @@ class TBDriverOptionalArgs(unittest.TestCase):
                            sec_slider_setting}
             with TBDTestFixture(TBB_PATH,
                                 pref_dict=slider_pref) as driver:
+                ver = driver.get_tbb_version()
+                if not ver or (LooseVersion(ver) < LooseVersion('4.5')):
+                    print ("TBB version doesn't support security slider %s" % ver)
+                    return
                 driver.load_url_ensure(cm.CHECK_TPO_URL)
                 try:
                     el = driver.find_element_by("JavaScript is enabled.",
@@ -280,8 +288,7 @@ class TBDriverOptionalArgs(unittest.TestCase):
         # https://www.freedesktop.org/software/fontconfig/fontconfig-user.html
         environ["FC_DEBUG"] = "%d" % (1024 + 8 + 1)
         with TBDTestFixture(TBB_PATH, tbb_logfile_path=log_file) as driver:
-            driver.load_url_ensure("about:tor")
-            ver = ut.get_tbb_version(driver.page_source)
+            ver = driver.get_tbb_version()
             if not ver or (LooseVersion(ver) <= LooseVersion('4.5')):
                 print ("TBB version doesn't support font bundling %s" % ver)
                 return

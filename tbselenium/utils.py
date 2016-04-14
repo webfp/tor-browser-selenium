@@ -19,14 +19,6 @@ def gen_find_files(dir_path, pattern="*"):
             yield join(path, name)
 
 
-def get_tbb_version(src):
-    match = re.search(r'(Tor Browser.)([^<]*)', src,
-                      flags=re.MULTILINE | re.DOTALL)
-    if not match:
-        return ""
-    return match.group(2)
-
-
 def read_file(file_path, mode='rU'):
     """Read and return file content."""
     with open(file_path, mode) as f:
