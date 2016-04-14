@@ -33,7 +33,6 @@ class TorBrowserDriver(FirefoxDriver):
                  pref_dict={},
                  socks_port=None,
                  canvas_allowed_hosts=[]):
-
         self.tor_cfg = tor_cfg
         self.setup_tbb_paths(tbb_path, tbb_fx_binary_path,
                              tbb_profile_path, tor_data_dir)
@@ -64,7 +63,7 @@ class TorBrowserDriver(FirefoxDriver):
                                                firefox_binary=self.binary,
                                                capabilities=self.capabilities,
                                                # default timeout is 30
-                                               timeout=60)
+                                               timeout=cm.TB_INIT_TIMEOUT)
         self.is_running = True
 
     def setup_tbb_paths(self, tbb_path, tbb_fx_binary_path, tbb_profile_path,

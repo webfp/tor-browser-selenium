@@ -26,9 +26,7 @@ KNOWN_SOCKS_PORTS = [DEFAULT_SOCKS_PORT, TBB_SOCKS_PORT]
 PORT_BAN_PREFS = ["extensions.torbutton.banned_ports",
                   "network.security.ports.banned"]
 
-# TOR CONTROLLER
-STREAM_CLOSE_TIMEOUT = 20  # wait 20 seconds before raising an alarm signal
-# otherwise we had many cases where get_streams hanged
+TB_INIT_TIMEOUT = 60
 
 # Test constants
 CHECK_TPO_URL = "http://check.torproject.org"
@@ -46,4 +44,8 @@ class TBDriverPathError(Exception):
 
 
 class TBDriverPortError(Exception):
+    pass
+
+
+class TimeExceededError(Exception):
     pass
