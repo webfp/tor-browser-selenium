@@ -4,15 +4,15 @@ os: linux
 dist: trusty
 python:
   - "2.7"
-  - "3.5"
+#  - "3.5"
 env:
-  - export TBB_PATH=$HOME/tbb408/tor-browser_en-US
-  - export TBB_PATH=$HOME/tbb55/tor-browser_en-US
-  - export TBB_PATH=$HOME/tbb55/tor-browser_zh-CN
-  - export TBB_PATH=$HOME/tbb55/tor-browser_ar
-  - export TBB_PATH=$HOME/tbb60a4/tor-browser_en-US
-  - export TBB_PATH=$HOME/tbb60a4/tor-browser_zh-CN
-  - export TBB_PATH=$HOME/tbb60a4/tor-browser_ar
+  - export version_arch='4.0.8/tor-browser-linux64-4.0.8_en-US.tar.xz'
+  - export version_arch='5.5/tor-browser-linux64-5.5_en-US.tar.xz'
+#  - export version_arch='5.5/tor-browser-linux64-5.5_zh-CN.tar.xz'
+#  - export version_arch='5.5/tor-browser-linux64-5.5_ar.tar.xz'
+#  - export version_arch='6.0a4/tor-browser-linux64-6.0a4_en-US.tar.xz'
+#  - export version_arch='6.0a4/tor-browser-linux64-6.0a4_zh-CN.tar.xz'
+#  - export version_arch='6.0a4/tor-browser-linux64-6.0a4_ar.tar.xz'
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
@@ -20,21 +20,12 @@ install:
   - pip install -r requirements-travis.txt
   - sudo apt-get -qq install tor
   - easy_install .
-  - mkdir $HOME/tbb408 $HOME/tbb55 $HOME/tbb60a4
-  - wget -P $HOME/downloads https://archive.torproject.org/tor-package-archive/torbrowser/4.0.8/tor-browser-linux64-4.0.8_en-US.tar.xz
-  - tar -xvf $HOME/downloads/tor-browser-linux64-4.0.8_en-US.tar.xz -C $HOME/tbb408
-  - wget -P $HOME/downloads https://archive.torproject.org/tor-package-archive/torbrowser/5.5/tor-browser-linux64-5.5_en-US.tar.xz
-  - tar -xvf $HOME/downloads/tor-browser-linux64-5.5_en-US.tar.xz -C $HOME/tbb55
-  - wget -P $HOME/downloads https://archive.torproject.org/tor-package-archive/torbrowser/5.5/tor-browser-linux64-5.5_zh-CN.tar.xz
-  - tar -xvf $HOME/downloads/tor-browser-linux64-5.5_zh-CN.tar.xz -C $HOME/tbb55
-  - wget -P $HOME/downloads https://archive.torproject.org/tor-package-archive/torbrowser/5.5/tor-browser-linux64-5.5_ar.tar.xz
-  - tar -xvf $HOME/downloads/tor-browser-linux64-5.5_ar.tar.xz -C $HOME/tbb55
-  - wget -P $HOME/downloads https://archive.torproject.org/tor-package-archive/torbrowser/6.0a4/tor-browser-linux64-6.0a4_en-US.tar.xz
-  - tar -xvf $HOME/downloads/tor-browser-linux64-6.0a4_en-US.tar.xz -C $HOME/tbb60a4
-  - wget -P $HOME/downloads https://archive.torproject.org/tor-package-archive/torbrowser/6.0a4/tor-browser-linux64-6.0a4_zh-CN.tar.xz
-  - tar -xvf $HOME/downloads/tor-browser-linux64-6.0a4_zh-CN.tar.xz -C $HOME/tbb60a4
-  - wget -P $HOME/downloads https://archive.torproject.org/tor-package-archive/torbrowser/6.0a4/tor-browser-linux64-6.0a4_ar.tar.xz
-  - tar -xvf $HOME/downloads/tor-browser-linux64-6.0a4_ar.tar.xz -C $HOME/tbb60a4
+  - tarball=`echo $version_arch |cut -d'/' -f 2`
+  - wget https://archive.torproject.org/tor-package-archive/torbrowser/$version_arch
+  - mkdir $HOME/tbb
+  - tar -xf $tarball -C $HOME/tbb
+  - export TBB_PATH=$HOME/tbb/tor-browser_*
+
 before_script:
   - cd tbselenium/test
 script: travis_retry py.test -s --cov=tbselenium --cov-report term-missing
