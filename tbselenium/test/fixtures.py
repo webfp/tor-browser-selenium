@@ -2,7 +2,10 @@ import signal
 from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.common import TimeExceededError, TB_INIT_TIMEOUT
 from selenium.common.exceptions import (TimeoutException, WebDriverException)
-from httplib import CannotSendRequest
+try:
+    from httplib import CannotSendRequest
+except ImportError:
+    from http.client import CannotSendRequest
 try:
     from stem.process import launch_tor_with_config
 except ImportError as err:
