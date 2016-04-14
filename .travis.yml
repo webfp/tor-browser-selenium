@@ -22,13 +22,9 @@ install:
   - easy_install .
   - tarball=`echo $version_arch |cut -d'/' -f 2`
   - wget https://archive.torproject.org/tor-package-archive/torbrowser/$version_arch
-  - mkdir $HOME/tbb
-  - tar -xf $tarball -C $HOME/tbb
-  - locale_ext=`echo $tarball |cut -d'_' -f 2`
-  - locale=`echo $locale_ext |cut -d'.' -f 1`
-  - export TBB_PATH=$HOME/tbb/tor-browser_$locale
-  - echo $TBB_PATH
-  - ls -l $HOME/tbb
+  - tar -xf $tarball -C $HOME
+  - locale=`echo $tarball |cut -d'_' -f 2 | cut -d'.' -f 1`
+  - export TBB_PATH=$HOME/tor-browser_$locale
 before_script:
   - cd tbselenium/test
 script: travis_retry py.test -s --cov=tbselenium --cov-report term-missing
