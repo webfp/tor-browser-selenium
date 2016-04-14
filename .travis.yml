@@ -9,7 +9,6 @@ python:
   - "2.7"
   - "3.5"
 env:
-  - export TBB_PATH=$HOME/tbb36/tor-browser_en-US
   - export TBB_PATH=$HOME/tbb45/tor-browser_en-US
   - export TBB_PATH=$HOME/tbb55/tor-browser_en-US
   - export TBB_PATH=$HOME/tbb55/tor-browser_zh-CN
@@ -24,9 +23,7 @@ install:
   - pip install -r requirements-travis.txt
   - sudo apt-get -qq install tor
   - easy_install .
-  - mkdir $HOME/tbb36 $HOME/tbb45 $HOME/tbb55 $HOME/tbb60a4
-  - wget -P $HOME/downloads https://archive.torproject.org/tor-package-archive/torbrowser/3.6/tor-browser-linux64-3.6_en-US.tar.xz
-  - tar -xvf $HOME/downloads/tor-browser-linux64-3.6_en-US.tar.xz -C $HOME/tbb36
+  - mkdir $HOME/tbb45 $HOME/tbb55 $HOME/tbb60a4
   - wget -P $HOME/downloads https://archive.torproject.org/tor-package-archive/torbrowser/4.5/tor-browser-linux64-4.5_en-US.tar.xz
   - tar -xvf $HOME/downloads/tor-browser-linux64-4.5_en-US.tar.xz -C $HOME/tbb45
   - wget -P $HOME/downloads https://archive.torproject.org/tor-package-archive/torbrowser/5.5/tor-browser-linux64-5.5_en-US.tar.xz
