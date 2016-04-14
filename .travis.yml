@@ -5,6 +5,11 @@ dist: trusty
 python:
   - "2.7"
   - "3.5"
+env:
+  - export TBB_PATH=$HOME/tbb554/tor-browser_en-US
+  - export TBB_PATH=$HOME/tbb554/tor-browser_zh-CN
+  - export TBB_PATH=$HOME/tbb60a4/tor-browser_en-US
+  - export TBB_PATH=$HOME/tbb60a4/tor-browser_zh-CN
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
@@ -12,9 +17,16 @@ install:
   - pip install -r requirements-travis.txt
   - sudo apt-get -qq install tor
   - easy_install .
+  - mkdir $HOME/tbb554
   - wget https://archive.torproject.org/tor-package-archive/torbrowser/5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz
-  - tar -xvf tor-browser-linux64-5.5.4_en-US.tar.xz
+  - tar -xvf tor-browser-linux64-5.5.4_en-US.tar.xz -C $HOME/tbb554
+  - wget https://archive.torproject.org/tor-package-archive/torbrowser/5.5.4/tor-browser-linux64-5.5.4_zh-CN.tar.xz
+  - tar -xvf tor-browser-linux64-5.5.4_zh-CN.tar.xz -C $HOME/tbb554
+  - mkdir $HOME/tbb60a4
+  - wget https://archive.torproject.org/tor-package-archive/torbrowser/6.0a4/tor-browser-linux64-6.0a4_en-US.tar.xz
+  - tar -xvf tor-browser-linux64-6.0a4_en-US.tar.xz -C $HOME/tbb60a4
+  - wget https://archive.torproject.org/tor-package-archive/torbrowser/6.0a4/tor-browser-linux64-6.0a4_zh-CN.tar.xz
+  - tar -xvf tor-browser-linux64-6.0a4_zh-CN.tar.xz -C $HOME/tbb60a4
 before_script:
   - cd tbselenium/test
-  - export TBB_PATH=../../tor-browser_en-US
 script:  py.test -s
