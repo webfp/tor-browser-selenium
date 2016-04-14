@@ -217,7 +217,6 @@ class TBDriverOptionalArgs(unittest.TestCase):
         torrc = {'ControlPort': str(control_port),
                  'SOCKSPort': str(socks_port),
                  'DataDirectory': temp_data_dir}
-        # TODO add fixture here
         tor_process = launch_tor_with_config_fixture(config=torrc,
                                                      tor_cmd=custom_tor_binary)
         with Controller.from_port(port=control_port) as controller:
