@@ -210,6 +210,7 @@ class TorBrowserDriver(FirefoxDriver):
         set_pref('extensions.torbutton.versioncheck_enabled', False)
         # following is only needed for TBB < 4.5a3 to add canvas permissions
         set_pref('permissions.memory_only', False)
+        set_pref('extensions.torbutton.prompted_language', True)
         # Configure Firefox to use Tor SOCKS proxy
         set_pref('network.proxy.socks_port', self.socks_port)
         set_pref('extensions.torbutton.socks_port', self.socks_port)

@@ -163,7 +163,10 @@ class TBDriverFailTest(unittest.TestCase):
         with TorBrowserDriver(TBB_PATH, socks_port=9999,
                               tor_cfg=cm.USE_RUNNING_TOR) as driver:
             driver.load_url(cm.CHECK_TPO_URL)
-            self.assertEqual(driver.title, "Problem loading page")
+            page_source = driver.page_source
+            for moz_err_text in ["connectionFailure", "errorTitleText",
+                                 "errorLongContent", "loadError", "Mozilla"]:
+                self.assertIn(moz_err_text, page_source)
 
 
 class ScreenshotTest(unittest.TestCase):
