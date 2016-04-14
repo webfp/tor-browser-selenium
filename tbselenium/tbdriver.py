@@ -241,15 +241,14 @@ class TorBrowserDriver(FirefoxDriver):
         return "ENTITY connectionFailure.title" in self.page_source
 
     def get_tbb_version(self):
-        """This method loads about:tor page to get the version."""
-        # TODO read from the versions file
+        """Read the TB version from the 'sources/versions' file in TBB."""
         version_file = join(self.tbb_path, cm.TB_VERSIONS_PATH)
         for line in open(version_file):
             if "TORBROWSER_VERSION=" in line:
                 return line.split("=")[-1]
 
     def quit(self):
-        """Quit the driver. Override the method of the base class."""
+        """Quit the driver. Clean up if the parent's quit fails."""
         self.is_running = False
         try:
             super(TorBrowserDriver, self).quit()

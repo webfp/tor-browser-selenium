@@ -181,6 +181,9 @@ class ScreenshotTest(unittest.TestCase):
 
 class TBDriverOptionalArgs(unittest.TestCase):
 
+    def supports_sec_slider(self, version):
+        return version or (LooseVersion(version) < LooseVersion('4.5'))
+
     def test_add_ports_to_fx_banned_ports(self):
         test_socks_port = 9999
         # No Tor process is listening on 9999, we just test the pref
@@ -234,7 +237,7 @@ class TBDriverOptionalArgs(unittest.TestCase):
         slider_pref = {"extensions.torbutton.security_slider": 1}
         with TBDTestFixture(TBB_PATH, pref_dict=slider_pref) as driver:
             ver = driver.get_tbb_version()
-            if not ver or (LooseVersion(ver) < LooseVersion('4.5')):
+            if self.supports_sec_slider(ver):
                 print ("TBB version doesn't support security slider %s" % ver)
                 return
             driver.load_url_ensure(cm.CHECK_TPO_URL, 1)
@@ -251,8 +254,7 @@ class TBDriverOptionalArgs(unittest.TestCase):
             with TBDTestFixture(TBB_PATH,
                                 pref_dict=slider_pref) as driver:
                 ver = driver.get_tbb_version()
-                if not ver or (LooseVersion(ver) < LooseVersion('4.5')):
-                    print ("TBB version doesn't support security slider %s" % ver)
+                if self.supports_sec_slider(ver):
                     return
                 driver.load_url_ensure(cm.CHECK_TPO_URL)
                 try:
