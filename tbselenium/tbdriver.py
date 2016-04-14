@@ -33,6 +33,7 @@ class TorBrowserDriver(FirefoxDriver):
                  pref_dict={},
                  socks_port=None,
                  canvas_allowed_hosts=[]):
+
         self.tor_cfg = tor_cfg
         self.setup_tbb_paths(tbb_path, tbb_fx_binary_path,
                              tbb_profile_path, tor_data_dir)
