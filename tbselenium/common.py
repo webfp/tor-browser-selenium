@@ -1,4 +1,5 @@
 from os.path import join
+from os import environ
 
 # DEFAULT TBB PATHS works for TBB versions v4.x and above
 # Old TBB versions (V3.X or below) have different directory structures
@@ -43,3 +44,5 @@ ABOUT_TOR_URL = "about:tor"
 # Which tor process/binary to use
 LAUNCH_NEW_TBB_TOR = 0  # use tor in TBB, launch a new process
 USE_RUNNING_TOR = 1  # use the tor installed and running on the system
+
+TRAVIS = "CI" in environ

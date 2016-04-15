@@ -1,6 +1,5 @@
 import pytest
 import unittest
-from os import environ
 from selenium.webdriver.common.utils import is_connectable
 from tbselenium import common as cm
 
@@ -13,7 +12,7 @@ class EnvironmentTest(unittest.TestCase):
             self.fail("Missing python package. Install it by running"
                       " '(sudo) pip install %s'" % pkg_name)
 
-    @pytest.mark.skipif("CI" not in environ, reason="Only runs on CI")
+    @pytest.mark.skipif(not cm.TRAVIS, reason="Only runs on CI")
     def test_default_tor_ports(self):
         """Make sure tor is listening on the port we expect."""
         self.assertTrue(is_connectable(cm.DEFAULT_SOCKS_PORT))
