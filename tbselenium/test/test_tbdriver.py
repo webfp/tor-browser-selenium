@@ -78,9 +78,9 @@ class TBDriverTest(unittest.TestCase):
         """Make sure we load the Firefox libraries from the TBB directories.
         We only test libxul (main Firefox/Gecko library) and libstdc++.
         """
-        xul_lib_path = join(self.tb_driver.tbb_browser_dir, "libxul.so")
-        std_c_lib_path = join(self.tb_driver.tbb_path,
-                              cm.DEFAULT_TOR_BINARY_DIR,
+        driver = self.tb_driver
+        xul_lib_path = join(driver.tbb_browser_dir, "libxul.so")
+        std_c_lib_path = join(driver.tbb_path, cm.DEFAULT_TOR_BINARY_DIR,
                               "libstdc++.so.6")
 
         self.failUnless(self.tb_driver.binary.process,

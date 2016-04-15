@@ -11,8 +11,8 @@ try:
 except ImportError as err:
     pass
 
-MAX_FIXTURE_TRIES = 5
-LAUNCH_TOR_TIMEOUT = 90
+MAX_FIXTURE_TRIES = 3
+LAUNCH_TOR_TIMEOUT = 30
 LOAD_PAGE_TIMEOUT = 60
 
 
