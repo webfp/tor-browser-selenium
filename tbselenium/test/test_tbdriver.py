@@ -1,4 +1,3 @@
-import re
 import sys
 import tempfile
 import pytest
@@ -239,42 +238,6 @@ class TBDriverOptionalArgs(unittest.TestCase):
         self.assertIn("addons.manager", log_txt)
         if exists(log_file):
             remove(log_file)
-
-    def test_font_bundling(self):
-        _, log_file = tempfile.mkstemp()
-        used_font_files = set()
-        bundled_fonts_dir = join(TBB_PATH, cm.DEFAULT_BUNDLED_FONTS_PATH)
-        bundled_fonts_dir = bundled_fonts_dir
-        # https://www.freedesktop.org/software/fontconfig/fontconfig-user.html
-        environ["FC_DEBUG"] = "%d" % (1024 + 8 + 1)
-        with TBDTestFixture(TBB_PATH, tbb_logfile_path=log_file) as driver:
-            if not driver.supports_bundled_fonts:
-                pytest.skip("TBB version doesn't support font bundling %s" %
-                            driver.tb_version)
-            driver.load_url_ensure("https://www.wikipedia.org/")
-
-        bundled_font_files = set(ut.gen_find_files(bundled_fonts_dir))
-        self.assertTrue(len(bundled_font_files) > 0)
-        log_txt = ut.read_file(log_file)
-
-        fonts_conf_path = join(TBB_PATH, cm.DEFAULT_FONTS_CONF_PATH)
-        expected_log = "Loading config file %s" % fonts_conf_path
-        self.assertIn(expected_log, log_txt)
-
-        # We get the following log if Firefox cannot find any fonts at startup
-        self.assertNotIn("failed to choose a font, expect ugly output",
-                         log_txt)
-
-        expected_load_fonts_log = "adding fonts from%s" % bundled_fonts_dir
-        self.assertIn(expected_load_fonts_log, log_txt)
-
-        for _, font_path, _ in re.findall(r"(file: \")(.*)(\".*)", log_txt):
-            # fontconfig logs include path to the font file, e.g.
-            # file: "/path/to/tbb/Browser/fonts/Arimo-Bold.ttf"(w)
-            self.assertIn(bundled_fonts_dir, font_path)
-            used_font_files.add(font_path)
-        # make sure the TBB only loaded and used the bundled fonts
-        self.assertEqual(used_font_files, bundled_font_files)
 
     def test_temp_tor_data_dir(self):
         """If we use a temporary directory as tor_data_dir,
