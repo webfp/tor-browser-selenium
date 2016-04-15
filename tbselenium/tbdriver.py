@@ -9,7 +9,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
-from selenium.common.exceptions import TimeoutException
 
 import tbselenium.common as cm
 from tbselenium.utils import add_canvas_permission
@@ -65,7 +64,7 @@ class TorBrowserDriver(FirefoxDriver):
                                                firefox_binary=self.binary,
                                                capabilities=self.capabilities,
                                                # default timeout is 30
-                                               timeout=60)
+                                               timeout=cm.TB_INIT_TIMEOUT)
         self.is_running = True
 
     def setup_tbb_paths(self, tbb_path, tbb_fx_binary_path, tbb_profile_path,
@@ -126,27 +125,6 @@ class TorBrowserDriver(FirefoxDriver):
             self.find_element_by("body", find_by=By.TAG_NAME)
         sleep(wait_on_page)
 
-    def load_url_ensure(self, url, wait_on_page=0, wait_for_page_body=False,
-                        max_reload_tries=5):
-        """Make sure the requested URL is loaded. Retry if necessary."""
-        last_err = None
-        for tries in range(1, max_reload_tries + 1):
-            try:
-                self.load_url(url, wait_on_page, wait_for_page_body)
-                if tries > 1:  # TODO:  for debugging, can be removed
-                    print ("Try %s. Title: %s URL: %s" %
-                           (tries, self.title, self.current_url))
-                if self.current_url != "about:newtab" and \
-                        self.title != "Problem loading page":  # TODO i18n?
-                    break
-            except TimeoutException as last_err:
-                continue
-        else:
-            if last_err:
-                raise last_err
-            else:
-                raise TimeoutException("Can't load the page. %s tries" % tries)
-
     def find_element_by(self, selector, timeout=30,
                         find_by=By.CSS_SELECTOR):
         """Wait until the element matching the selector appears or timeout."""
@@ -168,9 +146,7 @@ class TorBrowserDriver(FirefoxDriver):
         for port_ban_pref in cm.PORT_BAN_PREFS:
             banned_ports = tb_prefs.get(port_ban_pref, DEFAULT_BANNED_PORTS)
             set_pref(port_ban_pref,
-                     "%s,%s,%s" % (banned_ports,
-                                   socks_port,
-                                   control_port))
+                     "%s,%s,%s" % (banned_ports, socks_port, control_port))
 
     def set_tb_prefs_for_using_system_tor(self, control_port):
         """Set the preferences suggested by start-tor-browser script
@@ -260,8 +236,19 @@ class TorBrowserDriver(FirefoxDriver):
         return FirefoxBinary(firefox_path=self.tbb_fx_binary_path,
                              log_file=tbb_logfile)
 
+    def is_connection_error_page(self):
+        """Check if we get a connection error, i.e. 'Problem loading page'."""
+        return "ENTITY connectionFailure.title" in self.page_source
+
+    def get_tbb_version(self):
+        """Read the TB version from the 'sources/versions' file in TBB."""
+        version_file = join(self.tbb_path, cm.TB_VERSIONS_PATH)
+        for line in open(version_file):
+            if "TORBROWSER_VERSION=" in line:
+                return line.split("=")[-1]
+
     def quit(self):
-        """Quit the driver. Override the method of the base class."""
+        """Quit the driver. Clean up if the parent's quit fails."""
         self.is_running = False
         try:
             super(TorBrowserDriver, self).quit()

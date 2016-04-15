@@ -1,24 +1,30 @@
 from os.path import join
 
-# DEFAULT TBB PATHS: according to latest TBB version (5.5.4)
-# Old TBB versions (V4.X or below) have a different directory structure
+# DEFAULT TBB PATHS works for TBB versions v4.x and above
+# Old TBB versions (V3.X or below) have different directory structures
 DEFAULT_TBB_BROWSER_DIR = 'Browser'
+DEFAULT_TBB_TORBROWSER_DIR = join('Browser', 'TorBrowser')
 DEFAULT_TBB_FX_BINARY_PATH = join('Browser', 'firefox')
-DEFAULT_TOR_BINARY_DIR = join('Browser', 'TorBrowser', 'Tor')
+DEFAULT_TOR_BINARY_DIR = join(DEFAULT_TBB_TORBROWSER_DIR, 'Tor')
 DEFAULT_TOR_BINARY_PATH = join(DEFAULT_TOR_BINARY_DIR, 'tor')
-DEFAULT_TBB_DATA_DIR = join('Browser', 'TorBrowser', 'Data')
+DEFAULT_TBB_DATA_DIR = join(DEFAULT_TBB_TORBROWSER_DIR, 'Data')
 DEFAULT_TBB_PROFILE_PATH = join(DEFAULT_TBB_DATA_DIR, 'Browser',
                                 'profile.default')
 DEFAULT_TOR_DATA_PATH = join(DEFAULT_TBB_DATA_DIR, 'Tor')
+TB_VERSIONS_PATH = join(DEFAULT_TBB_TORBROWSER_DIR,
+                        'Docs', 'sources', 'versions')
+
+# Directories for bundled fonts - Linux only
 DEFAULT_FONTCONFIG_PATH = join(DEFAULT_TBB_DATA_DIR, 'fontconfig')
 FONTCONFIG_FILE = "fonts.conf"
 DEFAULT_FONTS_CONF_PATH = join(DEFAULT_FONTCONFIG_PATH, FONTCONFIG_FILE)
 DEFAULT_BUNDLED_FONTS_PATH = join('Browser', 'fonts')
 
-# TOR PORTS
+# SYSTEM TOR PORTS
 DEFAULT_SOCKS_PORT = 9050
 DEFAULT_CONTROL_PORT = 9051
 
+# TBB TOR PORTS
 TBB_SOCKS_PORT = 9150
 TBB_CONTROL_PORT = 9151
 
@@ -26,9 +32,7 @@ KNOWN_SOCKS_PORTS = [DEFAULT_SOCKS_PORT, TBB_SOCKS_PORT]
 PORT_BAN_PREFS = ["extensions.torbutton.banned_ports",
                   "network.security.ports.banned"]
 
-# TOR CONTROLLER
-STREAM_CLOSE_TIMEOUT = 20  # wait 20 seconds before raising an alarm signal
-# otherwise we had many cases where get_streams hanged
+TB_INIT_TIMEOUT = 60
 
 # Test constants
 CHECK_TPO_URL = "http://check.torproject.org"
@@ -45,5 +49,13 @@ class TBDriverPathError(Exception):
     pass
 
 
+class TBBTestEnvVarError(Exception):
+    pass
+
+
 class TBDriverPortError(Exception):
+    pass
+
+
+class TimeExceededError(Exception):
     pass
