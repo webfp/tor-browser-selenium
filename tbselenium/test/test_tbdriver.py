@@ -182,7 +182,15 @@ class ScreenshotTest(unittest.TestCase):
 class TBDriverOptionalArgs(unittest.TestCase):
 
     def supports_sec_slider(self, version):
-        return version or (LooseVersion(version) < LooseVersion('4.5'))
+        if not version or (LooseVersion(version) < LooseVersion('4.5')):
+            return False
+        return True
+
+    def test_supports_sec_slider(self):
+        self.assertTrue(self.supports_sec_slider("6.0a4"))
+        self.assertTrue(self.supports_sec_slider("5.5.4"))
+        self.assertTrue(self.supports_sec_slider("4.5"))
+        self.assertFalse(self.supports_sec_slider("4.0"))
 
     def test_add_ports_to_fx_banned_ports(self):
         test_socks_port = 9999
