@@ -66,22 +66,6 @@ with TorBrowserDriver("/path/to/tbb", canvas_exceptions=["https://torproject.org
     driver.get_screenshot_as_file("screenshot.png")
 ```
 
-### Using old Tor Browser Bundles
-
-If you want to use TBB version 3.X and older you need to initialize TorBrowserDriver with the paths for Tor Browser binary and profile (instead of the TBB folder).
-This is due to changes in the TBB directory structure; old versions have different directory structure than the current one.
-
-For instance, for Tor Browser Bundle 3.5:
-
-```python
-tbb_3_5 = join('/some/path', 'tor-browser_en-US')
-tb_binary = join(tbb_3_5, "Browser", "firefox")
-tb_profile = join(tbb_3_5, "Data", "Browser", "profile.default")
-with TorBrowserDriver(tbb_binary_path=tb_binary,
-                      tbb_profile_path=tb_profile) as driver:
-    driver.get('https://check.torproject.org')
-```
-
 ### TorBrowserDriver + Stem
 This example shows how TorBrowserDriver can use a running Tor process started with [Stem](https://stem.torproject.org/api/control.html).
 
@@ -106,6 +90,22 @@ with Controller.from_port(port=custom_control_port) as controller:
 # Kill tor process
 if tor_process:
     tor_process.kill()
+```
+
+### Using old Tor Browser Bundles
+
+If you want to use TBB version 3.X and older you need to initialize TorBrowserDriver with the paths for Tor Browser binary and profile (instead of the TBB folder).
+This is due to changes in the TBB directory structure; old versions have different directory structure than the current one.
+
+For instance, for Tor Browser Bundle 3.5:
+
+```python
+tbb_3_5 = join('/some/path', 'tor-browser_en-US')
+tb_binary = join(tbb_3_5, "Browser", "firefox")
+tb_profile = join(tbb_3_5, "Data", "Browser", "profile.default")
+with TorBrowserDriver(tbb_binary_path=tb_binary,
+                      tbb_profile_path=tb_profile) as driver:
+    driver.get('https://check.torproject.org')
 ```
 
 Check `test_examples.py` for more examples.
