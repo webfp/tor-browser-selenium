@@ -19,9 +19,9 @@ matrix:
     - python: "2.7"
       env: version_arch='6.0a4/tor-browser-linux64-6.0a4_ar.tar.xz'
     - python: "3.4"
-      env:: version_arch='5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz'
+      env: version_arch='5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz'
     - python: "3.5"
-      env:: version_arch='5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz'
+      env: version_arch='5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz'
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
