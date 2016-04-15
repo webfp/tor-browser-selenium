@@ -1,5 +1,5 @@
 sudo: required
-language: python
+language: generic
 os: linux
 dist: trusty
 matrix:
@@ -22,8 +22,6 @@ matrix:
       env: version_arch='5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz'
     - python: "3.5"
       env: version_arch='5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz'
-  exclude:
-    - language: python
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
