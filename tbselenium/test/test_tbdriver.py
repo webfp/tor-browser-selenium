@@ -5,15 +5,14 @@ import pytest
 import unittest
 from os import remove, environ
 from os.path import getsize, exists, join, dirname, isfile
-from distutils.version import LooseVersion
 
-from selenium.common.exceptions import (TimeoutException,
-                                        NoSuchElementException)
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.utils import is_connectable
 
+from tbselenium.exceptions import TBDriverPathError, TBDriverPortError
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
 from tbselenium.test.fixtures import TorBrowserDriverFixture as TBDTestFixture
@@ -32,6 +31,8 @@ TEST_HTTPS_URL = "https://www.freedomboxfoundation.org/thanks/"
 
 MISSING_DIR = "_no_such_directory_"
 MISSING_FILE = "_no_such_file_"
+
+SEC_SLIDER_PREF = "extensions.torbutton.security_slider"
 
 
 class TBDriverTest(unittest.TestCase):
@@ -72,24 +73,19 @@ class TBDriverTest(unittest.TestCase):
         self.assertTrue(self.tb_driver.binary.which('firefox').
                         startswith(TBB_PATH))
 
-    @pytest.mark.skipif(sys.platform == 'win32',
-                        reason="Test does not support Windows")
     def test_should_load_tbb_firefox_libs(self):
         """Make sure we load the Firefox libraries from the TBB directories.
         We only test libxul (main Firefox/Gecko library) and libstdc++.
         """
         driver = self.tb_driver
+        if sys.platform == 'win32':
+            pytest.skip("This test doesn't support Windows")
+        pid = self.tb_driver.binary.process.pid
         xul_lib_path = join(driver.tbb_browser_dir, "libxul.so")
         std_c_lib_path = join(driver.tbb_path, cm.DEFAULT_TOR_BINARY_DIR,
                               "libstdc++.so.6")
-
-        self.failUnless(self.tb_driver.binary.process,
-                        "TorBrowserDriver process doesn't exist")
-        pid = self.tb_driver.binary.process.pid
-
         for lib_path in [xul_lib_path, std_c_lib_path]:
-            self.failUnless(isfile(lib_path),
-                            "Can't find the library %s" % lib_path)
+            self.failUnless(isfile(lib_path))
             # We read the memory map of the process
             # http://man7.org/linux/man-pages/man5/proc.5.html
             proc_mem_map_file = "/proc/%d/maps" % (pid)
@@ -104,7 +100,7 @@ class TBDriverTest(unittest.TestCase):
 class TBDriverFailTest(unittest.TestCase):
 
     def test_should_raise_for_missing_paths(self):
-        with self.assertRaises(cm.TBDriverPathError) as exc:
+        with self.assertRaises(TBDriverPathError) as exc:
             TBDTestFixture()
         exc_msg = exc.exception
         self.assertEqual(str(exc_msg),
@@ -112,7 +108,7 @@ class TBDriverFailTest(unittest.TestCase):
                          "should be provided ")
 
     def test_should_raise_for_missing_tbb_path(self):
-        with self.assertRaises(cm.TBDriverPathError) as exc:
+        with self.assertRaises(TBDriverPathError) as exc:
             TBDTestFixture(tbb_path=MISSING_DIR)
         exc_msg = exc.exception
         self.assertEqual(str(exc_msg),
@@ -120,7 +116,7 @@ class TBDriverFailTest(unittest.TestCase):
 
     def test_should_raise_for_missing_fx_binary(self):
         temp_dir = tempfile.mkdtemp()
-        with self.assertRaises(cm.TBDriverPathError) as exc:
+        with self.assertRaises(TBDriverPathError) as exc:
             TBDTestFixture(tbb_fx_binary_path=MISSING_FILE,
                            tbb_profile_path=temp_dir)
         exc_msg = exc.exception
@@ -129,7 +125,7 @@ class TBDriverFailTest(unittest.TestCase):
 
     def test_should_raise_for_missing_fx_profile(self):
         _, temp_file = tempfile.mkstemp()
-        with self.assertRaises(cm.TBDriverPathError) as exc:
+        with self.assertRaises(TBDriverPathError) as exc:
             TBDTestFixture(tbb_fx_binary_path=temp_file,
                            tbb_profile_path=MISSING_DIR)
         exc_msg = exc.exception
@@ -145,7 +141,7 @@ class TBDriverFailTest(unittest.TestCase):
             TBDTestFixture(TBB_PATH, pref_dict=(1, 2))
 
     def test_should_fail_launching_tor_on_custom_socks_port(self):
-        with self.assertRaises(cm.TBDriverPortError):
+        with self.assertRaises(TBDriverPortError):
             TBDTestFixture(TBB_PATH, socks_port=10001,
                            tor_cfg=cm.LAUNCH_NEW_TBB_TOR)
 
@@ -153,7 +149,7 @@ class TBDriverFailTest(unittest.TestCase):
         with TBDTestFixture(TBB_PATH, socks_port=9999,
                             tor_cfg=cm.USE_RUNNING_TOR) as driver:
             driver.load_url(cm.CHECK_TPO_URL)
-            self.assertTrue(driver.is_connection_error_page())
+            self.assertTrue(driver.is_connection_error_page)
 
 
 class ScreenshotTest(unittest.TestCase):
@@ -181,17 +177,6 @@ class ScreenshotTest(unittest.TestCase):
 
 class TBDriverOptionalArgs(unittest.TestCase):
 
-    def supports_sec_slider(self, version):
-        if not version or (LooseVersion(version) < LooseVersion('4.5')):
-            return False
-        return True
-
-    def test_supports_sec_slider(self):
-        self.assertTrue(self.supports_sec_slider("6.0a4"))
-        self.assertTrue(self.supports_sec_slider("5.5.4"))
-        self.assertTrue(self.supports_sec_slider("4.5"))
-        self.assertFalse(self.supports_sec_slider("4.0"))
-
     def test_add_ports_to_fx_banned_ports(self):
         test_socks_port = 9999
         # No Tor process is listening on 9999, we just test the pref
@@ -206,8 +191,7 @@ class TBDriverOptionalArgs(unittest.TestCase):
         This test requires a system tor process with SOCKS port 9050.
         """
         if not is_connectable(cm.DEFAULT_SOCKS_PORT):
-            print("Skipping system tor test. Start tor to run this test.")
-            return
+            pytest.skip("Skipping. Start system Tor to run the test.")
         with TBDTestFixture(TBB_PATH, tor_cfg=cm.USE_RUNNING_TOR) as driver:
             driver.load_url_ensure(cm.CHECK_TPO_URL)
             driver.find_element_by("h1.on")
@@ -217,8 +201,7 @@ class TBDriverOptionalArgs(unittest.TestCase):
         try:
             from stem.control import Controller
         except ImportError as err:
-            print("Can't import Stem. Skipping test: %s" % err)
-            return
+            pytest.skip("Can't import Stem. Skipping test: %s" % err)
         custom_tor_binary = join(TBB_PATH, cm.DEFAULT_TOR_BINARY_PATH)
         environ["LD_LIBRARY_PATH"] = dirname(custom_tor_binary)
         # any port would do, pick 9250, 9251 to avoid conflict
@@ -240,39 +223,6 @@ class TBDriverOptionalArgs(unittest.TestCase):
         # Kill tor process
         if tor_process:
             tor_process.kill()
-
-    def test_security_slider_settings_hi(self):
-        slider_pref = {"extensions.torbutton.security_slider": 1}
-        with TBDTestFixture(TBB_PATH, pref_dict=slider_pref) as driver:
-            ver = driver.get_tbb_version()
-            if self.supports_sec_slider(ver):
-                print ("TBB version doesn't support security slider %s" % ver)
-                return
-            driver.load_url_ensure(cm.CHECK_TPO_URL, 1)
-            self.assertRaises(NoSuchElementException,
-                              driver.find_element_by_link_text,
-                              "JavaScript is enabled.")
-
-    def test_security_slider_settings_low_mid(self):
-        for sec_slider_setting in [2, 3, 4]:
-            # 2: medium-high, 3: medium-low, 4: low (default)
-            el = None
-            slider_pref = {"extensions.torbutton.security_slider":
-                           sec_slider_setting}
-            with TBDTestFixture(TBB_PATH,
-                                pref_dict=slider_pref) as driver:
-                ver = driver.get_tbb_version()
-                if self.supports_sec_slider(ver):
-                    return
-                driver.load_url_ensure(cm.CHECK_TPO_URL)
-                try:
-                    el = driver.find_element_by("JavaScript is enabled.",
-                                                find_by=By.LINK_TEXT)
-                except TimeoutException:
-                    self.fail("Can't confirm if JS is enabled for security "
-                              "slider setting %s, on page %s."
-                              % (sec_slider_setting, driver.title))
-                self.assertTrue(el)
 
     def test_tbb_logfile(self):
         """Make sure log file is populated."""
@@ -298,10 +248,9 @@ class TBDriverOptionalArgs(unittest.TestCase):
         # https://www.freedesktop.org/software/fontconfig/fontconfig-user.html
         environ["FC_DEBUG"] = "%d" % (1024 + 8 + 1)
         with TBDTestFixture(TBB_PATH, tbb_logfile_path=log_file) as driver:
-            ver = driver.get_tbb_version()
-            if not ver or (LooseVersion(ver) <= LooseVersion('4.5')):
-                print ("TBB version doesn't support font bundling %s" % ver)
-                return
+            if not driver.supports_bundled_fonts:
+                pytest.skip("TBB version doesn't support font bundling %s" %
+                            driver.tb_version)
             driver.load_url_ensure("https://www.wikipedia.org/")
 
         bundled_font_files = set(ut.gen_find_files(bundled_fonts_dir))
@@ -347,6 +296,35 @@ class TBDriverOptionalArgs(unittest.TestCase):
             driver.load_url_ensure(cm.CHECK_TPO_URL)
         last_mod_time_after = ut.get_last_modified_of_dir(tbb_tor_data_path)
         self.assertNotEqual(last_mod_time_before, last_mod_time_after)
+
+
+class TBSecuritySlider(unittest.TestCase):
+
+    def test_security_slider_settings_hi(self):
+        """Setting `High` should disable JavaScript."""
+        with TBDTestFixture(TBB_PATH,
+                            pref_dict={SEC_SLIDER_PREF: 1}) as driver:
+            if not driver.supports_sec_slider:
+                pytest.skip("Security slider is not supported")
+            driver.load_url_ensure(cm.CHECK_TPO_URL)
+            try:
+                driver.find_element_by("JavaScript is enabled.",
+                                       find_by=By.LINK_TEXT, timeout=5)
+                self.fail("Security slider should disable JavaScript")
+            except (NoSuchElementException, TimeoutException):
+                pass
+
+    def test_security_slider_settings_low_mid(self):
+        # TODO: test other features to distinguish between levels
+        for sec_slider_setting in [2, 3, 4]:
+            slider_dict = {SEC_SLIDER_PREF: sec_slider_setting}
+            # 2: medium-high, 3: medium-low, 4: low (default)
+            with TBDTestFixture(TBB_PATH, pref_dict=slider_dict) as driver:
+                if not driver.supports_sec_slider:
+                    pytest.skip("Security slider is not supported")
+                driver.load_url_ensure(cm.CHECK_TPO_URL)
+                driver.find_element_by("JavaScript is enabled.",
+                                       find_by=By.LINK_TEXT, timeout=5)
 
 
 class TBDriverTestAssumptions(unittest.TestCase):

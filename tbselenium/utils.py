@@ -1,4 +1,3 @@
-import re
 import sqlite3
 from os import walk
 from os.path import join, getmtime

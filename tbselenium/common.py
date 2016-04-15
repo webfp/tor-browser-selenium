@@ -43,19 +43,3 @@ ABOUT_TOR_URL = "about:tor"
 # Which tor process/binary to use
 LAUNCH_NEW_TBB_TOR = 0  # use tor in TBB, launch a new process
 USE_RUNNING_TOR = 1  # use the tor installed and running on the system
-
-
-class TBDriverPathError(Exception):
-    pass
-
-
-class TBBTestEnvVarError(Exception):
-    pass
-
-
-class TBDriverPortError(Exception):
-    pass
-
-
-class TimeExceededError(Exception):
-    pass

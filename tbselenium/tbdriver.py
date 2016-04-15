@@ -2,6 +2,7 @@ import shutil
 from os import environ, chdir
 from os.path import isdir, isfile, join, abspath
 from time import sleep
+from distutils.version import LooseVersion
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -9,9 +10,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
-
+from selenium.webdriver.common.utils import is_connectable
 import tbselenium.common as cm
 from tbselenium.utils import add_canvas_permission
+from tbselenium.exceptions import (TBDriverConfigError, TBDriverPortError,
+                                   TBDriverPathError)
+
 
 try:
     from httplib import CannotSendRequest
@@ -40,32 +44,38 @@ class TorBrowserDriver(FirefoxDriver):
         self.canvas_allowed_hosts = canvas_allowed_hosts
         self.profile = webdriver.FirefoxProfile(self.tbb_profile_path)
         add_canvas_permission(self.profile.path, self.canvas_allowed_hosts)
+        self.init_socks_port(tor_cfg, socks_port)
+        self.init_prefs(pref_dict)
+        self.init_tb_version()
+        self.setup_capabilities()
+        self.export_env_vars()
+        self.binary = self.get_tb_binary(logfile=tbb_logfile_path)
+        super(TorBrowserDriver, self).__init__(firefox_profile=self.profile,
+                                               firefox_binary=self.binary,
+                                               capabilities=self.capabilities,
+                                               timeout=cm.TB_INIT_TIMEOUT)
+        self.is_running = True
+
+    def init_socks_port(self, tor_cfg, socks_port):
+        """Check SOCKS port and Tor config inputs."""
+        if tor_cfg not in [cm.USE_RUNNING_TOR, cm.LAUNCH_NEW_TBB_TOR]:
+            raise TBDriverConfigError("Unrecognized Tor config (tor_cfg)")
+
         if socks_port is None:
             if tor_cfg == cm.USE_RUNNING_TOR:
                 socks_port = cm.DEFAULT_SOCKS_PORT  # 9050
             else:
                 socks_port = cm.TBB_SOCKS_PORT  # 9150
+
+        if tor_cfg == cm.LAUNCH_NEW_TBB_TOR:
+            if is_connectable(socks_port):
+                raise TBDriverPortError("SOCKS port %s is already in use"
+                                        % socks_port)
+            if socks_port != cm.TBB_SOCKS_PORT:
+                # No support for launching TBB's Tor on a custom port, use Stem
+                raise TBDriverPortError("Error: Use Stem if you need to launch"
+                                        " Tor on a custom SOCKS port")
         self.socks_port = socks_port
-        if tor_cfg == cm.LAUNCH_NEW_TBB_TOR and\
-                socks_port != cm.TBB_SOCKS_PORT:
-            # No support for launching TBB's Tor on a custom port
-            # Managing/editing torrc would be messy
-            # TorBrowserDriver can connect to a running Tor process on any port
-            # This is limitation is about launching Tor.
-            # You can use Stem to launch Tor on the port you like and have
-            # TorBrowserDriver connect to it.
-            raise cm.TBDriverPortError("Error: Use Stem if you need to launch"
-                                       " Tor on a custom SOCKS port")
-        self.update_prefs(pref_dict)
-        self.setup_capabilities()
-        self.export_env_vars()
-        self.binary = self.get_tbb_binary(logfile=tbb_logfile_path)
-        super(TorBrowserDriver, self).__init__(firefox_profile=self.profile,
-                                               firefox_binary=self.binary,
-                                               capabilities=self.capabilities,
-                                               # default timeout is 30
-                                               timeout=cm.TB_INIT_TIMEOUT)
-        self.is_running = True
 
     def setup_tbb_paths(self, tbb_path, tbb_fx_binary_path, tbb_profile_path,
                         tor_data_dir):
@@ -76,25 +86,22 @@ class TorBrowserDriver(FirefoxDriver):
         2) path to TBB's Firefox binary and profile
         """
         if not (tbb_path or (tbb_fx_binary_path and tbb_profile_path)):
-            raise cm.TBDriverPathError("Either TBB path or Firefox profile"
-                                       " and binary path should be provided"
-                                       " %s" % tbb_path)
+            raise TBDriverPathError("Either TBB path or Firefox profile"
+                                    " and binary path should be provided"
+                                    " %s" % tbb_path)
 
         if tbb_path:
             if not isdir(tbb_path):
-                raise cm.TBDriverPathError("TBB path is not a directory %s"
-                                           % tbb_path)
+                raise TBDriverPathError("TBB path is not a directory %s"
+                                        % tbb_path)
             tbb_fx_binary_path = join(tbb_path, cm.DEFAULT_TBB_FX_BINARY_PATH)
             tbb_profile_path = join(tbb_path, cm.DEFAULT_TBB_PROFILE_PATH)
         if not isfile(tbb_fx_binary_path):
-            raise cm.TBDriverPathError("Invalid Firefox binary %s"
-                                       % tbb_fx_binary_path)
+            raise TBDriverPathError("Invalid Firefox binary %s"
+                                    % tbb_fx_binary_path)
         if not isdir(tbb_profile_path):
-            raise cm.TBDriverPathError("Invalid Firefox profile dir %s"
-                                       % tbb_profile_path)
-        # Convert all the paths to absolute. We set Fx prefs and env. vars
-        # based on these paths (e.g. tor_data_dir, FONTCONFIG_PATH), which
-        # won't work if paths are relative.
+            raise TBDriverPathError("Invalid Firefox profile dir %s"
+                                    % tbb_profile_path)
         self.tbb_path = abspath(tbb_path)
         self.tbb_profile_path = abspath(tbb_profile_path)
         self.tbb_fx_binary_path = abspath(tbb_fx_binary_path)
@@ -103,7 +110,6 @@ class TorBrowserDriver(FirefoxDriver):
             self.tor_data_dir = tor_data_dir  # only relevant if we launch tor
         else:
             self.tor_data_dir = join(tbb_path, cm.DEFAULT_TOR_DATA_PATH)
-
         # TB can't find bundled "fonts" if we don't switch to tbb_browser_dir
         chdir(self.tbb_browser_dir)
 
@@ -133,6 +139,7 @@ class TorBrowserDriver(FirefoxDriver):
 
     def add_ports_to_fx_banned_ports(self, socks_port, control_port):
         """By default, ports 9050,9051,9150,9151 are banned in TB.
+
         If we use a tor process running on a custom SOCKS port, we add SOCKS
         and control ports to the following prefs:
             network.security.ports.banned
@@ -145,8 +152,8 @@ class TorBrowserDriver(FirefoxDriver):
         DEFAULT_BANNED_PORTS = "9050,9051,9150,9151"
         for port_ban_pref in cm.PORT_BAN_PREFS:
             banned_ports = tb_prefs.get(port_ban_pref, DEFAULT_BANNED_PORTS)
-            set_pref(port_ban_pref,
-                     "%s,%s,%s" % (banned_ports, socks_port, control_port))
+            set_pref(port_ban_pref, "%s,%s,%s" %
+                     (banned_ports, socks_port, control_port))
 
     def set_tb_prefs_for_using_system_tor(self, control_port):
         """Set the preferences suggested by start-tor-browser script
@@ -172,7 +179,7 @@ class TorBrowserDriver(FirefoxDriver):
         set_pref('extensions.torlauncher.logmethod', 0)
         set_pref('extensions.torlauncher.prompt_at_startup', False)
 
-    def update_prefs(self, pref_dict):
+    def init_prefs(self, pref_dict):
         control_port = self.socks_port + 1
         self.add_ports_to_fx_banned_ports(self.socks_port, control_port)
         set_pref = self.profile.set_preference
@@ -204,21 +211,17 @@ class TorBrowserDriver(FirefoxDriver):
         self.profile.update_preferences()
 
     def export_env_vars(self):
-        """Setup LD_LIBRARY_PATH and HOME environment variables."""
+        """Setup LD_LIBRARY_PATH and HOME environment variables.
+
+        We follow start-tor-browser script.
+        """
         tor_binary_dir = join(self.tbb_path, cm.DEFAULT_TOR_BINARY_DIR)
-        # Set LD_LIBRARY_PATH to point to "TBB_DIR/Browser/Tor" like the
-        # start-tor-browser shell script does
         environ["LD_LIBRARY_PATH"] = tor_binary_dir
-        # set the home variable to "TBB_DIR/Browser" directory
-        # https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/commit/?id=2e4fb90d4fc019d6680f24089cb1d0b4d4a276a5
-        # TODO: make sure we don't get strange side effects due to overwriting
-        # $HOME environment variable.
         environ["FONTCONFIG_PATH"] = join(self.tbb_path,
                                           cm.DEFAULT_FONTCONFIG_PATH)
         environ["FONTCONFIG_FILE"] = cm.FONTCONFIG_FILE
         environ["HOME"] = self.tbb_browser_dir
-        # Add "TBB_DIR/Browser" to the PATH to make sure Selenium discovers
-        # TB's binary if it needs to. See, issue #10.
+        # Add "TBB_DIR/Browser" to the PATH, see issue #10.
         current_path = environ["PATH"]
         environ["PATH"] = "%s:%s" % (self.tbb_browser_dir, current_path)
 
@@ -230,22 +233,40 @@ class TorBrowserDriver(FirefoxDriver):
                                   'javascriptEnabled': True,
                                   'browserConnectionEnabled': True})
 
-    def get_tbb_binary(self, logfile=None):
+    def get_tb_binary(self, logfile=None):
         """Return FirefoxBinary pointing to the TBB's firefox binary."""
         tbb_logfile = open(logfile, 'a+') if logfile else None
         return FirefoxBinary(firefox_path=self.tbb_fx_binary_path,
                              log_file=tbb_logfile)
 
+    @property
     def is_connection_error_page(self):
         """Check if we get a connection error, i.e. 'Problem loading page'."""
         return "ENTITY connectionFailure.title" in self.page_source
 
-    def get_tbb_version(self):
-        """Read the TB version from the 'sources/versions' file in TBB."""
+    def init_tb_version(self):
+        self.tb_version = "Unknown"
         version_file = join(self.tbb_path, cm.TB_VERSIONS_PATH)
         for line in open(version_file):
             if "TORBROWSER_VERSION=" in line:
-                return line.split("=")[-1]
+                self.tb_version = line.split("=")[-1]
+
+    @property
+    def supports_sec_slider(self):
+        """Checks if security slider is supported or not."""
+        version = self.tb_version
+        if not version or (LooseVersion(version) < LooseVersion('4.5')):
+            return False
+        return True
+
+    @property
+    def supports_bundled_fonts(self):
+        """Checks if shipped with bundled fonts or not."""
+        version = self.tb_version
+        # This comparison may fail for alpha versions, e.g. 4.5a1
+        if not version or (LooseVersion(version) < LooseVersion('4.5')):
+            return False
+        return True
 
     def quit(self):
         """Quit the driver. Clean up if the parent's quit fails."""

@@ -1,6 +1,7 @@
 import signal
 from tbselenium.tbdriver import TorBrowserDriver
-from tbselenium.common import TimeExceededError, TB_INIT_TIMEOUT
+from tbselenium.common import TB_INIT_TIMEOUT
+from tbselenium.exceptions import TimeExceededError
 from selenium.common.exceptions import (TimeoutException, WebDriverException)
 try:
     from httplib import CannotSendRequest
@@ -42,7 +43,7 @@ class TorBrowserDriverFixture(TorBrowserDriver):
                 timeout(LOAD_PAGE_TIMEOUT)
                 self.load_url(*args, **kwargs)
                 if self.current_url != "about:newtab" and \
-                        not self.is_connection_error_page():
+                        not self.is_connection_error_page:
                     break
             except (TimeoutException, TimeExceededError,
                     CannotSendRequest) as last_err:
