@@ -41,4 +41,4 @@ install:
   - export TBB_PATH=$HOME/tor-browser_$locale
 before_script:
   - cd tbselenium/test
-script: travis_retry py.test -s --cov=tbselenium --cov-report term-missing
+script: travis_retry py.test -s --cov=tbselenium --cov-report term-missing --durations=10
