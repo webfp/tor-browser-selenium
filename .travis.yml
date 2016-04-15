@@ -2,6 +2,9 @@ sudo: required
 language: generic
 os: linux
 dist: trusty
+env:
+  matrix:
+    - TRAVIS_EXTRA_JOB_WORKAROUND=true
 matrix:
   include:
     - python: "2.7"
@@ -22,6 +25,8 @@ matrix:
       env: version_arch='5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz'
     - python: "3.5"
       env: version_arch='5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz'
+  exclude:
+    - env: TRAVIS_EXTRA_JOB_WORKAROUND=true
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
