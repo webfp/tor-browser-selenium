@@ -18,13 +18,13 @@ class TBDriverFontBundle(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         _, log_file = tempfile.mkstemp()
+        # https://www.freedesktop.org/software/fontconfig/fontconfig-user.html
         environ["FC_DEBUG"] = "%d" % (1024 + 8 + 1)
         cls.driver = TBDTestFixture(TBB_PATH, tbb_logfile_path=log_file)
         driver = cls.driver
         if not driver.supports_bundled_fonts:
             cls.tearDownClass()
             pytest.skip("Skip bundled font tests. V%s" % driver.tb_version)
-        # https://www.freedesktop.org/software/fontconfig/fontconfig-user.html
         driver.load_url_ensure("https://www.wikipedia.org/")
         cls.log_txt = ut.read_file(log_file)
         cls.bundled_fonts_dir = join(driver.tbb_path,
@@ -36,8 +36,9 @@ class TBDriverFontBundle(unittest.TestCase):
         if cls.driver:
             cls.driver.quit()
 
-    def test_should_load_font_config(self):
-        fonts_conf_path = join(TBB_PATH, cm.DEFAULT_FONTS_CONF_PATH)
+    def test_should_load_font_config_file(self):
+        fonts_conf_path = join(self.driver.tbb_path,
+                               cm.DEFAULT_FONTS_CONF_PATH)
         expected_log = "Loading config file %s" % fonts_conf_path
         self.assertIn(expected_log, self.log_txt)
 
@@ -45,14 +46,14 @@ class TBDriverFontBundle(unittest.TestCase):
         expected_log = "adding fonts from%s" % self.bundled_fonts_dir
         self.assertIn(expected_log, self.log_txt)
 
-    def test_ugly_output_log(self):
+    def test_should_not_fail_to_choose_fonts(self):
         ugly_warning = "failed to choose a font, expect ugly output"
         self.assertNotIn(ugly_warning, self.log_txt)
 
-    def test_tbb_should_include_bundled_fonts(self):
+    def test_tbb_should_include_bundled_font_files(self):
         self.assertTrue(len(self.bundled_font_files) > 0)
 
-    def test_only_load_and_use_bundled_fonts(self):
+    def test_should_only_load_and_use_bundled_fonts(self):
         used_font_files = set()
         # search in fontconfig logs
         for _, ttf, _ in re.findall(r"(file: \")(.*)(\".*)", self.log_txt):
