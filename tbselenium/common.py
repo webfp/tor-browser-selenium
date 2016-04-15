@@ -49,6 +49,10 @@ class TBDriverPathError(Exception):
     pass
 
 
+class TBBTestEnvVarError(Exception):
+    pass
+
+
 class TBDriverPortError(Exception):
     pass
 

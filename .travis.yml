@@ -2,21 +2,25 @@ sudo: required
 language: python
 os: linux
 dist: trusty
-python:
-  - "2.7"
-env:
-  - export version_arch='4.0.8/tor-browser-linux64-4.0.8_en-US.tar.xz'
-  - export version_arch='5.5/tor-browser-linux64-5.5_en-US.tar.xz'
-  - export version_arch='5.5/tor-browser-linux64-5.5_zh-CN.tar.xz'
-  - export version_arch='5.5/tor-browser-linux64-5.5_ar.tar.xz'
-  - export version_arch='6.0a4/tor-browser-linux64-6.0a4_en-US.tar.xz'
-  - export version_arch='6.0a4/tor-browser-linux64-6.0a4_zh-CN.tar.xz'
-  - export version_arch='6.0a4/tor-browser-linux64-6.0a4_ar.tar.xz'
 include:
+  - python: "2.7"
+    env version_arch='4.0.8/tor-browser-linux64-4.0.8_en-US.tar.xz'
+  - python: "2.7"
+    env version_arch='5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz'
+  - python: "2.7"
+    env version_arch='5.5.4/tor-browser-linux64-5.5.4_zh-CN.tar.xz'
+  - python: "2.7"
+    env version_arch='5.5.4/tor-browser-linux64-5.5.4_ar.tar.xz'
+  - python: "2.7"
+    env version_arch='6.0a4/tor-browser-linux64-6.0a4_en-US.tar.xz'
+  - python: "2.7"
+    env version_arch='6.0a4/tor-browser-linux64-6.0a4_zh-CN.tar.xz'
+  - python: "2.7"
+    env version_arch='6.0a4/tor-browser-linux64-6.0a4_ar.tar.xz'
   - python: "3.4"
-    env: version_arch='5.5/tor-browser-linux64-5.5_en-US.tar.xz'
+    env: version_arch='5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz'
   - python: "3.5"
-    env: version_arch='5.5/tor-browser-linux64-5.5_en-US.tar.xz'
+    env: version_arch='5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz'
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
