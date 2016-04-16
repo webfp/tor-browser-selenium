@@ -21,6 +21,7 @@ class EnvironmentTest(unittest.TestCase):
         self.assert_py_pkg_installed('selenium')
 
     def test_py_selenium_version(self):
+        # TODO use LooseVersion
         import selenium
         pkg_ver = selenium.__version__
         err_msg = "Python Selenium package should be greater than 2.45.0"

@@ -1,4 +1,3 @@
-import pytest
 from os import environ
 try:
     from pyvirtualdisplay import Display
@@ -8,6 +7,8 @@ except ImportError:  # we don't need/install it when running CI tests
 # Default size for the virtual display
 DEFAULT_XVFB_WIN_W = 1280
 DEFAULT_XVFB_WIN_H = 800
+
+test_conf = {"xvfb_display": None}
 
 
 def start_xvfb(win_width=DEFAULT_XVFB_WIN_W,
@@ -22,17 +23,12 @@ def stop_xvfb(xvfb_display):
         xvfb_display.stop()
 
 
-@pytest.fixture(scope="session", autouse=True)
-def prepare_test_setup(request):
-    """Run an XVFB display during the tests.
-    Don't run on CI or if there's an env var named NO_XVFB
-    """
-    xvfb_display = None
+def pytest_sessionstart(session):
     if "TRAVIS" not in environ and "NO_XVFB" not in environ:
-        xvfb_display = start_xvfb()
+        test_conf["xvfb_display"] = start_xvfb()
 
-    def teardown_test_setup():
-        if xvfb_display:
-            stop_xvfb(xvfb_display)
 
-    request.addfinalizer(teardown_test_setup)
+def pytest_sessionfinish(session, exitstatus):
+    xvfb_display = test_conf["xvfb_display"]
+    if xvfb_display:
+        stop_xvfb(xvfb_display)
