@@ -61,12 +61,11 @@ class TorBrowserDriverFixture(TorBrowserDriver):
         last_err = RuntimeError("Unknown error")
         for tries in range(MAX_FIXTURE_TRIES):
             try:
-                timeout(LOAD_PAGE_TIMEOUT)
                 self.load_url(*args, **kwargs)
                 if self.current_url != "about:newtab" and \
                         not self.is_connection_error_page:
                     break
-            except (TimeoutException, TimeExceededError,
+            except (TimeoutException,
                     CannotSendRequest) as last_err:
                 print ("\nload_url timed out.  Attempt %s %s" %
                        ((tries + 1), last_err))
