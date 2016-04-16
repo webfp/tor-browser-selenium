@@ -7,7 +7,7 @@ from os import environ
 from os.path import join
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
-from tbselenium.test.fixtures import TorBrowserDriverFixture as TBDriverFixture
+from tbselenium.test.fixtures import TBDriverFixture
 import tbselenium.utils as ut
 
 

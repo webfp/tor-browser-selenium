@@ -1,6 +1,7 @@
 from tbselenium.tbdriver import TorBrowserDriver
 import tbselenium.common as cm
 from tbselenium.exceptions import StemLaunchError, TorBrowserDriverInitError
+from tbselenium.utils import launch_tbb_tor_with_stem
 from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver.common.utils import is_connectable
 
@@ -8,26 +9,22 @@ try:
     from httplib import CannotSendRequest
 except ImportError:
     from http.client import CannotSendRequest
-try:
-    from stem.process import launch_tor_with_config
-except ImportError as err:
-    pass
+
 
 MAX_FIXTURE_TRIES = 3
 
 
-class TorBrowserDriverFixture(TorBrowserDriver):
+class TBDriverFixture(TorBrowserDriver):
     """Extend TorBrowserDriver to have fixtures for tests."""
     def __init__(self, *args, **kwargs):
         self.change_default_tor_cfg(kwargs)
         for tries in range(MAX_FIXTURE_TRIES):
             try:
-                return super(TorBrowserDriverFixture, self).__init__(*args,
-                                                                     **kwargs)
+                return super(TBDriverFixture, self).__init__(*args, **kwargs)
             except (TimeoutException, WebDriverException) as last_err:
                 print ("\nTBDriver init timed out. Attempt %s %s" %
                        ((tries + 1), last_err))
-                super(TorBrowserDriverFixture, self).quit()  # clean up
+                super(TBDriverFixture, self).quit()  # clean up
                 continue
         else:
             raise TorBrowserDriverInitError("Cannot initialize")
@@ -63,14 +60,14 @@ class TorBrowserDriverFixture(TorBrowserDriver):
             raise WebDriverException("Can't load the page")
 
 
-def launch_tor_with_config_fixture(*args, **kwargs):
+def launch_tbb_tor_with_stem_fixture(*args, **kwargs):
     for tries in range(MAX_FIXTURE_TRIES):
         try:
-            return launch_tor_with_config(*args, **kwargs)
+            return launch_tbb_tor_with_stem(*args, **kwargs)
         except OSError as last_err:
             print ("\nlaunch_tor try %s %s" % ((tries + 1), last_err))
             if "timeout without success" in str(last_err):
                 continue
-            else:
+            else:  # we don't want to retry if this is not a timeout
                 raise
     raise StemLaunchError("Cannot start Tor")

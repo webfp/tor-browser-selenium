@@ -4,7 +4,7 @@ import pytest
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 
-from tbselenium.test.fixtures import TorBrowserDriverFixture as TBDriverFixture
+from tbselenium.test.fixtures import TBDriverFixture
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
 

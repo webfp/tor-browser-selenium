@@ -29,6 +29,10 @@ DEFAULT_CONTROL_PORT = 9051
 TBB_SOCKS_PORT = 9150
 TBB_CONTROL_PORT = 9151
 
+# pick 9250, 9251 to avoid conflict
+STEM_SOCKS_PORT = 9250
+STEM_CONTROL_PORT = 9251
+
 KNOWN_SOCKS_PORTS = [DEFAULT_SOCKS_PORT, TBB_SOCKS_PORT]
 PORT_BAN_PREFS = ["extensions.torbutton.banned_ports",
                   "network.security.ports.banned"]

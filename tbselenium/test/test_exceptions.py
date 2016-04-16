@@ -2,7 +2,7 @@ import unittest
 import tempfile
 from tbselenium.exceptions import TBDriverPathError, TBDriverPortError
 from tbselenium.test import TBB_PATH
-from tbselenium.test.fixtures import TorBrowserDriverFixture as TBDriverFixture
+from tbselenium.test.fixtures import TBDriverFixture
 from tbselenium import common as cm
 
 MISSING_DIR = "_no_such_directory_"
