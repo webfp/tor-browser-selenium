@@ -1,8 +1,6 @@
-import signal
 from tbselenium.tbdriver import TorBrowserDriver
 import tbselenium.common as cm
-from tbselenium.exceptions import (TimeExceededError, StemLaunchError,
-                                   TorBrowserDriverInitError)
+from tbselenium.exceptions import StemLaunchError, TorBrowserDriverInitError
 from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver.common.utils import is_connectable
 
@@ -16,10 +14,6 @@ except ImportError as err:
     pass
 
 MAX_FIXTURE_TRIES = 3
-EXTERNAL_TIMEOUT_GRACE = 5  # only fire if the internal timeout fails
-LAUNCH_TOR_TIMEOUT = 30 + EXTERNAL_TIMEOUT_GRACE
-LOAD_PAGE_TIMEOUT = 60
-TB_INIT_EXT_TIMEOUT = cm.TB_INIT_TIMEOUT + EXTERNAL_TIMEOUT_GRACE
 
 
 class TorBrowserDriverFixture(TorBrowserDriver):
@@ -80,20 +74,3 @@ def launch_tor_with_config_fixture(*args, **kwargs):
             else:
                 raise
     raise StemLaunchError("Cannot start Tor")
-
-
-# We only experience timeouts on Travis CI
-def raise_signal(signum, frame):
-    """Raise an exception to signal timeout."""
-    raise TimeExceededError("Timed out")
-
-
-def timeout(duration):
-    """Timeout after given duration. Linux only."""
-    signal.signal(signal.SIGALRM, raise_signal)
-    signal.alarm(duration)  # alarm after X seconds
-
-
-def cancel_timeout():
-    """Cancel the running alarm."""
-    signal.alarm(0)
