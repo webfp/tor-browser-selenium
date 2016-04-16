@@ -34,11 +34,11 @@ install:
   - pip install -r requirements-travis.txt
   - sudo apt-get -qq install tor
   - easy_install .
-  - tarball=`echo $VERSION_ARCH |cut -d'/' -f 2`
-  - wget https://archive.torproject.org/tor-package-archive/torbrowser/$VERSION_ARCH
+  - tarball=`echo ${VERSION_ARCH} |cut -d'/' -f 2`
+  - wget https://archive.torproject.org/tor-package-archive/torbrowser/${VERSION_ARCH}
   - tar -xf $tarball -C $HOME
   - locale=`echo $tarball |cut -d'_' -f 2 | cut -d'.' -f 1`
-  - export TBB_PATH=$HOME/tor-browser_$locale
+  - export TBB_PATH=${HOME}/tor-browser_$locale
 before_script:
   - cd tbselenium/test
 script: travis_retry py.test -s -v --cov=tbselenium --cov-report term-missing --durations=10
