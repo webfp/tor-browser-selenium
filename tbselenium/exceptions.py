@@ -17,3 +17,11 @@ class TBDriverConfigError(Exception):
 
 class TimeExceededError(Exception):
     pass
+
+
+class TorBrowserDriverInitError(Exception):
+    pass
+
+
+class StemLaunchError(Exception):
+    pass

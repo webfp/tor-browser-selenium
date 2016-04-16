@@ -1,34 +1,32 @@
 from os import environ
-try:
-    from pyvirtualdisplay import Display
-except ImportError:  # we don't need/install it when running CI tests
-    pass
+import tempfile
+from tbselenium.utils import start_xvfb, stop_xvfb
+from tbselenium.test.fixtures import launch_tbb_tor_with_stem_fixture
+import tbselenium.common as cm
 
-# Default size for the virtual display
-DEFAULT_XVFB_WIN_W = 1280
-DEFAULT_XVFB_WIN_H = 800
-
-test_conf = {"xvfb_display": None}
+test_conf = {}
 
 
-def start_xvfb(win_width=DEFAULT_XVFB_WIN_W,
-               win_height=DEFAULT_XVFB_WIN_H):
-    xvfb_display = Display(visible=0, size=(win_width, win_height))
-    xvfb_display.start()
-    return xvfb_display
-
-
-def stop_xvfb(xvfb_display):
-    if xvfb_display:
-        xvfb_display.stop()
+def launch_tor():
+    temp_data_dir = tempfile.mkdtemp()
+    torrc = {'ControlPort': str(cm.DEFAULT_CONTROL_PORT),
+             'SOCKSPort': str(cm.DEFAULT_SOCKS_PORT),
+             'DataDirectory': temp_data_dir}
+    launch_tbb_tor_with_stem_fixture(torrc=torrc)
 
 
 def pytest_sessionstart(session):
     if "TRAVIS" not in environ and "NO_XVFB" not in environ:
         test_conf["xvfb_display"] = start_xvfb()
+    if "TRAVIS" in environ:
+        test_conf["tor_process"] = launch_tor()
 
 
 def pytest_sessionfinish(session, exitstatus):
-    xvfb_display = test_conf["xvfb_display"]
+    xvfb_display = test_conf.get("xvfb_display")
+    tor_process = test_conf.get("tor_process")
     if xvfb_display:
         stop_xvfb(xvfb_display)
+
+    if tor_process:
+        tor_process.kill()

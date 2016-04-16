@@ -55,6 +55,7 @@ class TorBrowserDriver(FirefoxDriver):
                                                capabilities=self.capabilities,
                                                timeout=cm.TB_INIT_TIMEOUT)
         self.is_running = True
+        sleep(1)
 
     def init_socks_port(self, tor_cfg, socks_port):
         """Check SOCKS port and Tor config inputs."""

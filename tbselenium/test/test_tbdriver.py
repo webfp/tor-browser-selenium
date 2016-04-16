@@ -7,7 +7,7 @@ from selenium.webdriver.common.utils import is_connectable
 
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
-from tbselenium.test.fixtures import TorBrowserDriverFixture as TBDriverFixture
+from tbselenium.test.fixtures import TBDriverFixture
 import tbselenium.utils as ut
 
 

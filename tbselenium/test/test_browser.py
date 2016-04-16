@@ -2,7 +2,7 @@ import pytest
 import sys
 import unittest
 import tempfile
-from tbselenium.test.fixtures import TorBrowserDriverFixture as TBDriverFixture
+from tbselenium.test.fixtures import TBDriverFixture
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
 import tbselenium.utils as ut

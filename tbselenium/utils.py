@@ -1,7 +1,44 @@
 import sqlite3
-from os import walk
-from os.path import join, getmtime
+import tempfile
+import tbselenium.common as cm
+from tbselenium.test import TBB_PATH
+from os import walk, environ
+from os.path import join, getmtime, dirname
 import fnmatch
+
+try:  # only needed for tests
+    from pyvirtualdisplay import Display
+except ImportError:
+    pass
+
+try:  # only needed for tests and examples
+    from stem.process import launch_tor_with_config
+except ImportError:
+    pass
+
+
+def modify_env_var(env_var, value, operation="prepend"):
+    existing_value = environ.get(env_var, '')
+    if operation == "prepend":
+        new_env_var = "%s:%s" % (value, existing_value)
+    elif operation == "append":
+        new_env_var = "%s:%s" % (existing_value, value)
+    elif operation == "set":
+        new_env_var = value
+    environ[env_var] = new_env_var
+
+
+def launch_tbb_tor_with_stem(torrc=None, tor_binary=None, retry=3):
+    if tor_binary is None:
+        tor_binary = join(TBB_PATH, cm.DEFAULT_TOR_BINARY_PATH)
+    modify_env_var("LD_LIBRARY_PATH", dirname(tor_binary))
+    temp_data_dir = tempfile.mkdtemp()
+    if torrc is None:
+        torrc = {'ControlPort': str(cm.STEM_CONTROL_PORT),
+                 'SOCKSPort': str(cm.STEM_SOCKS_PORT),
+                 'DataDirectory': temp_data_dir}
+
+    return launch_tor_with_config(config=torrc, tor_cmd=tor_binary)
 
 
 def get_last_modified_of_dir(dir_path):
@@ -23,6 +60,23 @@ def read_file(file_path, mode='rU'):
     with open(file_path, mode) as f:
         content = f.read()
     return content
+
+
+# Default size for the virtual display
+DEFAULT_XVFB_WIN_W = 1280
+DEFAULT_XVFB_WIN_H = 800
+
+
+def start_xvfb(win_width=DEFAULT_XVFB_WIN_W,
+               win_height=DEFAULT_XVFB_WIN_H):
+    xvfb_display = Display(visible=0, size=(win_width, win_height))
+    xvfb_display.start()
+    return xvfb_display
+
+
+def stop_xvfb(xvfb_display):
+    if xvfb_display:
+        xvfb_display.stop()
 
 
 def add_canvas_permission(profile_path, canvas_allowed_hosts):
