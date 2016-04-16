@@ -89,7 +89,7 @@ def launch_tor_with_config_fixture(*args, **kwargs):
             continue
         except OSError as last_err:
             print ("\nlaunch_tor try %s %s" % ((tries + 1), last_err))
-            if "timeout without success" in str(last_err.exception):
+            if "timeout without success" in str(last_err):
                 continue
             else:
                 raise
