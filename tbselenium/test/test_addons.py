@@ -1,4 +1,5 @@
 import unittest
+import pytest
 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -42,6 +43,7 @@ class NoScriptTest(unittest.TestCase):
     WEBGL_CHECK_JS = "var cvs = document.createElement('canvas');\
                     return cvs.getContext('experimental-webgl');"
 
+    @pytest.mark.skipif(cm.TRAVIS, reason="CI doesn't support WebGL")
     def test_noscript(self):
         """NoScript should disable WebGL."""
         with TBDriverFixture(TBB_PATH) as driver:
@@ -50,6 +52,7 @@ class NoScriptTest(unittest.TestCase):
             webgl_support = driver.execute_script(self.WEBGL_CHECK_JS)
             self.assertIsNone(webgl_support)
 
+    @pytest.mark.skipif(cm.TRAVIS, reason="CI doesn't support WebGL")
     def test_noscript_webgl_enabled(self):
         """Make sure that when we disable NoScript's WebGL blocking,
         WebGL becomes available. This is to the test method we
