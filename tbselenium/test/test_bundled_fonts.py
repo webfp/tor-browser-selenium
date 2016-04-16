@@ -7,12 +7,12 @@ from os import environ
 from os.path import join
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
-from tbselenium.test.fixtures import TorBrowserDriverFixture as TBDTestFixture
+from tbselenium.test.fixtures import TorBrowserDriverFixture as TBDriverFixture
 import tbselenium.utils as ut
 
 
 @pytest.mark.skipif(sys.platform != 'linux2', reason='Requires Linux')
-class TBDriverFontBundle(unittest.TestCase):
+class TBBundledFonts(unittest.TestCase):
     """Use fontconfig's FC_DEBUG logs to test font bundling."""
 
     @classmethod
@@ -20,7 +20,7 @@ class TBDriverFontBundle(unittest.TestCase):
         _, log_file = tempfile.mkstemp()
         # https://www.freedesktop.org/software/fontconfig/fontconfig-user.html
         environ["FC_DEBUG"] = "%d" % (1024 + 8 + 1)
-        cls.driver = TBDTestFixture(TBB_PATH, tbb_logfile_path=log_file)
+        cls.driver = TBDriverFixture(TBB_PATH, tbb_logfile_path=log_file)
         driver = cls.driver
         if not driver.supports_bundled_fonts:
             cls.tearDownClass()

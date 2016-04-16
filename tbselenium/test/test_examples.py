@@ -15,11 +15,7 @@ class TorBrowserDriverExamples(unittest.TestCase):
 
     @unittest.skip("Only for didactic purposes.")
     def test_visit_a_page(self):
-        """The most basic use of the TorBrowserDriver.
-
-        It assumes Tor is already running and SOCKS listening to the
-        default port.
-        """
+        """The most basic use of the TorBrowserDriver."""
         with TorBrowserDriver(TBB_PATH) as driver:
             driver.get(cm.TEST_URL)
             sleep(1)  # stay one second on the page
@@ -27,10 +23,7 @@ class TorBrowserDriverExamples(unittest.TestCase):
     @unittest.skip("Only for didactic purposes.")
     def test_take_screenshot(self):
         """Take screenshot of the page."""
-        # We need to add an exception for canvas access in the Tor Browser
-        # permission database. We need to do this for each site that we
-        # plan to visit.
-        canvas_allowed = [cm.CHECK_TPO_HOST]
+        canvas_allowed = [cm.CHECK_TPO_HOST]  # not needed for recent TBs
         with TorBrowserDriver(TBB_PATH,
                               canvas_allowed_hosts=canvas_allowed) as driver:
             driver.get(cm.TEST_URL)
@@ -44,17 +37,14 @@ class TorBrowserDriverExamples(unittest.TestCase):
         directory structure is different from the one that is currently
         used by Tor developers.
         """
-        # example for TBB 3.5, which we assume has been extracted in the home directory
+        # Assume we've extracted TBB 3.5 to our home directory
         tbb_3_5 = join(expanduser('~'), 'tor-browser_en-US')
         tb_binary = join(tbb_3_5, "Browser", "firefox")
         tb_profile = join(tbb_3_5, "Data", "Browser", "profile.default")
         with TorBrowserDriver(tbb_binary_path=tb_binary,
                               tbb_profile_path=tb_profile,
                               tbb_logfile_path="ff.log") as driver:
-            # as shown in the line above, you can also indicate the
-            # log file for the Tor Browser (firefox log).
             driver.get(cm.TEST_URL)
-            sleep(1)
 
     @unittest.skip("Only for didactic purposes.")
     def test_run_driver_with_stem_customized(self):
@@ -82,14 +72,15 @@ class TorBrowserDriverExamples(unittest.TestCase):
         # including the path and the level for logging in tor.
         # you can also use the DataDirectory property in torrc
         # to set a custom data directory for tor.
-        # For other options see: https://www.torproject.org/docs/tor-manual.html.en
+        # See other options: https://www.torproject.org/docs/tor-manual.html.en
         tor_process = launch_tor_with_config(config=torrc,
                                              tor_cmd=custom_tor_binary)
 
         with Controller.from_port(port=custom_control_port) as controller:
             controller.authenticate()
             # Visit the page with the TorBrowserDriver
-            with TorBrowserDriver(TBB_PATH, socks_port=custom_socks_port) as driver:
+            with TorBrowserDriver(TBB_PATH,
+                                  socks_port=custom_socks_port) as driver:
                 driver.get(cm.TEST_URL)
                 sleep(1)
 

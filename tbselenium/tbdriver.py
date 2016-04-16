@@ -273,7 +273,7 @@ class TorBrowserDriver(FirefoxDriver):
         self.is_running = False
         try:
             super(TorBrowserDriver, self).quit()
-        except CannotSendRequest as exc:
+        except (CannotSendRequest, AttributeError) as exc:
             print("[tbselenium] %s" % exc)
             # following code is from webdriver.firefox.webdriver.quit()
             try:
