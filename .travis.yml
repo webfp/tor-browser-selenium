@@ -40,7 +40,7 @@ install:
   - pip install -r requirements-travis.txt
   - easy_install .
   - TARBALL=`echo ${VERSION_ARCH} |cut -d'/' -f 2`
-  - ./travis.sh
+  - . ./travis.sh
   - locale=`echo $TARBALL |cut -d'_' -f 2 | cut -d'.' -f 1`
   - export TBB_PATH=${HOME}/tor-browser_$locale
 
