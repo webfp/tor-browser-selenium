@@ -56,7 +56,7 @@ class TorBrowserTest(unittest.TestCase):
     def test_tbdriver_fx_profile_not_be_modified(self):
         """Visiting a site should not modify the original profile contents."""
         profile_path = join(TBB_PATH, cm.DEFAULT_TBB_PROFILE_PATH)
-        mtime_before = ut.get_last_modified_of_dir(profile_path)
+        mtime_before = ut.get_dir_mtime(profile_path)
         self.driver.load_url_ensure(cm.CHECK_TPO_URL)
-        mtime_after = ut.get_last_modified_of_dir(profile_path)
+        mtime_after = ut.get_dir_mtime(profile_path)
         self.assertEqual(mtime_before, mtime_after)

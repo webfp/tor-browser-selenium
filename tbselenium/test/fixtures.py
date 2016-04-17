@@ -26,8 +26,10 @@ class TBDriverFixture(TorBrowserDriver):
                        ((tries + 1), last_err))
                 super(TBDriverFixture, self).quit()  # clean up
                 continue
-        else:
-            raise TorBrowserDriverInitError("Cannot initialize")
+        # Raise if we didn't return yet
+        to_raise = last_err if last_err else\
+            TorBrowserDriverInitError("Cannot initialize")
+        raise to_raise
 
     def change_default_tor_cfg(self, kwargs):
         """Use system Tor if the caller doesn't specifically wants
@@ -38,10 +40,9 @@ class TBDriverFixture(TorBrowserDriver):
         for each test.
         """
 
-        if kwargs.get("tor_cfg") != cm.LAUNCH_NEW_TBB_TOR and\
+        if kwargs.get("tor_cfg") is None and\
                 is_connectable(cm.DEFAULT_SOCKS_PORT):
             kwargs["tor_cfg"] = cm.USE_RUNNING_TOR
-            # print ("Will use system Tor for the test")
 
     def load_url_ensure(self, *args, **kwargs):
         """Make sure the requested URL is loaded. Retry if necessary."""
@@ -50,14 +51,16 @@ class TBDriverFixture(TorBrowserDriver):
                 self.load_url(*args, **kwargs)
                 if self.current_url != "about:newtab" and \
                         not self.is_connection_error_page:
-                    break
+                    return
             except (TimeoutException,
                     CannotSendRequest) as last_err:
                 print ("\nload_url timed out.  Attempt %s %s" %
                        ((tries + 1), last_err))
                 continue
-        else:
-            raise WebDriverException("Can't load the page")
+        # Raise if we didn't return yet
+        to_raise = last_err if last_err else\
+            WebDriverException("Can't load the page")
+        raise to_raise
 
 
 def launch_tbb_tor_with_stem_fixture(*args, **kwargs):
@@ -70,4 +73,7 @@ def launch_tbb_tor_with_stem_fixture(*args, **kwargs):
                 continue
             else:  # we don't want to retry if this is not a timeout
                 raise
-    raise StemLaunchError("Cannot start Tor")
+    # Raise if we didn't return yet
+    to_raise = last_err if last_err else\
+        StemLaunchError("Cannot start Tor")
+    raise to_raise

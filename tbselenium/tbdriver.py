@@ -8,11 +8,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver import DesiredCapabilities
-from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
 from selenium.webdriver.common.utils import is_connectable
 import tbselenium.common as cm
 from tbselenium.utils import add_canvas_permission
+from tbselenium.tbbinary import TBBinary
 from tbselenium.exceptions import (TBDriverConfigError, TBDriverPortError,
                                    TBDriverPathError)
 
@@ -69,13 +69,18 @@ class TorBrowserDriver(FirefoxDriver):
                 socks_port = cm.TBB_SOCKS_PORT  # 9150
 
         if tor_cfg == cm.LAUNCH_NEW_TBB_TOR:
-            if not cm.TRAVIS and is_connectable(socks_port):
+            if is_connectable(socks_port):
                 raise TBDriverPortError("SOCKS port %s is already in use"
                                         % socks_port)
             if socks_port != cm.TBB_SOCKS_PORT:
                 # No support for launching TBB's Tor on a custom port, use Stem
-                raise TBDriverPortError("Error: Use Stem if you need to launch"
-                                        " Tor on a custom SOCKS port")
+                raise TBDriverPortError("Can only launch Tor on TBB's default"
+                                        "port (9150). Use Stem for launching"
+                                        "Tor on a custom SOCKS port")
+        elif tor_cfg == cm.USE_RUNNING_TOR:
+            if not is_connectable(socks_port):
+                raise TBDriverPortError("SOCKS port %s is not listening"
+                                        % socks_port)
         self.socks_port = socks_port
 
     def setup_tbb_paths(self, tbb_path, tbb_fx_binary_path, tbb_profile_path,
@@ -237,8 +242,8 @@ class TorBrowserDriver(FirefoxDriver):
     def get_tb_binary(self, logfile=None):
         """Return FirefoxBinary pointing to the TBB's firefox binary."""
         tbb_logfile = open(logfile, 'a+') if logfile else None
-        return FirefoxBinary(firefox_path=self.tbb_fx_binary_path,
-                             log_file=tbb_logfile)
+        return TBBinary(firefox_path=self.tbb_fx_binary_path,
+                        log_file=tbb_logfile)
 
     @property
     def is_connection_error_page(self):
@@ -269,6 +274,18 @@ class TorBrowserDriver(FirefoxDriver):
             return False
         return True
 
+    def clean_up_profile_dirs(self):
+        """Remove temporary profile directories.
+        Only called when WebDriver.quit() is interrupted
+        """
+        tempfolder = self.profile.tempfolder
+        profile_path = self.profile.path
+
+        if tempfolder and isdir(tempfolder):
+            shutil.rmtree(tempfolder)
+        if isdir(profile_path):
+            shutil.rmtree(profile_path)
+
     def quit(self):
         """Quit the driver. Clean up if the parent's quit fails."""
         self.is_running = False
@@ -276,12 +293,9 @@ class TorBrowserDriver(FirefoxDriver):
             super(TorBrowserDriver, self).quit()
         except (CannotSendRequest, AttributeError) as exc:
             print("[tbselenium] %s" % exc)
-            # following code is from webdriver.firefox.webdriver.quit()
-            try:
-                self.binary.kill()  # kill the browser
-                shutil.rmtree(self.profile.path)
-                if self.profile.tempfolder is not None:
-                    shutil.rmtree(self.profile.tempfolder)
+            try:  # Clean up  if webdriver.quit() throws
+                self.binary.kill()
+                self.clean_up_profile_dirs()
             except Exception as e:
                 print("[tbselenium] %s" % e)
 

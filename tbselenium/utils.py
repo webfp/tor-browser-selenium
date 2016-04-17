@@ -1,10 +1,10 @@
 import sqlite3
 import tempfile
 import tbselenium.common as cm
-from tbselenium.test import TBB_PATH
 from os import walk, environ
-from os.path import join, getmtime, dirname
+from os.path import join, getmtime, dirname, isfile
 import fnmatch
+from tbselenium.exceptions import StemLaunchError
 
 try:  # only needed for tests
     from pyvirtualdisplay import Display
@@ -28,9 +28,13 @@ def modify_env_var(env_var, value, operation="prepend"):
     environ[env_var] = new_env_var
 
 
-def launch_tbb_tor_with_stem(torrc=None, tor_binary=None, retry=3):
-    if tor_binary is None:
-        tor_binary = join(TBB_PATH, cm.DEFAULT_TOR_BINARY_PATH)
+def launch_tbb_tor_with_stem(tbb_path=None, torrc=None, tor_binary=None):
+    if not (tor_binary or tbb_path):
+        raise StemLaunchError("Either pass tbb_path or tor_binary")
+    if not tor_binary and tbb_path:
+        tor_binary = join(tbb_path, cm.DEFAULT_TOR_BINARY_PATH)
+    if not isfile(tor_binary):
+        raise StemLaunchError("Invalid Tor binary")
     modify_env_var("LD_LIBRARY_PATH", dirname(tor_binary))
     temp_data_dir = tempfile.mkdtemp()
     if torrc is None:
@@ -41,7 +45,7 @@ def launch_tbb_tor_with_stem(torrc=None, tor_binary=None, retry=3):
     return launch_tor_with_config(config=torrc, tor_cmd=tor_binary)
 
 
-def get_last_modified_of_dir(dir_path):
+def get_dir_mtime(dir_path):
     """Recursively get the last modified time of a directory."""
     return max(getmtime(_dir) for _dir, _, _ in walk(dir_path))
 
