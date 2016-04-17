@@ -39,13 +39,7 @@ before_install:
 install:
   - pip install -r requirements-travis.txt
   - easy_install .
-  - tarball=`echo ${VERSION_ARCH} |cut -d'/' -f 2`
-  - locale=`echo $tarball |cut -d'_' -f 2 | cut -d'.' -f 1`
-  - mkdir -p ${DOWNLOAD_DIR}
-  - "[ ! -e ${DOWNLOAD_DIR}/$tarball ] && echo ${DOWNLOAD_DIR}/$tarball"
-  - "[ ! -e ${DOWNLOAD_DIR}/$tarball ] && wget -P ${DOWNLOAD_DIR} ${TBB_ARCHIVE_URL}/${VERSION_ARCH}"
-  - tar -xf ${DOWNLOAD_DIR}/$tarball -C $HOME
-  - export TBB_PATH=${HOME}/tor-browser_$locale
+  - ./travis.sh
 before_script:
   - cd tbselenium
 script: travis_retry py.test -s -v --cov=tbselenium --cov-report term-missing --durations=10 test
