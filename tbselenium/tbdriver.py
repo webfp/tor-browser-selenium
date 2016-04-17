@@ -76,6 +76,10 @@ class TorBrowserDriver(FirefoxDriver):
                 # No support for launching TBB's Tor on a custom port, use Stem
                 raise TBDriverPortError("Error: Use Stem if you need to launch"
                                         " Tor on a custom SOCKS port")
+        elif tor_cfg == cm.USE_RUNNING_TOR:
+            if not is_connectable(socks_port):
+                raise TBDriverPortError("SOCKS port %s is not listening"
+                                        % socks_port)
         self.socks_port = socks_port
 
     def setup_tbb_paths(self, tbb_path, tbb_fx_binary_path, tbb_profile_path,
