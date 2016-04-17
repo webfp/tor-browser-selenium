@@ -1,5 +1,6 @@
 import unittest
 import tempfile
+from os.path import isdir
 
 from selenium.webdriver.common.utils import free_port
 
@@ -75,6 +76,21 @@ class TBDriverExceptions(unittest.TestCase):
     def test_fixture_should_raise_for_invalid_tor_config(self):
         with self.assertRaises(TBDriverConfigError):
             TBDriverFixture(TBB_PATH, tor_cfg=-1)
+
+    def test_missing_browser(self):
+        driver = TBDriverFixture(TBB_PATH)
+
+        tempfolder = driver.profile.tempfolder
+        profile_path = driver.profile.path
+
+        self.assertTrue(isdir(tempfolder))
+        self.assertTrue(isdir(profile_path))
+        # kill the browser process
+        driver.binary.kill()
+
+        driver.quit()
+        self.assertFalse(isdir(profile_path))
+        self.assertFalse(isdir(tempfolder))
 
 if __name__ == "__main__":
     unittest.main()

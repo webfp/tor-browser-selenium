@@ -1,14 +1,11 @@
 import tempfile
-import pytest
 import unittest
-from os.path import join
-
-from selenium.webdriver.common.utils import is_connectable, free_port
+from os.path import join, isdir
 
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
 from tbselenium.test.fixtures import TBDriverFixture
-import tbselenium.utils as ut
+from tbselenium.utils import get_dir_mtime
 
 
 class TBDriverTest(unittest.TestCase):
@@ -29,39 +26,55 @@ class TBDriverTest(unittest.TestCase):
         self.assertIn("DuckDuckGo", self.tb_driver.title)
 
 
-class TBDriverOptionalArgs(unittest.TestCase):
+class TBDriverCleanUp(unittest.TestCase):
+    def setUp(self):
+        self.tb_driver = TBDriverFixture(TBB_PATH)
 
-    def test_running_with_system_tor(self):
-        if not is_connectable(cm.DEFAULT_SOCKS_PORT):
-            pytest.skip("Skipping. Start system Tor to run this test.")
-        with TBDriverFixture(TBB_PATH, tor_cfg=cm.USE_RUNNING_TOR) as driver:
-            driver.load_url_ensure(cm.CHECK_TPO_URL)
-            driver.find_element_by("h1.on")
+    def test_browser_process_should_be_terminated_after_quit(self):
+        driver = self.tb_driver
+        fx_process = driver.binary.process
+
+        self.assertEqual(fx_process.poll(), None)
+        driver.quit()
+        self.assertNotEqual(fx_process.poll(), None)
+
+    def test_profile_dirs_should_be_removed(self):
+        driver = self.tb_driver
+        tempfolder = driver.profile.tempfolder
+        profile_path = driver.profile.path
+
+        self.assertTrue(isdir(tempfolder))
+        self.assertTrue(isdir(profile_path))
+        driver.quit()
+        self.assertFalse(isdir(profile_path))
+        self.assertFalse(isdir(tempfolder))
+
+
+class TBDriverTorDataDir(unittest.TestCase):
+
+    TOR_DATA_PATH = join(TBB_PATH, cm.DEFAULT_TOR_DATA_PATH)
 
     def test_temp_tor_data_dir(self):
-        """If we use a temporary directory as tor_data_dir,
-        tor datadir in TBB should remain unchanged.
+        """Tor data directory in TBB should not be modified if
+        we use a separate tor_data_dir.
         """
-
         tmp_dir = tempfile.mkdtemp()
-        tbb_tor_data_path = join(TBB_PATH, cm.DEFAULT_TOR_DATA_PATH)
-        last_mod_time_before = ut.get_last_modified_of_dir(tbb_tor_data_path)
-        with TBDriverFixture(TBB_PATH,
-                             tor_cfg=cm.LAUNCH_NEW_TBB_TOR,
-                             tor_data_dir=tmp_dir) as driver:
+        mod_time_before = get_dir_mtime(self.TOR_DATA_PATH)
+
+        with TBDriverFixture(TBB_PATH, tor_data_dir=tmp_dir,
+                             tor_cfg=cm.LAUNCH_NEW_TBB_TOR) as driver:
             driver.load_url_ensure(cm.CHECK_TPO_URL)
-        last_mod_time_after = ut.get_last_modified_of_dir(tbb_tor_data_path)
-        self.assertEqual(last_mod_time_before, last_mod_time_after)
+        mod_time_after = get_dir_mtime(self.TOR_DATA_PATH)
+        self.assertEqual(mod_time_before, mod_time_after)
 
     def test_non_temp_tor_data_dir(self):
-        """Tor data dir in TBB should be modified if we don't use a temporary
-        tor_data_dir.
+        """Tor data directory in TBB should be modified if we don't
+        use a separate tor_data_dir.
         """
+        mod_time_before = get_dir_mtime(self.TOR_DATA_PATH)
 
-        tbb_tor_data_path = join(TBB_PATH, cm.DEFAULT_TOR_DATA_PATH)
-        last_mod_time_before = ut.get_last_modified_of_dir(tbb_tor_data_path)
         with TBDriverFixture(TBB_PATH,
                              tor_cfg=cm.LAUNCH_NEW_TBB_TOR) as driver:
             driver.load_url_ensure(cm.CHECK_TPO_URL)
-        last_mod_time_after = ut.get_last_modified_of_dir(tbb_tor_data_path)
-        self.assertNotEqual(last_mod_time_before, last_mod_time_after)
+        mod_time_after = get_dir_mtime(self.TOR_DATA_PATH)
+        self.assertNotEqual(mod_time_before, mod_time_after)

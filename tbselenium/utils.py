@@ -41,7 +41,7 @@ def launch_tbb_tor_with_stem(torrc=None, tor_binary=None, retry=3):
     return launch_tor_with_config(config=torrc, tor_cmd=tor_binary)
 
 
-def get_last_modified_of_dir(dir_path):
+def get_dir_mtime(dir_path):
     """Recursively get the last modified time of a directory."""
     return max(getmtime(_dir) for _dir, _, _ in walk(dir_path))
 
