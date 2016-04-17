@@ -69,7 +69,8 @@ class TorBrowserDriver(FirefoxDriver):
                 socks_port = cm.TBB_SOCKS_PORT  # 9150
 
         if tor_cfg == cm.LAUNCH_NEW_TBB_TOR:
-            if not cm.TRAVIS and is_connectable(socks_port):
+            # if not cm.TRAVIS and is_connectable(socks_port):
+            if is_connectable(socks_port):
                 raise TBDriverPortError("SOCKS port %s is already in use"
                                         % socks_port)
             if socks_port != cm.TBB_SOCKS_PORT:
