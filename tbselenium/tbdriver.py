@@ -282,11 +282,9 @@ class TorBrowserDriver(FirefoxDriver):
         profile_path = self.profile.path
 
         if tempfolder and isdir(tempfolder):
-            print("[tbselenium] Removing %s" % tempfolder)
             shutil.rmtree(tempfolder)
         if isdir(profile_path):
             shutil.rmtree(profile_path)
-            print("[tbselenium] Removing %s" % profile_path)
 
     def quit(self):
         """Quit the driver. Clean up if the parent's quit fails."""

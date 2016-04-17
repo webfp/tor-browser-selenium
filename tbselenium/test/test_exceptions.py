@@ -1,6 +1,7 @@
 import unittest
 import pytest
 from os.path import isdir, join
+import tempfile
 
 from selenium.webdriver.common.utils import free_port, is_connectable
 
@@ -94,12 +95,13 @@ class TBDriverExceptions(unittest.TestCase):
             TBDriverFixture(TBB_PATH, tor_cfg=-1)
 
     def test_should_raise_for_stem(self):
+        temp_dir = tempfile.mkdtemp()
         with self.assertRaises(StemLaunchError):
             launch_tbb_tor_with_stem()
         with self.assertRaises(StemLaunchError):
             launch_tbb_tor_with_stem(tbb_path="", tor_binary="")
         with self.assertRaises(StemLaunchError):
-            launch_tbb_tor_with_stem(tbb_path="", tor_binary="")
+            launch_tbb_tor_with_stem(tbb_path=temp_dir, tor_binary="")
 
     def test_missing_browser(self):
         driver = TBDriverFixture(TBB_PATH)

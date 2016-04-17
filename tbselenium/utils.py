@@ -1,7 +1,6 @@
 import sqlite3
 import tempfile
 import tbselenium.common as cm
-from tbselenium.test import TBB_PATH
 from os import walk, environ
 from os.path import join, getmtime, dirname, isfile
 import fnmatch

@@ -48,13 +48,6 @@ class TBDriverCleanUp(unittest.TestCase):
         self.assertFalse(isdir(profile_path))
         self.assertFalse(isdir(tempfolder))
 
-    def test_clean_up_profile_dirs(self):
-        self.tb_driver.clean_up_profile_dirs()
-        try:
-            self.tb_driver.quit()
-        except Exception as exc:
-            print ("OMG %s" % str(exc))
-
 
 class TBDriverTorDataDir(unittest.TestCase):
 
