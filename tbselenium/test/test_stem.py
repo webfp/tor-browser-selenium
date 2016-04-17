@@ -13,23 +13,35 @@ except ImportError as err:
 
 class TBStemTest(unittest.TestCase):
 
-    def tearDown(self):
-        if self.tor_process:
-            self.tor_process.kill()
+    @classmethod
+    def setUpClass(cls):
+        super(TBStemTest, cls).setUpClass()
+        cls.tor_process = launch_tbb_tor_with_stem_fixture()
+        cls.controller = Controller.from_port(port=cm.STEM_CONTROL_PORT)
+        cls.controller.authenticate()
+        cls.driver = TBDriverFixture(TBB_PATH,
+                                     tor_cfg=cm.USE_RUNNING_TOR,
+                                     socks_port=cm.STEM_SOCKS_PORT)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.driver.quit()
+        cls.controller.close()
+        if cls.tor_process:
+            cls.tor_process.kill()
+
+    def test_should_add_custom_ports_to_fx_banned_ports(self):
+        for pref in cm.PORT_BAN_PREFS:
+            banned_ports = self.driver.profile.default_preferences[pref]
+            self.assertIn(str(cm.STEM_SOCKS_PORT), banned_ports)
+            self.assertIn(str(cm.STEM_CONTROL_PORT), banned_ports)
 
     def test_running_with_stem(self):
-        self.tor_process = launch_tbb_tor_with_stem_fixture()
-        with Controller.from_port(port=cm.STEM_CONTROL_PORT) as controller:
-            controller.authenticate()
-
-            with TBDriverFixture(TBB_PATH,
-                                 tor_cfg=cm.USE_RUNNING_TOR,
-                                 socks_port=cm.STEM_SOCKS_PORT) as driver:
-
-                driver.load_url_ensure(cm.CHECK_TPO_URL)
-                driver.find_element_by("h1.on")
-                ccts = controller.get_circuits()
-                self.assertGreater(len(ccts), 0)
+        driver = self.driver
+        driver.load_url_ensure(cm.CHECK_TPO_URL)
+        driver.find_element_by("h1.on")
+        ccts = self.controller.get_circuits()
+        self.assertGreater(len(ccts), 0)
 
 if __name__ == "__main__":
     unittest.main()

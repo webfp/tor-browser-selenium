@@ -3,7 +3,7 @@ import pytest
 import unittest
 from os.path import join
 
-from selenium.webdriver.common.utils import is_connectable
+from selenium.webdriver.common.utils import is_connectable, free_port
 
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
@@ -31,18 +31,9 @@ class TBDriverTest(unittest.TestCase):
 
 class TBDriverOptionalArgs(unittest.TestCase):
 
-    def test_add_ports_to_fx_banned_ports(self):
-        test_socks_port = 9999
-        # No Tor process is listening on 9999, we just test the pref
-        with TBDriverFixture(TBB_PATH, tor_cfg=cm.USE_RUNNING_TOR,
-                             socks_port=test_socks_port) as driver:
-            for pref in cm.PORT_BAN_PREFS:
-                banned_ports = driver.profile.default_preferences[pref]
-                self.assertIn(str(test_socks_port), banned_ports)
-
     def test_running_with_system_tor(self):
         if not is_connectable(cm.DEFAULT_SOCKS_PORT):
-            pytest.skip("Skipping. Start system Tor to run the test.")
+            pytest.skip("Skipping. Start system Tor to run this test.")
         with TBDriverFixture(TBB_PATH, tor_cfg=cm.USE_RUNNING_TOR) as driver:
             driver.load_url_ensure(cm.CHECK_TPO_URL)
             driver.find_element_by("h1.on")
