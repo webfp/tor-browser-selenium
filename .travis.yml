@@ -46,5 +46,5 @@ install:
   - tar -xf ${DOWNLOAD_DIR}/$tarball -C $HOME
   - export TBB_PATH=${HOME}/tor-browser_$locale
 before_script:
-  - cd tbselenium/test
-script: travis_retry py.test -s -v --cov=tbselenium --cov-report term-missing --durations=10
+  - cd tbselenium
+script: travis_retry py.test -s -v --cov=tbselenium --cov-report term-missing --durations=10 test
