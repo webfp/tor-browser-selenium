@@ -49,4 +49,4 @@ ABOUT_TOR_URL = "about:tor"
 LAUNCH_NEW_TBB_TOR = 0  # use tor in TBB, launch a new process
 USE_RUNNING_TOR = 1  # use the tor installed and running on the system
 
-TRAVIS = "CI" in environ
+TRAVIS = "CI" in environ and "TRAVIS" in environ

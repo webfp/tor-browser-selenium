@@ -33,7 +33,6 @@ class TBDriverCleanUp(unittest.TestCase):
     def test_browser_process_should_be_terminated_after_quit(self):
         driver = self.tb_driver
         fx_process = driver.binary.process
-
         self.assertEqual(fx_process.poll(), None)
         driver.quit()
         self.assertNotEqual(fx_process.poll(), None)
@@ -48,6 +47,13 @@ class TBDriverCleanUp(unittest.TestCase):
         driver.quit()
         self.assertFalse(isdir(profile_path))
         self.assertFalse(isdir(tempfolder))
+
+    def test_clean_up_profile_dirs(self):
+        self.tb_driver.clean_up_profile_dirs()
+        try:
+            self.tb_driver.quit()
+        except Exception as exc:
+            print ("OMG %s" % str(exc))
 
 
 class TBDriverTorDataDir(unittest.TestCase):

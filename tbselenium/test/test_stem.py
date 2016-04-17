@@ -16,7 +16,7 @@ class TBStemTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super(TBStemTest, cls).setUpClass()
-        cls.tor_process = launch_tbb_tor_with_stem_fixture()
+        cls.tor_process = launch_tbb_tor_with_stem_fixture(tbb_path=TBB_PATH)
         cls.controller = Controller.from_port(port=cm.STEM_CONTROL_PORT)
         cls.controller.authenticate()
         cls.driver = TBDriverFixture(TBB_PATH,
