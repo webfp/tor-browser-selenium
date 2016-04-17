@@ -1,9 +1,13 @@
 import unittest
 import tempfile
-from tbselenium.exceptions import TBDriverPathError, TBDriverPortError
+
 from tbselenium.test import TBB_PATH
 from tbselenium.test.fixtures import TBDriverFixture
 from tbselenium import common as cm
+
+from tbselenium.exceptions import (TBDriverPathError,
+                                   TBDriverPortError,
+                                   TBDriverConfigError)
 
 MISSING_DIR = "_no_such_directory_"
 MISSING_FILE = "_no_such_file_"
@@ -63,6 +67,9 @@ class TBDriverExceptions(unittest.TestCase):
             driver.load_url(cm.CHECK_TPO_URL)
             self.assertTrue(driver.is_connection_error_page)
 
+    def test_should_raise_for_invalid_tor_config(self):
+        with self.assertRaises(TBDriverConfigError):
+            TBDriverFixture(TBB_PATH, tor_cfg=9999)
 
 if __name__ == "__main__":
     unittest.main()
