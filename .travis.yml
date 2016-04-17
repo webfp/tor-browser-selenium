@@ -39,7 +39,7 @@ before_install:
 install:
   - pip install -r requirements-travis.txt
   - easy_install .
-  - ./travis.sh
+  - . ./travis.sh
 before_script:
   - cd tbselenium
 script: travis_retry py.test -s -v --cov=tbselenium --cov-report term-missing --durations=10 test
