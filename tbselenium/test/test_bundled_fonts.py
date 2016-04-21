@@ -3,8 +3,8 @@ import re
 import tempfile
 import pytest
 import unittest
-from os import environ
-from os.path import join
+from os import environ, listdir
+from os.path import join, basename
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
 from tbselenium.test.fixtures import TBDriverFixture
@@ -29,7 +29,7 @@ class TBBundledFonts(unittest.TestCase):
         cls.log_txt = ut.read_file(log_file)
         cls.bundled_fonts_dir = join(driver.tbb_path,
                                      cm.DEFAULT_BUNDLED_FONTS_PATH)
-        cls.bundled_font_files = set(ut.gen_find_files(cls.bundled_fonts_dir))
+        cls.bundled_font_files = set(listdir(cls.bundled_fonts_dir))
 
     @classmethod
     def tearDownClass(cls):
@@ -58,7 +58,7 @@ class TBBundledFonts(unittest.TestCase):
         # search in fontconfig logs
         for _, ttf, _ in re.findall(r"(file: \")(.*)(\".*)", self.log_txt):
             self.assertIn(self.bundled_fonts_dir, ttf)
-            used_font_files.add(ttf)
+            used_font_files.add(basename(ttf))
         self.assertEqual(used_font_files, self.bundled_font_files)
 
 

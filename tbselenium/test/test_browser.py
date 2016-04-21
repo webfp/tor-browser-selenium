@@ -5,9 +5,9 @@ import tempfile
 from tbselenium.test.fixtures import TBDriverFixture
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
-import tbselenium.utils as ut
+from tbselenium.utils import read_file
 
-from os.path import exists, join
+from os.path import exists, getmtime, join
 from os import remove
 
 
@@ -30,7 +30,7 @@ class TorBrowserTest(unittest.TestCase):
                         startswith(TBB_PATH))
 
     def test_tbb_logfile(self):
-        log_txt = ut.read_file(self.log_file)
+        log_txt = read_file(self.log_file)
         self.assertIn("torbutton@torproject.org", log_txt)
         self.assertIn("addons.manager", log_txt)
 
@@ -49,14 +49,14 @@ class TorBrowserTest(unittest.TestCase):
         std_c_lib_path = join(driver.tbb_path, cm.DEFAULT_TOR_BINARY_DIR,
                               "libstdc++.so.6")
         proc_mem_map_file = "/proc/%d/maps" % (pid)
-        mem_map = ut.read_file(proc_mem_map_file)
+        mem_map = read_file(proc_mem_map_file)
         self.assertIn(xul_lib_path, mem_map)
         self.assertIn(std_c_lib_path, mem_map)
 
     def test_tbdriver_fx_profile_not_be_modified(self):
         """Visiting a site should not modify the original profile contents."""
         profile_path = join(TBB_PATH, cm.DEFAULT_TBB_PROFILE_PATH)
-        mtime_before = ut.get_dir_mtime(profile_path)
+        mtime_before = getmtime(profile_path)
         self.driver.load_url_ensure(cm.CHECK_TPO_URL)
-        mtime_after = ut.get_dir_mtime(profile_path)
+        mtime_after = getmtime(profile_path)
         self.assertEqual(mtime_before, mtime_after)
