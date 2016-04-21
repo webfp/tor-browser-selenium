@@ -2,13 +2,6 @@
 
 A Python library to automate Tor Browser with Selenium.
 
-## Compatibility
-[Tested](https://travis-ci.org/webfp/tor-browser-selenium) with the following Tor Browser Bundle versions on Debian (Wheezy) and Ubuntu (14.04 & 15.10):
-
-* 4.0.8
-* 5.5.4
-* 6.0a4
-
 ## Installation and use
 
 ```
@@ -22,11 +15,17 @@ with TorBrowserDriver("/path/to/TorBrowserBundle/") as driver:
     driver.get('https://check.torproject.org')
 ```
 
-TorBrowserDriver does not download Tor Browser Bundle (TBB) for you. You should [download](https://www.torproject.org/projects/torbrowser.html.en) and extract Tor Browser Bundle and provide its path when you initialize `TorBrowserDriver`.
+TorBrowserDriver does not download Tor Browser Bundle (TBB) for you. You should [download](https://www.torproject.org/projects/torbrowser.html.en) and extract TBB and provide its path when you initialize `TorBrowserDriver`.
 
-## Test
-TorBrowserDriver has extensive tests, which you can run with the following command:
+## Test and development
+Install the Python packages needed for development and testing:
+
+`pip install requirements-dev.txt`
+
+Run the following to launch the tests:
+
 `./run_tests.py /path/to/TorBrowserBundle/`
+
 
 ## Examples
 Use the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/examples) to discover different ways to use TorBrowserDriver
@@ -39,9 +38,16 @@ Use the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/exa
 * [stem_adv.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/stem_adv.py): Simple use of Stem with the TorBrowserDriver with more advanced configuration
 
 
+## Compatibility
+[Tested](https://travis-ci.org/webfp/tor-browser-selenium) with the following Tor Browser Bundle versions on Debian (Wheezy) and Ubuntu (14.04 & 15.10):
+
+* 4.0.8
+* 5.5.4
+* 6.0a4
+
 ## Troubleshooting
 
-Solutions to some potential issues:
+Solutions to potential issues:
 
 * Outdated (or incompatible) Python Selenium package: This is the source of various obscure errors. Run: `pip install -U selenium`
 * Outdated Tor Browser Bundle: Download and use a more recent TBB version.
