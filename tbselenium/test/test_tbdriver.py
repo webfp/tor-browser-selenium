@@ -1,11 +1,10 @@
 import tempfile
 import unittest
-from os.path import join, isdir
+from os.path import join, isdir, getmtime
 
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
 from tbselenium.test.fixtures import TBDriverFixture
-from tbselenium.utils import get_dir_mtime
 
 
 class TBDriverTest(unittest.TestCase):
@@ -58,22 +57,22 @@ class TBDriverTorDataDir(unittest.TestCase):
         we use a separate tor_data_dir.
         """
         tmp_dir = tempfile.mkdtemp()
-        mod_time_before = get_dir_mtime(self.TOR_DATA_PATH)
+        mod_time_before = getmtime(self.TOR_DATA_PATH)
 
         with TBDriverFixture(TBB_PATH, tor_data_dir=tmp_dir,
                              tor_cfg=cm.LAUNCH_NEW_TBB_TOR) as driver:
             driver.load_url_ensure(cm.CHECK_TPO_URL)
-        mod_time_after = get_dir_mtime(self.TOR_DATA_PATH)
+        mod_time_after = getmtime(self.TOR_DATA_PATH)
         self.assertEqual(mod_time_before, mod_time_after)
 
     def test_non_temp_tor_data_dir(self):
         """Tor data directory in TBB should be modified if we don't
         use a separate tor_data_dir.
         """
-        mod_time_before = get_dir_mtime(self.TOR_DATA_PATH)
+        mod_time_before = getmtime(self.TOR_DATA_PATH)
 
         with TBDriverFixture(TBB_PATH,
                              tor_cfg=cm.LAUNCH_NEW_TBB_TOR) as driver:
             driver.load_url_ensure(cm.CHECK_TPO_URL)
-        mod_time_after = get_dir_mtime(self.TOR_DATA_PATH)
+        mod_time_after = getmtime(self.TOR_DATA_PATH)
         self.assertNotEqual(mod_time_before, mod_time_after)

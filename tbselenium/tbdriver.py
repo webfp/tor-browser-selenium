@@ -9,9 +9,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
-from selenium.webdriver.common.utils import is_connectable
 import tbselenium.common as cm
-from tbselenium.utils import add_canvas_permission
+from tbselenium.utils import add_canvas_permission, prepend_to_env_var, is_busy
 from tbselenium.tbbinary import TBBinary
 from tbselenium.exceptions import (TBDriverConfigError, TBDriverPortError,
                                    TBDriverPathError)
@@ -69,7 +68,7 @@ class TorBrowserDriver(FirefoxDriver):
                 socks_port = cm.TBB_SOCKS_PORT  # 9150
 
         if tor_cfg == cm.LAUNCH_NEW_TBB_TOR:
-            if is_connectable(socks_port):
+            if is_busy(socks_port):
                 raise TBDriverPortError("SOCKS port %s is already in use"
                                         % socks_port)
             if socks_port != cm.TBB_SOCKS_PORT:
@@ -78,7 +77,7 @@ class TorBrowserDriver(FirefoxDriver):
                                         "port (9150). Use Stem for launching"
                                         "Tor on a custom SOCKS port")
         elif tor_cfg == cm.USE_RUNNING_TOR:
-            if not is_connectable(socks_port):
+            if not is_busy(socks_port):
                 raise TBDriverPortError("SOCKS port %s is not listening"
                                         % socks_port)
         self.socks_port = socks_port
@@ -228,8 +227,7 @@ class TorBrowserDriver(FirefoxDriver):
         environ["FONTCONFIG_FILE"] = cm.FONTCONFIG_FILE
         environ["HOME"] = self.tbb_browser_dir
         # Add "TBB_DIR/Browser" to the PATH, see issue #10.
-        current_path = environ["PATH"]
-        environ["PATH"] = "%s:%s" % (self.tbb_browser_dir, current_path)
+        prepend_to_env_var("PATH", self.tbb_browser_dir)
 
     def setup_capabilities(self):
         """Setup the required webdriver capabilities."""

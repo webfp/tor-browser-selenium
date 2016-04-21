@@ -1,21 +1,30 @@
-import tempfile
 import unittest
-from os.path import join
 import tbselenium.utils as ut
-from time import sleep
+from os.path import realpath
+from os import environ
 
 
 class UtilsTest(unittest.TestCase):
+    def test_read_file(self):
+        file_content = ut.read_file(realpath(__file__))
+        self.assertIn('whatever written here', file_content)
 
-    def test_writing_bytes_should_change_dir_mod_time(self):
-        temp_dir = tempfile.mkdtemp()
-        last_mod_time_before = ut.get_dir_mtime(temp_dir)
-        temp_file = join(temp_dir, 'temp_file')
-        sleep(0.1)
-        with open(temp_file, 'a') as f:
-            f.write('\0')
-        last_mod_time_after = ut.get_dir_mtime(temp_dir)
-        self.assertNotEqual(last_mod_time_before, last_mod_time_after)
+    def test_prepend_to_env_var(self):
+        env_var_name = "foo"
+        value1 = "bar"
+        value2 = "baz"
+
+        environ[env_var_name] = value2
+        ut.prepend_to_env_var(env_var_name, value1)
+        self.assertEqual(environ[env_var_name], ":".join([value1, value2]))
+
+        environ[env_var_name] = ""
+
+        ut.prepend_to_env_var(env_var_name, value1)
+        self.assertEqual(environ[env_var_name], value1)
+
+        ut.prepend_to_env_var("non_existent_env_var", value1)
+        self.assertEqual(environ["non_existent_env_var"], value1)
 
 if __name__ == "__main__":
     unittest.main()

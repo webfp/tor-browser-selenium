@@ -1,6 +1,6 @@
 from os import environ
 import tempfile
-from tbselenium.utils import start_xvfb, stop_xvfb
+from tbselenium.utils import start_xvfb, stop_xvfb, is_busy
 from tbselenium.test.fixtures import launch_tbb_tor_with_stem_fixture
 import tbselenium.common as cm
 from tbselenium.test import TBB_PATH
@@ -13,7 +13,8 @@ def launch_tor():
     torrc = {'ControlPort': str(cm.DEFAULT_CONTROL_PORT),
              'SOCKSPort': str(cm.DEFAULT_SOCKS_PORT),
              'DataDirectory': temp_data_dir}
-    launch_tbb_tor_with_stem_fixture(tbb_path=TBB_PATH, torrc=torrc)
+    if not is_busy(cm.DEFAULT_SOCKS_PORT):
+        launch_tbb_tor_with_stem_fixture(tbb_path=TBB_PATH, torrc=torrc)
 
 
 def pytest_sessionstart(session):

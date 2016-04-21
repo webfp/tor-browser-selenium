@@ -3,13 +3,13 @@ import pytest
 from os.path import isdir, join
 import tempfile
 
-from selenium.webdriver.common.utils import free_port, is_connectable
+from selenium.webdriver.common.utils import free_port
 
 from tbselenium.test import TBB_PATH
 from tbselenium.test.fixtures import TBDriverFixture
 from tbselenium import common as cm
 from tbselenium.tbdriver import TorBrowserDriver
-from tbselenium.utils import launch_tbb_tor_with_stem
+from tbselenium.utils import launch_tbb_tor_with_stem, is_busy
 from tbselenium.exceptions import (TBDriverPathError,
                                    TBDriverPortError,
                                    TBDriverConfigError, StemLaunchError)
@@ -67,7 +67,7 @@ class TBDriverExceptions(unittest.TestCase):
                          "Tor on a custom SOCKS port")
 
     def test_should_fail_launching_tbb_tor_on_used_port(self):
-        if not is_connectable(cm.DEFAULT_SOCKS_PORT):
+        if not is_busy(cm.DEFAULT_SOCKS_PORT):
             pytest.skip("Skipping. Start system Tor to run this test.")
         with self.assertRaises(TBDriverPortError) as exc:
             TorBrowserDriver(TBB_PATH,

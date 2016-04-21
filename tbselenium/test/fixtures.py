@@ -1,9 +1,8 @@
 from tbselenium.tbdriver import TorBrowserDriver
 import tbselenium.common as cm
 from tbselenium.exceptions import StemLaunchError, TorBrowserDriverInitError
-from tbselenium.utils import launch_tbb_tor_with_stem
+from tbselenium.utils import launch_tbb_tor_with_stem, is_busy
 from selenium.common.exceptions import TimeoutException, WebDriverException
-from selenium.webdriver.common.utils import is_connectable
 
 try:
     from httplib import CannotSendRequest
@@ -40,8 +39,7 @@ class TBDriverFixture(TorBrowserDriver):
         for each test.
         """
 
-        if kwargs.get("tor_cfg") is None and\
-                is_connectable(cm.DEFAULT_SOCKS_PORT):
+        if kwargs.get("tor_cfg") is None and is_busy(cm.DEFAULT_SOCKS_PORT):
             kwargs["tor_cfg"] = cm.USE_RUNNING_TOR
 
     def load_url_ensure(self, *args, **kwargs):
