@@ -46,8 +46,8 @@ def launch_tbb_tor_with_stem(tbb_path=None, torrc=None, tor_binary=None):
 
 
 def get_dir_mtime(dir_path):
-    """Recursively get the last modified time of a directory."""
-    return max(getmtime(_dir) for _dir, _, _ in walk(dir_path))
+    """Get the last modified time of a directory."""
+    return getmtime(dir_path)
 
 
 def gen_find_files(dir_path, pattern="*"):
