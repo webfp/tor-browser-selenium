@@ -44,6 +44,7 @@ def launch_tb_with_custom_stem(tbb_dir):
     with Controller.from_port(port=control_port) as controller:
         controller.authenticate()
         with TorBrowserDriver(tbb_dir, socks_port=socks_port,
+                              control_port=control_port,
                               tor_cfg=cm.USE_RUNNING_TOR) as driver:
             driver.load_url("https://check.torproject.org", wait_on_page=3)
             print(driver.find_element_by("h1.on").text)

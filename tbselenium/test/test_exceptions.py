@@ -58,13 +58,9 @@ class TBDriverExceptions(unittest.TestCase):
             TorBrowserDriver(TBB_PATH, pref_dict=(1, 2))
 
     def test_should_fail_launching_tbb_tor_on_custom_socks_port(self):
-        with self.assertRaises(TBDriverPortError) as exc:
+        with self.assertRaises(TBDriverPortError):
             TorBrowserDriver(TBB_PATH, socks_port=free_port(),
                              tor_cfg=cm.LAUNCH_NEW_TBB_TOR)
-        self.assertEqual(str(exc.exception),
-                         "Can only launch Tor on TBB's default"
-                         "port (9150). Use Stem for launching"
-                         "Tor on a custom SOCKS port")
 
     def test_should_fail_launching_tbb_tor_on_used_port(self):
         if not is_busy(cm.DEFAULT_SOCKS_PORT):
