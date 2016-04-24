@@ -35,6 +35,7 @@ class TorBrowserDriver(FirefoxDriver):
                  tor_data_dir="",
                  pref_dict={},
                  socks_port=None,
+                 control_port=None,
                  canvas_allowed_hosts=[]):
 
         self.tor_cfg = tor_cfg
@@ -43,7 +44,7 @@ class TorBrowserDriver(FirefoxDriver):
         self.canvas_allowed_hosts = canvas_allowed_hosts
         self.profile = webdriver.FirefoxProfile(self.tbb_profile_path)
         add_canvas_permission(self.profile.path, self.canvas_allowed_hosts)
-        self.init_socks_port(tor_cfg, socks_port)
+        self.init_ports(tor_cfg, socks_port, control_port)
         self.init_prefs(pref_dict)
         self.init_tb_version()
         self.setup_capabilities()
@@ -56,10 +57,10 @@ class TorBrowserDriver(FirefoxDriver):
         self.is_running = True
         sleep(1)
 
-    def init_socks_port(self, tor_cfg, socks_port):
+    def init_ports(self, tor_cfg, socks_port, control_port):
         """Check SOCKS port and Tor config inputs."""
         if tor_cfg not in [cm.USE_RUNNING_TOR, cm.LAUNCH_NEW_TBB_TOR]:
-            raise TBDriverConfigError("Unrecognized Tor config (tor_cfg)")
+            raise TBDriverConfigError("Unrecognized tor_cfg: %s" % tor_cfg)
 
         if socks_port is None:
             if tor_cfg == cm.USE_RUNNING_TOR:
@@ -67,20 +68,28 @@ class TorBrowserDriver(FirefoxDriver):
             else:
                 socks_port = cm.TBB_SOCKS_PORT  # 9150
 
+        if control_port is None:  # By convention, control port is SOCKS + 1
+            control_port = socks_port + 1
+
         if tor_cfg == cm.LAUNCH_NEW_TBB_TOR:
             if is_busy(socks_port):
                 raise TBDriverPortError("SOCKS port %s is already in use"
                                         % socks_port)
-            if socks_port != cm.TBB_SOCKS_PORT:
+            if is_busy(control_port):
+                raise TBDriverPortError("Control port %s is already in use"
+                                        % control_port)
+            if socks_port != cm.TBB_SOCKS_PORT or\
+                    control_port != cm.TBB_CONTROL_PORT:
                 # No support for launching TBB's Tor on a custom port, use Stem
                 raise TBDriverPortError("Can only launch Tor on TBB's default"
-                                        "port (9150). Use Stem for launching"
-                                        "Tor on a custom SOCKS port")
+                                        "ports (9150-9151). Use Stem for"
+                                        "launching Tor on a custom ports")
         elif tor_cfg == cm.USE_RUNNING_TOR:
             if not is_busy(socks_port):
                 raise TBDriverPortError("SOCKS port %s is not listening"
                                         % socks_port)
         self.socks_port = socks_port
+        self.control_port = control_port
 
     def setup_tbb_paths(self, tbb_path, tbb_fx_binary_path, tbb_profile_path,
                         tor_data_dir):
@@ -185,8 +194,7 @@ class TorBrowserDriver(FirefoxDriver):
         set_pref('extensions.torlauncher.prompt_at_startup', False)
 
     def init_prefs(self, pref_dict):
-        control_port = self.socks_port + 1
-        self.add_ports_to_fx_banned_ports(self.socks_port, control_port)
+        self.add_ports_to_fx_banned_ports(self.socks_port, self.control_port)
         set_pref = self.profile.set_preference
         set_pref('browser.startup.page', "0")
         set_pref('browser.startup.homepage', 'about:newtab')
@@ -202,14 +210,13 @@ class TorBrowserDriver(FirefoxDriver):
         # Configure Firefox to use Tor SOCKS proxy
         set_pref('network.proxy.socks_port', self.socks_port)
         set_pref('extensions.torbutton.socks_port', self.socks_port)
-        # If your control port != socks_port+1, use pref_dict to overwrite
-        set_pref('extensions.torlauncher.control_port', control_port)
+        set_pref('extensions.torlauncher.control_port', self.control_port)
         if self.tor_cfg == cm.LAUNCH_NEW_TBB_TOR:
             set_pref('extensions.torlauncher.start_tor', True)
             set_pref('extensions.torlauncher.tordatadir_path',
                      self.tor_data_dir)
         else:
-            self.set_tb_prefs_for_using_system_tor(control_port)
+            self.set_tb_prefs_for_using_system_tor(self.control_port)
         # pref_dict overwrites above preferences
         for pref_name, pref_val in pref_dict.items():
             set_pref(pref_name, pref_val)
