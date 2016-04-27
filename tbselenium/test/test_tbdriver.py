@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+from os import environ
 from os.path import join, isdir, getmtime
 
 from tbselenium import common as cm
@@ -23,6 +24,13 @@ class TBDriverTest(unittest.TestCase):
     def test_should_load_hidden_service(self):
         self.tb_driver.load_url_ensure("http://3g2upl4pq6kufc4m.onion")
         self.assertIn("DuckDuckGo", self.tb_driver.title)
+
+    def test_should_check_environ_in_prepend(self):
+        self.tb_driver.quit()
+        self.tb_driver = TBDriverFixture(TBB_PATH)
+        paths = environ["PATH"].split(':')
+        tbbpath_count = paths.count(self.tb_driver.tbb_browser_dir)
+        self.assertEqual(tbbpath_count, 1)
 
 
 class TBDriverCleanUp(unittest.TestCase):
