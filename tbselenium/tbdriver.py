@@ -92,9 +92,7 @@ class TorBrowserDriver(FirefoxDriver):
             if not is_busy(socks_port):
                 raise TBDriverPortError("SOCKS port %s is not listening"
                                         % socks_port)
-            if not is_busy(control_port):
-                raise TBDriverPortError("Control port %s is not listening"
-                                        % control_port)
+
         self.socks_port = socks_port
         self.control_port = control_port
 
@@ -222,6 +220,13 @@ class TorBrowserDriver(FirefoxDriver):
             set_pref('extensions.torlauncher.start_tor', True)
             set_pref('extensions.torlauncher.tordatadir_path',
                      self.tor_data_dir)
+            # without the following TBB 6.0a5 cannot find torrc, torrc-default
+            set_pref('extensions.torlauncher.torrc_path',
+                     join(self.tor_data_dir, "torrc"))
+            set_pref('extensions.torlauncher.torrc-defaults_path',
+                     join(self.tor_data_dir, "torrc-defaults"))
+            set_pref('extensions.torlauncher.tor_path',
+                     join(self.tbb_path, cm.DEFAULT_TOR_BINARY_PATH))
         else:
             self.set_tb_prefs_for_using_system_tor(self.control_port)
         # pref_dict overwrites above preferences
