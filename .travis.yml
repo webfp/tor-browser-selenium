@@ -16,21 +16,21 @@ matrix:
     - python: "2.7"
       env: VERSION_ARCH='4.0.8/tor-browser-linux64-4.0.8_en-US.tar.xz'
     - python: "2.7"
-      env: VERSION_ARCH='5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz'
+      env: VERSION_ARCH='5.5.5/tor-browser-linux64-5.5.5_en-US.tar.xz'
     - python: "2.7"
-      env: VERSION_ARCH='5.5.4/tor-browser-linux64-5.5.4_zh-CN.tar.xz'
+      env: VERSION_ARCH='5.5.5/tor-browser-linux64-5.5.5_zh-CN.tar.xz'
     - python: "2.7"
-      env: VERSION_ARCH='5.5.4/tor-browser-linux64-5.5.4_ar.tar.xz'
+      env: VERSION_ARCH='5.5.5/tor-browser-linux64-5.5.5_ar.tar.xz'
     - python: "2.7"
-      env: VERSION_ARCH='6.0a4/tor-browser-linux64-6.0a4_en-US.tar.xz'
+      env: VERSION_ARCH='6.0a5/tor-browser-linux64-6.0a5_en-US.tar.xz'
     - python: "2.7"
-      env: VERSION_ARCH='6.0a4/tor-browser-linux64-6.0a4_zh-CN.tar.xz'
+      env: VERSION_ARCH='6.0a5/tor-browser-linux64-6.0a5_zh-CN.tar.xz'
     - python: "2.7"
-      env: VERSION_ARCH='6.0a4/tor-browser-linux64-6.0a4_ar.tar.xz'
+      env: VERSION_ARCH='6.0a5/tor-browser-linux64-6.0a5_ar.tar.xz'
     - python: "3.4"
-      env: VERSION_ARCH='5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz'
+      env: VERSION_ARCH='5.5.5/tor-browser-linux64-5.5.5_en-US.tar.xz'
     - python: "3.5"
-      env: VERSION_ARCH='5.5.4/tor-browser-linux64-5.5.4_en-US.tar.xz'
+      env: VERSION_ARCH='5.5.5/tor-browser-linux64-5.5.5_en-US.tar.xz'
   exclude:
     - env: TRAVIS_EXTRA_JOB_WORKAROUND=true
 before_install:

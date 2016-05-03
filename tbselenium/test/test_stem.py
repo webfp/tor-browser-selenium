@@ -21,7 +21,8 @@ class TBStemTest(unittest.TestCase):
         cls.controller.authenticate()
         cls.driver = TBDriverFixture(TBB_PATH,
                                      tor_cfg=cm.USE_RUNNING_TOR,
-                                     socks_port=cm.STEM_SOCKS_PORT)
+                                     socks_port=cm.STEM_SOCKS_PORT,
+                                     control_port=cm.STEM_CONTROL_PORT)
 
     @classmethod
     def tearDownClass(cls):

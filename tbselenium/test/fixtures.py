@@ -1,7 +1,7 @@
 from tbselenium.tbdriver import TorBrowserDriver
 import tbselenium.common as cm
 from tbselenium.exceptions import StemLaunchError, TorBrowserDriverInitError
-from tbselenium.utils import launch_tbb_tor_with_stem, is_busy
+from tbselenium.utils import launch_tbb_tor_with_stem, is_busy, read_file
 from selenium.common.exceptions import TimeoutException, WebDriverException
 
 try:
@@ -11,6 +11,8 @@ except ImportError:
 
 
 MAX_FIXTURE_TRIES = 3
+
+DEBUG = False
 
 
 class TBDriverFixture(TorBrowserDriver):
@@ -23,6 +25,8 @@ class TBDriverFixture(TorBrowserDriver):
             except (TimeoutException, WebDriverException) as last_err:
                 print ("\nTBDriver init timed out. Attempt %s %s" %
                        ((tries + 1), last_err))
+                if DEBUG and "tbb_logfile_path" in kwargs:
+                    print(read_file(kwargs.get("tbb_logfile_path")))
                 super(TBDriverFixture, self).quit()  # clean up
                 continue
         # Raise if we didn't return yet

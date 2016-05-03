@@ -50,6 +50,7 @@ class TorBrowserDriver(FirefoxDriver):
         self.setup_capabilities()
         self.export_env_vars()
         self.binary = self.get_tb_binary(logfile=tbb_logfile_path)
+        self.binary.add_command_line_options('--class', '"Tor Browser"')
         super(TorBrowserDriver, self).__init__(firefox_profile=self.profile,
                                                firefox_binary=self.binary,
                                                capabilities=self.capabilities,
@@ -68,8 +69,11 @@ class TorBrowserDriver(FirefoxDriver):
             else:
                 socks_port = cm.TBB_SOCKS_PORT  # 9150
 
-        if control_port is None:  # By convention, control port is SOCKS + 1
-            control_port = socks_port + 1
+        if control_port is None:
+            if tor_cfg == cm.USE_RUNNING_TOR:
+                control_port = cm.DEFAULT_CONTROL_PORT  # 9051
+            else:
+                control_port = cm.TBB_CONTROL_PORT  # 9151
 
         if tor_cfg == cm.LAUNCH_NEW_TBB_TOR:
             if is_busy(socks_port):
@@ -88,6 +92,7 @@ class TorBrowserDriver(FirefoxDriver):
             if not is_busy(socks_port):
                 raise TBDriverPortError("SOCKS port %s is not listening"
                                         % socks_port)
+
         self.socks_port = socks_port
         self.control_port = control_port
 
@@ -215,6 +220,20 @@ class TorBrowserDriver(FirefoxDriver):
             set_pref('extensions.torlauncher.start_tor', True)
             set_pref('extensions.torlauncher.tordatadir_path',
                      self.tor_data_dir)
+            # TBB 6.0a5 cannot find the torrc-default file unless we pass it
+            # through the below prefs. This should be due to the fix for #13252
+            set_pref('extensions.torlauncher.tor_path',
+                     join(self.tbb_path, cm.DEFAULT_TOR_BINARY_PATH))
+            tbb_data_dir = join(self.tbb_path, cm.DEFAULT_TOR_DATA_PATH)
+            for torrc_file in ["torrc", "torrc-defaults"]:
+                # seek for torrc files in tor_data_dir
+                if isfile(join(self.tor_data_dir, "torrc-defaults")):
+                    set_pref('extensions.torlauncher.%s_path' % torrc_file,
+                             join(self.tor_data_dir, torrc_file))
+                else:  # fallback to Data/tor dir in TBB
+                    set_pref('extensions.torlauncher.%s_path' % torrc_file,
+                             join(tbb_data_dir, torrc_file))
+
         else:
             self.set_tb_prefs_for_using_system_tor(self.control_port)
         # pref_dict overwrites above preferences
