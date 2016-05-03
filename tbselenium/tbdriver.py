@@ -50,6 +50,7 @@ class TorBrowserDriver(FirefoxDriver):
         self.setup_capabilities()
         self.export_env_vars()
         self.binary = self.get_tb_binary(logfile=tbb_logfile_path)
+        self.binary.add_command_line_options('--class', '"Tor Browser"')
         super(TorBrowserDriver, self).__init__(firefox_profile=self.profile,
                                                firefox_binary=self.binary,
                                                capabilities=self.capabilities,
@@ -68,8 +69,11 @@ class TorBrowserDriver(FirefoxDriver):
             else:
                 socks_port = cm.TBB_SOCKS_PORT  # 9150
 
-        if control_port is None:  # By convention, control port is SOCKS + 1
-            control_port = socks_port + 1
+        if control_port is None:
+            if tor_cfg == cm.USE_RUNNING_TOR:
+                control_port = cm.DEFAULT_CONTROL_PORT  # 9051
+            else:
+                control_port = cm.TBB_CONTROL_PORT  # 9151
 
         if tor_cfg == cm.LAUNCH_NEW_TBB_TOR:
             if is_busy(socks_port):
@@ -88,6 +92,9 @@ class TorBrowserDriver(FirefoxDriver):
             if not is_busy(socks_port):
                 raise TBDriverPortError("SOCKS port %s is not listening"
                                         % socks_port)
+            if not is_busy(control_port):
+                raise TBDriverPortError("Control port %s is not listening"
+                                        % control_port)
         self.socks_port = socks_port
         self.control_port = control_port
 

@@ -42,7 +42,7 @@ Use the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/exa
 [Tested](https://travis-ci.org/webfp/tor-browser-selenium) with the following Tor Browser Bundle versions on Debian (Wheezy) and Ubuntu (14.04 & 15.10):
 
 * 4.0.8
-* 5.5.4
+* 5.5.5
 * 6.0a4
 
 ## Troubleshooting
