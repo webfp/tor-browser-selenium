@@ -220,13 +220,20 @@ class TorBrowserDriver(FirefoxDriver):
             set_pref('extensions.torlauncher.start_tor', True)
             set_pref('extensions.torlauncher.tordatadir_path',
                      self.tor_data_dir)
-            # without the following TBB 6.0a5 cannot find torrc, torrc-default
-            set_pref('extensions.torlauncher.torrc_path',
-                     join(self.tor_data_dir, "torrc"))
-            set_pref('extensions.torlauncher.torrc-defaults_path',
-                     join(self.tor_data_dir, "torrc-defaults"))
+            # TBB 6.0a5 cannot find the torrc-default file unless we pass it
+            # through the below prefs. This should be due to the fix for #13252
             set_pref('extensions.torlauncher.tor_path',
                      join(self.tbb_path, cm.DEFAULT_TOR_BINARY_PATH))
+            tbb_data_dir = join(self.tbb_path, cm.DEFAULT_TOR_DATA_PATH)
+            for torrc_file in ["torrc", "torrc-defaults"]:
+                # seek for torrc files in tor_data_dir
+                if isfile(join(self.tor_data_dir, "torrc-defaults")):
+                    set_pref('extensions.torlauncher.%s_path' % torrc_file,
+                             join(self.tor_data_dir, torrc_file))
+                else:  # fallback to Data/tor dir in TBB
+                    set_pref('extensions.torlauncher.%s_path' % torrc_file,
+                             join(tbb_data_dir, torrc_file))
+
         else:
             self.set_tb_prefs_for_using_system_tor(self.control_port)
         # pref_dict overwrites above preferences
