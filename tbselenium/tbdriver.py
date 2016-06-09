@@ -36,6 +36,7 @@ class TorBrowserDriver(FirefoxDriver):
                  pref_dict={},
                  socks_port=None,
                  control_port=None,
+                 extensions=[],
                  canvas_allowed_hosts=[]):
 
         self.tor_cfg = tor_cfg
@@ -44,6 +45,7 @@ class TorBrowserDriver(FirefoxDriver):
         self.canvas_allowed_hosts = canvas_allowed_hosts
         self.profile = webdriver.FirefoxProfile(self.tbb_profile_path)
         add_canvas_permission(self.profile.path, self.canvas_allowed_hosts)
+        self.install_extensions(extensions)
         self.init_ports(tor_cfg, socks_port, control_port)
         self.init_prefs(pref_dict)
         self.init_tb_version()
@@ -57,6 +59,10 @@ class TorBrowserDriver(FirefoxDriver):
                                                timeout=cm.TB_INIT_TIMEOUT)
         self.is_running = True
         sleep(1)
+
+    def install_extensions(self, extensions):
+        for extension in extensions:
+            self.profile.add_extension(extension)
 
     def init_ports(self, tor_cfg, socks_port, control_port):
         """Check SOCKS port and Tor config inputs."""
