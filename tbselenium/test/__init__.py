@@ -10,4 +10,4 @@ if TBB_PATH is None:
 
 TBB_PATH = abspath(TBB_PATH)
 if not isdir(TBB_PATH):
-    raise TBTestEnvVarError("`TBB_PATH` is not a directory.")
+    raise TBTestEnvVarError("TBB_PATH is not a directory: %s" % TBB_PATH)
