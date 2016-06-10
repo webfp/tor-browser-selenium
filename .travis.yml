@@ -18,25 +18,25 @@ cache:
 matrix:
   include:
     - python: "2.7"
-      env: VERSION_ARCH="${V5_LAST_STABLE}"'/tor-browser-linux64-'"${V5_LAST_STABLE}"'_en-US.tar.xz'
+      env: VERSION_ARCH="${V5_LAST_STABLE}/tor-browser-linux64-${V5_LAST_STABLE}_en-US.tar.xz"
     - python: "2.7"
-      env: VERSION_ARCH="${EXPERIMENTAL}"'/tor-browser-linux64-'"${EXPERIMENTAL}"'_en-US.tar.xz'
+      env: VERSION_ARCH="${EXPERIMENTAL}/tor-browser-linux64-${EXPERIMENTAL}_en-US.tar.xz"
     - python: "2.7"
-      env: VERSION_ARCH="${EXPERIMENTAL}"'/tor-browser-linux64-'"${EXPERIMENTAL}"'_zh-CN.tar.xz'
+      env: VERSION_ARCH="${EXPERIMENTAL}/tor-browser-linux64-${EXPERIMENTAL}_zh-CN.tar.xz"
     - python: "2.7"
-      env: VERSION_ARCH="${EXPERIMENTAL}"'/tor-browser-linux64-'"${EXPERIMENTAL}"'_ar.tar.xz'
+      env: VERSION_ARCH="${EXPERIMENTAL}/tor-browser-linux64-${EXPERIMENTAL}_ar.tar.xz"
     - python: "2.7"
-      env: VERSION_ARCH="${STABLE}"'/tor-browser-linux64-'"${STABLE}"'_en-US.tar.xz'
+      env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_en-US.tar.xz"
     - python: "2.7"
-      env: VERSION_ARCH="${STABLE}"'/tor-browser-linux64-'"${STABLE}"'_zh-CN.tar.xz'
+      env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_zh-CN.tar.xz"
     - python: "2.7"
-      env: VERSION_ARCH="${STABLE}"'/tor-browser-linux64-'"${STABLE}"'_ar.tar.xz'
+      env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_ar.tar.xz"
     - python: "2.7"
-      env: VERSION_ARCH="${HARDENED}"'/tor-browser-linux64-'"${HARDENED}"'_ALL.tar.xz'
+      env: VERSION_ARCH="${HARDENED}/tor-browser-linux64-${HARDENED}_ALL.tar.xz"
     - python: "3.4"
-      env: VERSION_ARCH="${STABLE}"'/tor-browser-linux64-'"${STABLE}"'_en-US.tar.xz'
+      env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_en-US.tar.xz"
     - python: "3.5"
-      env: VERSION_ARCH="${STABLE}"'/tor-browser-linux64-'"${STABLE}"'_en-US.tar.xz'
+      env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_en-US.tar.xz"
   exclude:
     - env: TRAVIS_EXTRA_JOB_WORKAROUND=true
 before_install:
