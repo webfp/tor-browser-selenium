@@ -22,11 +22,11 @@ matrix:
     - python: "2.7"
       env: VERSION_ARCH='5.5.5/tor-browser-linux64-5.5.5_ar.tar.xz'
     - python: "2.7"
-      env: VERSION_ARCH='6.0a5/tor-browser-linux64-6.0a5_en-US.tar.xz'
+      env: VERSION_ARCH='6.0.2/tor-browser-linux64-6.0.2_en-US.tar.xz'
     - python: "2.7"
-      env: VERSION_ARCH='6.0a5/tor-browser-linux64-6.0a5_zh-CN.tar.xz'
+      env: VERSION_ARCH='6.0.2/tor-browser-linux64-6.0.2_zh-CN.tar.xz'
     - python: "2.7"
-      env: VERSION_ARCH='6.0a5/tor-browser-linux64-6.0a5_ar.tar.xz'
+      env: VERSION_ARCH='6.0.2/tor-browser-linux64-6.0.2_ar.tar.xz'
     - python: "3.4"
       env: VERSION_ARCH='5.5.5/tor-browser-linux64-5.5.5_en-US.tar.xz'
     - python: "3.5"

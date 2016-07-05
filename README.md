@@ -43,7 +43,7 @@ Use the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/exa
 
 * 4.0.8
 * 5.5.5
-* 6.0.1
+* 6.0.2
 
 ## Troubleshooting
 
