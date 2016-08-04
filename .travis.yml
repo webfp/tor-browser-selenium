@@ -5,8 +5,8 @@ dist: trusty
 env:
   global:
     - DOWNLOAD_DIR=${HOME}/download
-    - STABLE=6.0.2
-    - EXPERIMENTAL=6.5a1
+    - STABLE=6.0.3
+    - EXPERIMENTAL=6.5a2
     - V5_LAST_STABLE=5.5.5
     - TBB_ARCHIVE_URL=https://archive.torproject.org/tor-package-archive/torbrowser
   matrix:
