@@ -1,4 +1,5 @@
 #!/bin/bash
+killall tor
 mkdir -p ${DOWNLOAD_DIR}
 echo $VERSION_ARCH
 echo ${TBB_ARCHIVE_URL}/${VERSION_ARCH}
