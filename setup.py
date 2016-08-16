@@ -8,6 +8,6 @@ setup(
     version=1.0,
     packages=["tbselenium"],
     install_requires=[
-        "selenium >= 2.45.0,<3"
+        "selenium>=2.45.0,<3"
     ]
 )
