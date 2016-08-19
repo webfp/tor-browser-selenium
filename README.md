@@ -2,14 +2,14 @@
 
 A Python library to automate Tor Browser with Selenium.
 
-## Installation and use
+## Installation
 
 ```
 git clone git@github.com:webfp/tor-browser-selenium.git
 cd tor-browser-selenium
 python setup.py install
 ```
-
+## Basic usage
 ```python
 from tbselenium.tbdriver import TorBrowserDriver
 with TorBrowserDriver("/path/to/TorBrowserBundle/") as driver:
