@@ -6,7 +6,8 @@ A Python library to automate Tor Browser with Selenium.
 
 ```
 git clone git@github.com:webfp/tor-browser-selenium.git
-pip install .
+cd tor-browser-selenium
+python setup.py install
 ```
 
 ```python
@@ -43,7 +44,7 @@ Use the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/exa
 
 * 4.0.8
 * 5.5.5
-* 6.0.1
+* 6.0.4
 
 ## Troubleshooting
 
