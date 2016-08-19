@@ -1,3 +1,5 @@
+import os
+import tempfile
 from socket import error as socket_error
 from tbselenium.tbdriver import TorBrowserDriver
 import tbselenium.common as cm
@@ -13,7 +15,8 @@ except ImportError:
 
 MAX_FIXTURE_TRIES = 3
 
-DEBUG = False
+# make sure TB logs to a file, print if init fails
+FORCE_TB_LOGS_DURING_TESTS = True
 
 
 class TBDriverFixture(TorBrowserDriver):
@@ -26,8 +29,10 @@ class TBDriverFixture(TorBrowserDriver):
             except (TimeoutException, WebDriverException, socket_error) as last_err:
                 print ("\nTBDriver init error. Attempt %s %s" %
                        ((tries + 1), last_err))
-                if DEBUG and "tbb_logfile_path" in kwargs:
-                    print(read_file(kwargs.get("tbb_logfile_path")))
+                if FORCE_TB_LOGS_DURING_TESTS:
+                    logs = read_file(kwargs.get("tbb_logfile_path"))
+                    if len(logs):
+                        print("TB logs:\n%s\n(End of TB logs)" % logs)
                 super(TBDriverFixture, self).quit()  # clean up
                 continue
         # Raise if we didn't return yet
@@ -35,9 +40,17 @@ class TBDriverFixture(TorBrowserDriver):
             TorBrowserDriverInitError("Cannot initialize")
         raise to_raise
 
+    def __del__(self):
+        # remove the temp log file if we created one
+        if FORCE_TB_LOGS_DURING_TESTS and os.path.isfile(self.log_file):
+            os.remove(self.log_file)
+
     def change_default_tor_cfg(self, kwargs):
         """Use system Tor if the caller doesn't specifically wants
         to launch a new TBB Tor.
+
+        if FORCE_TB_LOGS_DURING_TESTS is True add a log file arg to make
+        it easier to debug the failures.
 
         This makes tests faster and more robust against network
         issues since otherwise we'd have to launch a new Tor process
@@ -46,6 +59,9 @@ class TBDriverFixture(TorBrowserDriver):
 
         if kwargs.get("tor_cfg") is None and is_busy(cm.DEFAULT_SOCKS_PORT):
             kwargs["tor_cfg"] = cm.USE_RUNNING_TOR
+        if FORCE_TB_LOGS_DURING_TESTS and kwargs.get("tbb_logfile_path") is None:
+            _, self.log_file = tempfile.mkstemp()
+            kwargs["tbb_logfile_path"] = self.log_file
 
     def load_url_ensure(self, *args, **kwargs):
         """Make sure the requested URL is loaded. Retry if necessary."""
