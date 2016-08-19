@@ -54,11 +54,11 @@ Solutions to potential issues:
 * Outdated Tor Browser Bundle: Download and use a more recent TBB version.
 * Port conflict with other (`Tor`) process: Pick a different SOCKS and controller port using `socks_port` argument.
 * Use `tbb_logfile_path` argument of TorBrowserDriver to debug problems where an exception or traceback is not available or hard to understand. This can help debugging errors due to missing display, missing libraries (e.g. when the LD_LIBRARY_PATH is not set correctly) or other errors that Firefox/Tor Browser logs to standard output.
+* When you use the `LAUNCH_NEW_TBB_TOR` option and get the following [cryptic error](https://github.com/webfp/tor-browser-selenium/issues/62) during the initialization, it's likely that Tor failed to bootstrap:
 
-```python
-path_to_logfile = "ff.log"
-TorBrowserDriver(TBB_PATH, tbb_logfile_path=path_to_logfile)
-```
+ ```
+ Can't load the profile. Profile Dir: /tmp/tmpO7i1lL/webdriver-py-profilecopy If you specified a log_file in the FirefoxBinary constructor, check it for details
+ ```
 
 ## Credits
 We greatly benefited from the following two projects:
