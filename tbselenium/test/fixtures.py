@@ -1,3 +1,4 @@
+from socket import error as socket_error
 from tbselenium.tbdriver import TorBrowserDriver
 import tbselenium.common as cm
 from tbselenium.exceptions import StemLaunchError, TorBrowserDriverInitError
@@ -22,8 +23,8 @@ class TBDriverFixture(TorBrowserDriver):
         for tries in range(MAX_FIXTURE_TRIES):
             try:
                 return super(TBDriverFixture, self).__init__(*args, **kwargs)
-            except (TimeoutException, WebDriverException) as last_err:
-                print ("\nTBDriver init timed out. Attempt %s %s" %
+            except (TimeoutException, WebDriverException, socket_error) as last_err:
+                print ("\nTBDriver init error. Attempt %s %s" %
                        ((tries + 1), last_err))
                 if DEBUG and "tbb_logfile_path" in kwargs:
                     print(read_file(kwargs.get("tbb_logfile_path")))
