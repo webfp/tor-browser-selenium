@@ -216,7 +216,8 @@ class TorBrowserDriver(FirefoxDriver):
         set_pref('app.update.enabled', False)
         set_pref('extensions.torbutton.versioncheck_enabled', False)
         # following is only needed for TBB < 4.5a3 to add canvas permissions
-        set_pref('permissions.memory_only', False)
+        if self.canvas_allowed_hosts:
+            set_pref('permissions.memory_only', False)
         set_pref('extensions.torbutton.prompted_language', True)
         # Configure Firefox to use Tor SOCKS proxy
         set_pref('network.proxy.socks_port', self.socks_port)
@@ -226,20 +227,22 @@ class TorBrowserDriver(FirefoxDriver):
             set_pref('extensions.torlauncher.start_tor', True)
             set_pref('extensions.torlauncher.tordatadir_path',
                      self.tor_data_dir)
-            # TBB 6.0a5 cannot find the torrc-default file unless we pass it
-            # through the below prefs. This should be due to the fix for #13252
             set_pref('extensions.torlauncher.tor_path',
                      join(self.tbb_path, cm.DEFAULT_TOR_BINARY_PATH))
-            tbb_data_dir = join(self.tbb_path, cm.DEFAULT_TOR_DATA_PATH)
-            for torrc_file in ["torrc", "torrc-defaults"]:
-                # seek for torrc files in tor_data_dir
-                if isfile(join(self.tor_data_dir, "torrc-defaults")):
-                    set_pref('extensions.torlauncher.%s_path' % torrc_file,
-                             join(self.tor_data_dir, torrc_file))
-                else:  # fallback to Data/tor dir in TBB
-                    set_pref('extensions.torlauncher.%s_path' % torrc_file,
-                             join(tbb_data_dir, torrc_file))
-
+            # TBB > 6.0a5 cannot find the right path for torrc and
+            # torrc-defaults unless we set the corresponding pref.
+            # This should be due to the fix for #13252
+            torrc_path = join(self.tor_data_dir, "torrc")
+            set_pref('extensions.torlauncher.torrc_path', torrc_path)
+            # Fall back to torrc-defaults in tbb_path if it's not present
+            # in the (custom) tor_data_dir
+            torrc_defaults_path = join(self.tor_data_dir, "torrc-defaults")
+            if not isfile(torrc_defaults_path):
+                torrc_defaults_path = join(self.tbb_path,
+                                           cm.DEFAULT_TOR_DATA_PATH,
+                                           "torrc-defaults")
+            set_pref('extensions.torlauncher.torrc-defaults_path',
+                     torrc_defaults_path)
         else:
             self.set_tb_prefs_for_using_system_tor(self.control_port)
         # pref_dict overwrites above preferences
