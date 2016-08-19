@@ -321,13 +321,14 @@ class TorBrowserDriver(FirefoxDriver):
         self.is_running = False
         try:
             super(TorBrowserDriver, self).quit()
-        except (CannotSendRequest, AttributeError) as exc:
-            print("[tbselenium] %s" % exc)
+        except (CannotSendRequest, AttributeError):
             try:  # Clean up  if webdriver.quit() throws
-                self.binary.kill()
-                self.clean_up_profile_dirs()
+                if hasattr(self, "binary"):
+                    self.binary.kill()
+                if hasattr(self, "profile"):
+                    self.clean_up_profile_dirs()
             except Exception as e:
-                print("[tbselenium] %s" % e)
+                print("[tbselenium] Exception while quitting: %s" % e)
 
     def __enter__(self):
         return self
