@@ -1,7 +1,7 @@
 import unittest
-import pytest
 from os.path import isdir, join
 import tempfile
+import socket
 
 from selenium.webdriver.common.utils import free_port
 
@@ -19,6 +19,21 @@ MISSING_FILE = "_no_such_file_"
 
 
 class TBDriverExceptions(unittest.TestCase):
+    def setUp(self):
+        self.open_sockets = []
+
+    def tearDown(self):
+        for skt in self.open_sockets:
+            skt.close()
+
+    def occupy_port(self, port_no):
+        """Occupy the given port to simulate a port conflict."""
+        if is_busy(port_no):  # already occupied, nothing to do
+            return
+        skt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        skt.bind(("localhost", port_no))
+        skt.listen(1)
+        self.open_sockets.append(skt)
 
     def test_should_raise_for_missing_paths(self):
         with self.assertRaises(TBDriverPathError) as exc:
@@ -62,9 +77,8 @@ class TBDriverExceptions(unittest.TestCase):
             TorBrowserDriver(TBB_PATH, socks_port=free_port(),
                              tor_cfg=cm.LAUNCH_NEW_TBB_TOR)
 
-    def test_should_fail_launching_tbb_tor_on_used_port(self):
-        if not is_busy(cm.DEFAULT_SOCKS_PORT):
-            pytest.skip("Skipping. Start system Tor to run this test.")
+    def test_should_fail_launching_tbb_tor_on_used_socks_port(self):
+        self.occupy_port(cm.DEFAULT_SOCKS_PORT)
         with self.assertRaises(TBDriverPortError) as exc:
             TorBrowserDriver(TBB_PATH,
                              socks_port=cm.DEFAULT_SOCKS_PORT,
@@ -72,6 +86,16 @@ class TBDriverExceptions(unittest.TestCase):
         self.assertEqual(str(exc.exception),
                          "SOCKS port %s is already in use"
                          % cm.DEFAULT_SOCKS_PORT)
+
+    def test_should_fail_launching_tbb_tor_on_used_control_port(self):
+        self.occupy_port(cm.DEFAULT_CONTROL_PORT)
+        with self.assertRaises(TBDriverPortError) as exc:
+            TorBrowserDriver(TBB_PATH,
+                             control_port=cm.DEFAULT_CONTROL_PORT,
+                             tor_cfg=cm.LAUNCH_NEW_TBB_TOR)
+        self.assertEqual(str(exc.exception),
+                         "Control port %s is already in use"
+                         % cm.DEFAULT_CONTROL_PORT)
 
     def test_should_not_load_with_wrong_sys_socks_port(self):
         socks_port = free_port()
