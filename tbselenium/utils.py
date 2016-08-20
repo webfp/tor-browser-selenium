@@ -43,7 +43,7 @@ def is_busy(port_no):
 def prepend_to_env_var(env_var, new_value):
     """Add the given value to the beginning of the environment var."""
     if environ.get(env_var, None):
-        if not new_value in environ[env_var].split(':'):
+        if new_value not in environ[env_var].split(':'):
             environ[env_var] = "%s:%s" % (new_value, environ[env_var])
     else:
         environ[env_var] = new_value

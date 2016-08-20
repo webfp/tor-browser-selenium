@@ -61,7 +61,8 @@ class TBDriverTorDataDir(unittest.TestCase):
 
     TOR_DATA_PATH = join(TBB_PATH, cm.DEFAULT_TOR_DATA_PATH)
 
-    @pytest.mark.skipif(cm.TRAVIS, reason="Requires Tor bootstrap, not reliable on Travis")
+    @pytest.mark.skipif(cm.TRAVIS, reason="Requires Tor bootstrap,"
+                        "unreliable on Travis")
     def test_temp_tor_data_dir(self):
         """Tor data directory in TBB should not be modified if
         we use a separate tor_data_dir.
@@ -75,7 +76,8 @@ class TBDriverTorDataDir(unittest.TestCase):
         mod_time_after = getmtime(self.TOR_DATA_PATH)
         self.assertEqual(mod_time_before, mod_time_after)
 
-    @pytest.mark.skipif(cm.TRAVIS, reason="Requires Tor bootstrap, not reliable on Travis")
+    @pytest.mark.skipif(cm.TRAVIS, reason="Requires Tor bootstrap,"
+                        "unreliable on Travis")
     def test_non_temp_tor_data_dir(self):
         """Tor data directory in TBB should be modified if we don't
         use a separate tor_data_dir.

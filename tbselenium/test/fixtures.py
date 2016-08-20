@@ -26,7 +26,8 @@ class TBDriverFixture(TorBrowserDriver):
         for tries in range(MAX_FIXTURE_TRIES):
             try:
                 return super(TBDriverFixture, self).__init__(*args, **kwargs)
-            except (TimeoutException, WebDriverException, socket_error) as last_err:
+            except (TimeoutException, WebDriverException,
+                    socket_error) as last_err:
                 print ("\nTBDriver init error. Attempt %s %s" %
                        ((tries + 1), last_err))
                 if FORCE_TB_LOGS_DURING_TESTS:
@@ -41,7 +42,7 @@ class TBDriverFixture(TorBrowserDriver):
         raise to_raise
 
     def __del__(self):
-        # remove the temp log file if we created one
+        # remove the temp log file if we created
         if FORCE_TB_LOGS_DURING_TESTS and os.path.isfile(self.log_file):
             os.remove(self.log_file)
 
@@ -59,7 +60,8 @@ class TBDriverFixture(TorBrowserDriver):
 
         if kwargs.get("tor_cfg") is None and is_busy(cm.DEFAULT_SOCKS_PORT):
             kwargs["tor_cfg"] = cm.USE_RUNNING_TOR
-        if FORCE_TB_LOGS_DURING_TESTS and kwargs.get("tbb_logfile_path") is None:
+        if FORCE_TB_LOGS_DURING_TESTS and\
+                kwargs.get("tbb_logfile_path") is None:
             _, self.log_file = tempfile.mkstemp()
             kwargs["tbb_logfile_path"] = self.log_file
 
