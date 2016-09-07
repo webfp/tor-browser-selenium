@@ -5,7 +5,7 @@ A Python library to automate Tor Browser with Selenium.
 ## Installation
 
 ```
-git clone git@github.com:webfp/tor-browser-selenium.git
+git clone https://github.com/webfp/tor-browser-selenium.git
 cd tor-browser-selenium
 python setup.py install
 ```
