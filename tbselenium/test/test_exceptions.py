@@ -7,9 +7,10 @@ from selenium.webdriver.common.utils import free_port
 
 from tbselenium.test import TBB_PATH
 from tbselenium.test.fixtures import TBDriverFixture
+from tbselenium.test.process_utils import get_fx_proc_from_geckodriver_service
 from tbselenium import common as cm
+from tbselenium import utils as ut
 from tbselenium.tbdriver import TorBrowserDriver
-from tbselenium.utils import launch_tbb_tor_with_stem, is_busy
 from tbselenium.exceptions import (TBDriverPathError,
                                    TBDriverPortError,
                                    TBDriverConfigError, StemLaunchError)
@@ -28,7 +29,7 @@ class TBDriverExceptions(unittest.TestCase):
 
     def occupy_port(self, port_no):
         """Occupy the given port to simulate a port conflict."""
-        if is_busy(port_no):  # already occupied, nothing to do
+        if ut.is_busy(port_no):  # already occupied, nothing to do
             return
         skt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         skt.bind(("localhost", port_no))
@@ -117,11 +118,11 @@ class TBDriverExceptions(unittest.TestCase):
     def test_should_raise_for_stem(self):
         temp_dir = tempfile.mkdtemp()
         with self.assertRaises(StemLaunchError):
-            launch_tbb_tor_with_stem()
+            ut.launch_tbb_tor_with_stem()
         with self.assertRaises(StemLaunchError):
-            launch_tbb_tor_with_stem(tbb_path="", tor_binary="")
+            ut.launch_tbb_tor_with_stem(tbb_path="", tor_binary="")
         with self.assertRaises(StemLaunchError):
-            launch_tbb_tor_with_stem(tbb_path=temp_dir, tor_binary="")
+            ut.launch_tbb_tor_with_stem(tbb_path=temp_dir, tor_binary="")
 
     def test_missing_browser(self):
         driver = TBDriverFixture(TBB_PATH)
@@ -132,8 +133,11 @@ class TBDriverExceptions(unittest.TestCase):
         self.assertTrue(isdir(tempfolder))
         self.assertTrue(isdir(profile_path))
         # kill the browser process
-        driver.binary.kill()
-
+        if driver.capabilities.get("marionette"):
+            fx_proc = get_fx_proc_from_geckodriver_service(driver)
+            fx_proc.kill()
+        else:
+            driver.binary.kill()
         driver.quit()
         self.assertFalse(isdir(profile_path))
         self.assertFalse(isdir(tempfolder))

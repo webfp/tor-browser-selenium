@@ -14,6 +14,7 @@ from tbselenium.utils import add_canvas_permission, prepend_to_env_var, is_busy
 from tbselenium.tbbinary import TBBinary
 from tbselenium.exceptions import (TBDriverConfigError, TBDriverPortError,
                                    TBDriverPathError)
+from selenium.common.exceptions import WebDriverException
 
 
 try:
@@ -38,7 +39,8 @@ class TorBrowserDriver(FirefoxDriver):
                  control_port=None,
                  extensions=[],
                  canvas_allowed_hosts=[],
-                 default_bridge_type=""):
+                 default_bridge_type="",
+                 capabilities=None):
 
         self.tor_cfg = tor_cfg
         self.setup_tbb_paths(tbb_path, tbb_fx_binary_path,
@@ -50,7 +52,7 @@ class TorBrowserDriver(FirefoxDriver):
         self.init_ports(tor_cfg, socks_port, control_port)
         self.init_prefs(pref_dict, default_bridge_type)
         self.init_tb_version()
-        self.setup_capabilities()
+        self.setup_capabilities(capabilities)
         self.export_env_vars()
         self.binary = self.get_tb_binary(logfile=tbb_logfile_path)
         self.binary.add_command_line_options('--class', '"Tor Browser"')
@@ -271,13 +273,20 @@ class TorBrowserDriver(FirefoxDriver):
         # Add "TBB_DIR/Browser" to the PATH, see issue #10.
         prepend_to_env_var("PATH", self.tbb_browser_dir)
 
-    def setup_capabilities(self):
+    def setup_capabilities(self, caps):
         """Setup the required webdriver capabilities."""
-        self.capabilities = DesiredCapabilities.FIREFOX
-        self.capabilities.update({'handlesAlerts': True,
-                                  'databaseEnabled': True,
-                                  'javascriptEnabled': True,
-                                  'browserConnectionEnabled': True})
+        if caps is None:
+            self.capabilities = DesiredCapabilities.FIREFOX
+            self.capabilities.update({'handlesAlerts': True,
+                                      'databaseEnabled': True,
+                                      'javascriptEnabled': True,
+                                      'browserConnectionEnabled': True})
+            tbb_major_ver = int(self.tb_version.split(".")[0])
+            if cm.FORCE_GECKODRIVER and tbb_major_ver >= cm.MIN_GECKODRIVER_TBB_VERSION:
+                self.capabilities.update({'marionette': True,
+                                          'binary': self.tbb_fx_binary_path})
+        else:
+            self.capabilities = caps
 
     def get_tb_binary(self, logfile=None):
         """Return FirefoxBinary pointing to the TBB's firefox binary."""
@@ -331,9 +340,11 @@ class TorBrowserDriver(FirefoxDriver):
         self.is_running = False
         try:
             super(TorBrowserDriver, self).quit()
-        except (CannotSendRequest, AttributeError):
+        except (CannotSendRequest, AttributeError, WebDriverException):
             try:  # Clean up  if webdriver.quit() throws
-                if hasattr(self, "binary"):
+                if self.capabilities.get("marionette"):
+                    self.service.stop()
+                elif hasattr(self, "binary"):
                     self.binary.kill()
                 if hasattr(self, "profile"):
                     self.clean_up_profile_dirs()

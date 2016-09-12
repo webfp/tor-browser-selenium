@@ -7,7 +7,6 @@ env:
     - DOWNLOAD_DIR=${HOME}/download
     - STABLE=6.5.1
     - EXPERIMENTAL=6.5a3
-    - V5_LAST_STABLE=5.5.5
     - TBB_ARCHIVE_URL=https://archive.torproject.org/tor-package-archive/torbrowser
   matrix:
     - TRAVIS_EXTRA_JOB_WORKAROUND=true
@@ -16,8 +15,6 @@ cache:
   - ${DOWNLOAD_DIR}
 matrix:
   include:
-    - python: "2.7"
-      env: VERSION_ARCH="${V5_LAST_STABLE}/tor-browser-linux64-${V5_LAST_STABLE}_en-US.tar.xz"
     - python: "2.7"
       env: VERSION_ARCH="${EXPERIMENTAL}/tor-browser-linux64-${EXPERIMENTAL}_en-US.tar.xz"
     - python: "2.7"

@@ -41,30 +41,28 @@ class HTTPSEverywhereTest(unittest.TestCase):
 
 class NoScriptTest(unittest.TestCase):
 
-    WEBGL_CHECK_JS = "var cvs = document.createElement('canvas');\
-                    return cvs.getContext('experimental-webgl');"
-
     @pytest.mark.skipif(cm.TRAVIS, reason="CI doesn't support WebGL")
-    def test_noscript(self):
+    def test_noscript_should_forbid_webgl(self):
         """NoScript should disable WebGL."""
+        webgl_status_disabled = ("This browser supports WebGL 1, "
+                                 "but it is disabled or unavailable.")
         with TBDriverFixture(TBB_PATH) as driver:
-            driver.load_url_ensure(cm.CHECK_TPO_URL,
+            driver.load_url_ensure("http://webglreport.com/",
                                    wait_for_page_body=True)
-            webgl_support = driver.execute_script(self.WEBGL_CHECK_JS)
-            self.assertIsNone(webgl_support)
+            status = driver.find_element_by(".header > p").text
+            self.assertIn(webgl_status_disabled, status)
 
     @pytest.mark.skipif(cm.TRAVIS, reason="CI doesn't support WebGL")
-    def test_noscript_webgl_enabled(self):
-        """Make sure that when we disable NoScript's WebGL blocking,
-        WebGL becomes available. This is to the test method we
-        use in test_noscript is sane.
-        """
+    def test_noscript_disable_webgl_block(self):
+        """WebGL should work when we disable NoScript's WebGL blocking."""
         disable_NS_webgl_pref = {"noscript.forbidWebGL": False}
+        webgl_status_enabled = ("This browser supports WebGL 1")
         with TBDriverFixture(TBB_PATH,
                              pref_dict=disable_NS_webgl_pref) as driver:
-            driver.load_url_ensure(cm.CHECK_TPO_URL, wait_for_page_body=True)
-            webgl_support = driver.execute_script(self.WEBGL_CHECK_JS)
-            self.assertIn("getSupportedExtensions", webgl_support)
+            driver.load_url_ensure("http://webglreport.com/",
+                                   wait_for_page_body=True)
+            status = driver.find_element_by(".header > p").text
+            self.assertIn(webgl_status_enabled, status)
 
 
 class CustomExtensionTest(unittest.TestCase):
