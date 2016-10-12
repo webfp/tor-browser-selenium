@@ -36,15 +36,14 @@ class TestGeckoDriverChromeScript(unittest.TestCase):
             used_fonts = driver.execute_script(GET_USED_FONT_FACES_JS)
             self.assertIn("Arimo", str(used_fonts))
             """
-            It seems we can't set the context to "content" with Tor Browser, e.g the
-            following fails:
+            It seems we can't set the context to "content" with Tor Browser,
+            e.g the following fails:
 
                 driver.set_context('content')
-                components = driver.execute_script(COMPONENT_CLASSES_JS)
-                self.assertNotIn("mozilla.org/inspector/dom-utils", str(components))
+                cc = driver.execute_script(COMPONENT_CLASSES_JS)
+                self.assertNotIn("mozilla.org/inspector/dom-utils", str(cc))
 
-            It seems to execute in the chrome context regardless of set_context 
+            It seems to execute in the chrome context regardless of set_context
             Interestingly, Setting context to "content" works with ESR 45.3.0.
             Could it be due to Tor Browser patches or TorButton?
             """
-            
