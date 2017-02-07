@@ -5,9 +5,9 @@ setup(
     name="tbselenium",
     description="Tor Browser automation with Selenium",
     keywords=["tor", "selenium", "tor browser"],
-    version=0.1,
+    version=0.2,
     url = 'https://github.com/webfp/tor-browser-selenium',
-    packages=["tbselenium"],
+    packages=["tbselenium", "tbselenium.test"],
     install_requires=[
         "selenium>=2.45.0,<3"
     ]
