@@ -23,6 +23,7 @@ class TBDriverFixture(TorBrowserDriver):
     """Extend TorBrowserDriver to have fixtures for tests."""
     def __init__(self, *args, **kwargs):
         self.change_default_tor_cfg(kwargs)
+        last_err = None
         for tries in range(MAX_FIXTURE_TRIES):
             try:
                 return super(TBDriverFixture, self).__init__(*args, **kwargs)
@@ -67,6 +68,7 @@ class TBDriverFixture(TorBrowserDriver):
 
     def load_url_ensure(self, *args, **kwargs):
         """Make sure the requested URL is loaded. Retry if necessary."""
+        last_err = None
         for tries in range(MAX_FIXTURE_TRIES):
             try:
                 self.load_url(*args, **kwargs)
@@ -85,6 +87,7 @@ class TBDriverFixture(TorBrowserDriver):
 
 
 def launch_tbb_tor_with_stem_fixture(*args, **kwargs):
+    last_err = None
     for tries in range(MAX_FIXTURE_TRIES):
         try:
             return launch_tbb_tor_with_stem(*args, **kwargs)
