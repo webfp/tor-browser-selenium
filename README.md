@@ -17,13 +17,28 @@ with TorBrowserDriver("/path/to/TorBrowserBundle/") as driver:
 TorBrowserDriver does not download Tor Browser Bundle (TBB) for you. You should [download](https://www.torproject.org/projects/torbrowser.html.en) and extract TBB and provide its path when you initialize `TorBrowserDriver`.
 
 ## Test and development
-Install the Python packages needed for development and testing:
+Install the Python packages that are needed for development and testing:
 
 `pip install requirements-dev.txt`
 
 Run the following to launch the tests:
 
 `./run_tests.py /path/to/TorBrowserBundle/`
+
+By default, tests will be run using `Xvfb`, so the browser will not be visible.
+You can disable `Xvfb` by exporting the following environment variable:
+
+`export NO_XVFB=1`
+
+#### Running individual tests
+First, export a `TBB_PATH` environment variable that points to the TBB version you want to use:
+
+`export TBB_PATH=/path/to/tbb/tor-browser_en-US/`
+
+Then, use `py.test` to launch the tests you want, e.g.:
+
+* `py.test tbselenium/test/test_tbdriver.py`
+* `py.test tbselenium/test/test_tbdriver.py::TBDriverTest::test_should_load_check_tpo`
 
 
 ## Examples
