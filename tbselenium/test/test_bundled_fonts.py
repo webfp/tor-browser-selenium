@@ -43,8 +43,8 @@ class TBBundledFonts(unittest.TestCase):
         self.assertIn(expected_log, self.log_txt)
 
     def test_should_add_bundled_fonts(self):
-        expected_log = "adding fonts from%s" % self.bundled_fonts_dir
-        self.assertIn(expected_log, self.log_txt)
+        expected_pattern = r"adding fonts from\s?%s" % self.bundled_fonts_dir
+        self.assertRegexpMatches(self.log_txt, expected_pattern)
 
     def test_should_not_fail_to_choose_fonts(self):
         ugly_warning = "failed to choose a font, expect ugly output"
