@@ -21,14 +21,18 @@ Install the Python packages that are needed for development and testing:
 
 `pip install requirements-dev.txt`
 
+Install `xvfb` package by running `apt-get install xvfb` or using your distro's package manager.
+
 Run the following to launch the tests:
 
 `./run_tests.py /path/to/TorBrowserBundle/`
 
 By default, tests will be run using `Xvfb`, so the browser will not be visible.
-You can disable `Xvfb` by exporting the following environment variable:
+You may disable `Xvfb` by exporting the following environment variable:
 
 `export NO_XVFB=1`
+
+
 
 #### Running individual tests
 First, export a `TBB_PATH` environment variable that points to the TBB version you want to use:
