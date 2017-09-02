@@ -37,7 +37,8 @@ class TorBrowserDriver(FirefoxDriver):
                  socks_port=None,
                  control_port=None,
                  extensions=[],
-                 canvas_allowed_hosts=[]):
+                 canvas_allowed_hosts=[],
+                 default_bridge_type=""):
 
         self.tor_cfg = tor_cfg
         self.setup_tbb_paths(tbb_path, tbb_fx_binary_path,
@@ -47,7 +48,7 @@ class TorBrowserDriver(FirefoxDriver):
         add_canvas_permission(self.profile.path, self.canvas_allowed_hosts)
         self.install_extensions(extensions)
         self.init_ports(tor_cfg, socks_port, control_port)
-        self.init_prefs(pref_dict)
+        self.init_prefs(pref_dict, default_bridge_type)
         self.init_tb_version()
         self.setup_capabilities()
         self.export_env_vars()
@@ -204,7 +205,7 @@ class TorBrowserDriver(FirefoxDriver):
         set_pref('extensions.torlauncher.logmethod', 0)
         set_pref('extensions.torlauncher.prompt_at_startup', False)
 
-    def init_prefs(self, pref_dict):
+    def init_prefs(self, pref_dict, default_bridge_type):
         self.add_ports_to_fx_banned_ports(self.socks_port, self.control_port)
         set_pref = self.profile.set_preference
         set_pref('browser.startup.page', "0")
@@ -218,6 +219,12 @@ class TorBrowserDriver(FirefoxDriver):
         # following is only needed for TBB < 4.5a3 to add canvas permissions
         if self.canvas_allowed_hosts:
             set_pref('permissions.memory_only', False)
+        if default_bridge_type:
+            # to use a non-default bridge, overwrite the relevant pref, e.g.:
+            # extensions.torlauncher.default_bridge.meek-azure.1 = meek 0.0....
+            set_pref('extensions.torlauncher.default_bridge_type',
+                     default_bridge_type)
+
         set_pref('extensions.torbutton.prompted_language', True)
         # Configure Firefox to use Tor SOCKS proxy
         set_pref('network.proxy.socks_port', self.socks_port)
