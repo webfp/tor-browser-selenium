@@ -51,5 +51,3 @@ USE_RUNNING_TOR = 1  # use the tor installed and running on the system
 
 TRAVIS = "CI" in environ and "TRAVIS" in environ
 GECKODRIVER_FIXED_LOGFILE_ISSUE = 1  # can't set the log file for geckodriver'
-MIN_GECKODRIVER_TBB_VERSION = 6  # min TBB version that works with geckodriver (Firefox ESR 45+))
-FORCE_GECKODRIVER = True

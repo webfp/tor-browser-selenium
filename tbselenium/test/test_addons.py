@@ -12,7 +12,7 @@ from tbselenium.test.fixtures import TBDriverFixture
 
 class HTTPSEverywhereTest(unittest.TestCase):
 
-    # Test URLs are taken from the TBB test suite
+    # Test idea is taken from the TBB test suite
     # https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/tree/marionette/tor_browser_tests/test_https-everywhere.py#n18
     HE_HTTP_URL = "http://httpbin.org/"
     HE_HTTPS_URL = "https://httpbin.org/"
@@ -30,7 +30,6 @@ class HTTPSEverywhereTest(unittest.TestCase):
         is due to HTTPSEverywhere - not because the site is forwarding
         to HTTPS by default.
 
-        We have to find another test site if this test starts to fail.
         """
 
         disable_HE_pref = {"extensions.https_everywhere.globalEnabled": False}
@@ -77,6 +76,7 @@ class CustomExtensionTest(unittest.TestCase):
         with TBDriverFixture(TBB_PATH,
                              extensions=[xpi_path]) as driver:
             driver.load_url_ensure(cm.CHECK_TPO_URL)
+
 
 if __name__ == "__main__":
     unittest.main()
