@@ -14,15 +14,15 @@ class HTTPSEverywhereTest(unittest.TestCase):
 
     # Test URLs are taken from the TBB test suite
     # https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/tree/marionette/tor_browser_tests/test_https-everywhere.py#n18
-    HE_HTTP_URL = "http://www.freedomboxfoundation.org/thanks/"
-    HE_HTTPS_URL = "https://www.freedomboxfoundation.org/thanks/"
+    HE_HTTP_URL = "http://httpbin.org/"
+    HE_HTTPS_URL = "https://httpbin.org/"
     TEST_LONG_WAIT = 60
 
     def test_https_everywhere_redirection(self):
         with TBDriverFixture(TBB_PATH) as driver:
             driver.load_url_ensure(self.HE_HTTP_URL)
             WebDriverWait(driver, self.TEST_LONG_WAIT).\
-                until(EC.title_contains("thanks"))
+                until(EC.title_contains("httpbin"))
             self.assertEqual(driver.current_url, self.HE_HTTPS_URL)
 
     def test_https_everywhere_disabled(self):
