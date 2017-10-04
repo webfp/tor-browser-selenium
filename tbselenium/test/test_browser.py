@@ -1,12 +1,12 @@
 import pytest
 import sys
 import unittest
-import psutil
 import tempfile
 from tbselenium.test.fixtures import TBDriverFixture
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
 from tbselenium.utils import read_file
+
 from os.path import exists, getmtime, join
 from os import remove
 
@@ -43,24 +43,19 @@ class TorBrowserTest(unittest.TestCase):
         """Make sure we load the Firefox libraries from the TBB directories.
         We only test libxul (main Firefox/Gecko library) and libstdc++.
 
+        The memory map of the TB process is used to find loaded libraries.
+        http://man7.org/linux/man-pages/man5/proc.5.html
         """
-        found_xul_lib = False
-        found_std_c_lib = False
+
         driver = self.driver
+        pid = driver.binary.process.pid
         xul_lib_path = join(driver.tbb_browser_dir, "libxul.so")
         std_c_lib_path = join(driver.tbb_path, cm.DEFAULT_TOR_BINARY_DIR,
                               "libstdc++.so.6")
-        tb_proc = psutil.Process(driver.binary.process.pid)
-
-        for pmap in tb_proc.memory_maps():
-            if "libxul.so" in pmap.path:
-                self.assertEqual(xul_lib_path, pmap.path)
-                found_xul_lib = True
-            elif "libstdc++.so.6" in pmap.path:
-                self.assertEqual(std_c_lib_path, pmap.path)
-                found_std_c_lib = True
-        self.assertTrue(found_xul_lib)
-        self.assertTrue(found_std_c_lib)
+        proc_mem_map_file = "/proc/%d/maps" % (pid)
+        mem_map = read_file(proc_mem_map_file)
+        self.assertIn(xul_lib_path, mem_map)
+        self.assertIn(std_c_lib_path, mem_map)
 
     def test_tbdriver_fx_profile_not_be_modified(self):
         """Visiting a site should not modify the original profile contents."""
