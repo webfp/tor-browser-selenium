@@ -4,7 +4,6 @@ import unittest
 import psutil
 import tempfile
 from tbselenium.test.fixtures import TBDriverFixture
-from tbselenium.test.process_utils import get_fx_proc_from_geckodriver_service
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
 from tbselenium.utils import read_file
@@ -51,10 +50,7 @@ class TorBrowserTest(unittest.TestCase):
         xul_lib_path = join(driver.tbb_browser_dir, "libxul.so")
         std_c_lib_path = join(driver.tbb_path, cm.DEFAULT_TOR_BINARY_DIR,
                               "libstdc++.so.6")
-        if driver.capabilities.get("marionette"):
-            tb_proc = get_fx_proc_from_geckodriver_service(driver)
-        else:
-            tb_proc = psutil.Process(driver.binary.process.pid)
+        tb_proc = psutil.Process(driver.binary.process.pid)
 
         for pmap in tb_proc.memory_maps():
             if "libxul.so" in pmap.path:

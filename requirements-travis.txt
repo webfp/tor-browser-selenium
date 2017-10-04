@@ -1,3 +1,2 @@
 stem
 pytest-cov
-psutil

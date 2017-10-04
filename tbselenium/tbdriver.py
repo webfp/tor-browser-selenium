@@ -347,9 +347,7 @@ class TorBrowserDriver(FirefoxDriver):
             super(TorBrowserDriver, self).quit()
         except (CannotSendRequest, AttributeError, WebDriverException):
             try:  # Clean up  if webdriver.quit() throws
-                if self.capabilities.get("marionette"):
-                    self.service.stop()
-                elif hasattr(self, "binary"):
+                if hasattr(self, "binary"):
                     self.binary.kill()
                 if hasattr(self, "profile"):
                     self.clean_up_profile_dirs()

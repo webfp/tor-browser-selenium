@@ -40,11 +40,7 @@ class TBDriverCleanUp(unittest.TestCase):
 
     def test_browser_process_should_be_terminated_after_quit(self):
         driver = self.tb_driver
-        if driver.capabilities.get("marionette"):
-            fx_process = driver.service.process
-        else:
-            fx_process = driver.binary.process
-
+        fx_process = driver.binary.process
         self.assertEqual(fx_process.poll(), None)
         driver.quit()
         self.assertNotEqual(fx_process.poll(), None)

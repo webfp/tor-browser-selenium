@@ -7,7 +7,6 @@ from selenium.webdriver.common.utils import free_port
 
 from tbselenium.test import TBB_PATH
 from tbselenium.test.fixtures import TBDriverFixture
-from tbselenium.test.process_utils import get_fx_proc_from_geckodriver_service
 from tbselenium import common as cm
 from tbselenium import utils as ut
 from tbselenium.tbdriver import TorBrowserDriver
@@ -133,14 +132,11 @@ class TBDriverExceptions(unittest.TestCase):
         self.assertTrue(isdir(tempfolder))
         self.assertTrue(isdir(profile_path))
         # kill the browser process
-        if driver.capabilities.get("marionette"):
-            fx_proc = get_fx_proc_from_geckodriver_service(driver)
-            fx_proc.kill()
-        else:
-            driver.binary.kill()
+        driver.binary.kill()
         driver.quit()
         self.assertFalse(isdir(profile_path))
         self.assertFalse(isdir(tempfolder))
+
 
 if __name__ == "__main__":
     unittest.main()
