@@ -7,7 +7,6 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
 import tbselenium.common as cm
 from tbselenium.utils import add_canvas_permission, prepend_to_env_var, is_busy
@@ -276,15 +275,20 @@ class TorBrowserDriver(FirefoxDriver):
     def setup_capabilities(self, caps):
         """Setup the required webdriver capabilities."""
         if caps is None:
-            self.capabilities = DesiredCapabilities.FIREFOX
-            self.capabilities.update({'handlesAlerts': True,
-                                      'databaseEnabled': True,
-                                      'javascriptEnabled': True,
-                                      'browserConnectionEnabled': True})
-            tbb_major_ver = int(self.tb_version.split(".")[0])
-            if cm.FORCE_GECKODRIVER and tbb_major_ver >= cm.MIN_GECKODRIVER_TBB_VERSION:
-                self.capabilities.update({'marionette': True,
-                                          'binary': self.tbb_fx_binary_path})
+            self.capabilities = {
+                "capabilities": {
+                    "alwaysMatch": {
+                        "moz:firefoxOptions": {
+                            "binary": self.tbb_fx_binary_path,
+                            "args": ["-profile", self.profile.path],
+                            "log": {
+                                "level": "trace"
+                            }
+                        }
+                    }
+                }
+            }
+            # tbb_major_ver = int(self.tb_version.split(".")[0])
         else:
             self.capabilities = caps
 
