@@ -51,5 +51,5 @@ LAUNCH_NEW_TBB_TOR = 0  # use tor in TBB, launch a new process
 USE_RUNNING_TOR = 1  # use the tor installed and running on the system
 
 TRAVIS = "CI" in environ and "TRAVIS" in environ
-GECKODRIVER_FIXED_LOGFILE_ISSUE = 1  # can't set the log file for geckodriver'
+GECKODRIVER_FIXED_LOGFILE_ISSUE = 1  # can't set the log file for geckodriver
 GECKODRIVER_LOG = join(TBB_PATH, DEFAULT_TBB_BROWSER_DIR, "geckodriver.log")

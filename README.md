@@ -57,7 +57,7 @@ Check the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/e
 
 
 ## Compatibility
-[Tested](https://travis-ci.org/webfp/tor-browser-selenium) with the following Tor Browser Bundle versions on Debian (Wheezy) and Ubuntu (17.04):
+[Tested](https://travis-ci.org/webfp/tor-browser-selenium) with the following Tor Browser Bundle versions on Debian and Ubuntu:
 
 * 7.0.6
 * 7.5a5
