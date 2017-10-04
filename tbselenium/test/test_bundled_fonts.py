@@ -18,8 +18,7 @@ class TBBundledFonts(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         if cm.GECKODRIVER_FIXED_LOGFILE_ISSUE:
-            log_file = join(TBB_PATH, cm.DEFAULT_TBB_BROWSER_DIR,
-                            "geckodriver.log")
+            log_file = cm.GECKODRIVER_LOG
         else:
             _, log_file = tempfile.mkstemp()
 

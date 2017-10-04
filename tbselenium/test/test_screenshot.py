@@ -17,7 +17,7 @@ class ScreenshotTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        _, cls.temp_file = tempfile.mkstemp()
+        _, cls.temp_file = tempfile.mkstemp(suffix=".png")
         # Passing canvas_allowed_hosts is not needed for TBB >= 4.5a3
         canvas_allowed = [cm.CHECK_TPO_HOST]
         cls.driver = TBDriverFixture(TBB_PATH,

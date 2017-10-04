@@ -6,7 +6,6 @@ import tbselenium.common as cm
 from tbselenium.exceptions import StemLaunchError, TorBrowserDriverInitError
 from tbselenium.utils import launch_tbb_tor_with_stem, is_busy, read_file
 from selenium.common.exceptions import TimeoutException, WebDriverException
-from tbselenium.test import TBB_PATH
 
 try:
     from httplib import CannotSendRequest
@@ -25,7 +24,6 @@ class TBDriverFixture(TorBrowserDriver):
     def __init__(self, *args, **kwargs):
         self.change_default_tor_cfg(kwargs)
         last_err = None
-        # from tbgeckodriver
         log_file = kwargs["tbb_logfile_path"]
         if cm.GECKODRIVER_FIXED_LOGFILE_ISSUE:
             open(log_file, "w").close()  # reset the file
@@ -70,9 +68,7 @@ class TBDriverFixture(TorBrowserDriver):
         if FORCE_TB_LOGS_DURING_TESTS and\
                 kwargs.get("tbb_logfile_path") is None:
             if cm.GECKODRIVER_FIXED_LOGFILE_ISSUE:
-                self.log_file = os.path.join(TBB_PATH,
-                                             cm.DEFAULT_TBB_BROWSER_DIR,
-                                             "geckodriver.log")
+                self.log_file = cm.GECKODRIVER_LOG
             else:
                 _, self.log_file = tempfile.mkstemp()
             kwargs["tbb_logfile_path"] = self.log_file

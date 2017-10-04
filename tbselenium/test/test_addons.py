@@ -41,8 +41,7 @@ class HTTPSEverywhereTest(unittest.TestCase):
 class NoScriptTest(unittest.TestCase):
 
     @pytest.mark.skipif(cm.TRAVIS, reason="CI doesn't support WebGL")
-    def test_noscript_should_forbid_webgl(self):
-        """NoScript should disable WebGL."""
+    def test_noscript_should_disable_webgl(self):
         webgl_status_disabled = ("This browser supports WebGL 1, "
                                  "but it is disabled or unavailable.")
         with TBDriverFixture(TBB_PATH) as driver:

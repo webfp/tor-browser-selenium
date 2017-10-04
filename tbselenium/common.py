@@ -1,5 +1,6 @@
 from os.path import join
 from os import environ
+from tbselenium.test import TBB_PATH
 
 # DEFAULT TBB PATHS works for TBB versions v4.x and above
 # Old TBB versions (V3.X or below) have different directory structures
@@ -51,3 +52,4 @@ USE_RUNNING_TOR = 1  # use the tor installed and running on the system
 
 TRAVIS = "CI" in environ and "TRAVIS" in environ
 GECKODRIVER_FIXED_LOGFILE_ISSUE = 1  # can't set the log file for geckodriver'
+GECKODRIVER_LOG = join(TBB_PATH, DEFAULT_TBB_BROWSER_DIR, "geckodriver.log")

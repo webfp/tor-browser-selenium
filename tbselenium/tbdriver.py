@@ -7,13 +7,13 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
 import tbselenium.common as cm
 from tbselenium.utils import add_canvas_permission, prepend_to_env_var, is_busy
 from tbselenium.tbbinary import TBBinary
 from tbselenium.exceptions import (TBDriverConfigError, TBDriverPortError,
                                    TBDriverPathError)
-from selenium.common.exceptions import WebDriverException
 
 
 try:

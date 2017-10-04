@@ -8,8 +8,8 @@ from selenium.webdriver.common.utils import free_port
 from tbselenium.test import TBB_PATH
 from tbselenium.test.fixtures import TBDriverFixture
 from tbselenium import common as cm
-from tbselenium.utils import launch_tbb_tor_with_stem, is_busy
 from tbselenium.tbdriver import TorBrowserDriver
+from tbselenium.utils import launch_tbb_tor_with_stem, is_busy
 from tbselenium.exceptions import (TBDriverPathError,
                                    TBDriverPortError,
                                    TBDriverConfigError, StemLaunchError)
