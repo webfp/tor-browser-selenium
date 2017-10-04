@@ -8,7 +8,7 @@ from selenium.webdriver.common.utils import free_port
 from tbselenium.test import TBB_PATH
 from tbselenium.test.fixtures import TBDriverFixture
 from tbselenium import common as cm
-from tbselenium import utils as ut
+from tbselenium.utils import launch_tbb_tor_with_stem, is_busy
 from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.exceptions import (TBDriverPathError,
                                    TBDriverPortError,
@@ -28,7 +28,7 @@ class TBDriverExceptions(unittest.TestCase):
 
     def occupy_port(self, port_no):
         """Occupy the given port to simulate a port conflict."""
-        if ut.is_busy(port_no):  # already occupied, nothing to do
+        if is_busy(port_no):  # already occupied, nothing to do
             return
         skt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         skt.bind(("localhost", port_no))
@@ -117,11 +117,11 @@ class TBDriverExceptions(unittest.TestCase):
     def test_should_raise_for_stem(self):
         temp_dir = tempfile.mkdtemp()
         with self.assertRaises(StemLaunchError):
-            ut.launch_tbb_tor_with_stem()
+            launch_tbb_tor_with_stem()
         with self.assertRaises(StemLaunchError):
-            ut.launch_tbb_tor_with_stem(tbb_path="", tor_binary="")
+            launch_tbb_tor_with_stem(tbb_path="", tor_binary="")
         with self.assertRaises(StemLaunchError):
-            ut.launch_tbb_tor_with_stem(tbb_path=temp_dir, tor_binary="")
+            launch_tbb_tor_with_stem(tbb_path=temp_dir, tor_binary="")
 
     def test_missing_browser(self):
         driver = TBDriverFixture(TBB_PATH)
