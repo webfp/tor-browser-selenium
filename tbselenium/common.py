@@ -12,8 +12,8 @@ DEFAULT_TBB_DATA_DIR = join(DEFAULT_TBB_TORBROWSER_DIR, 'Data')
 DEFAULT_TBB_PROFILE_PATH = join(DEFAULT_TBB_DATA_DIR, 'Browser',
                                 'profile.default')
 DEFAULT_TOR_DATA_PATH = join(DEFAULT_TBB_DATA_DIR, 'Tor')
-TB_VERSIONS_PATH = join(DEFAULT_TBB_TORBROWSER_DIR,
-                        'Docs', 'sources', 'versions')
+TB_CHANGE_LOG_PATH = join(DEFAULT_TBB_TORBROWSER_DIR,
+                          'Docs', 'ChangeLog.txt')
 
 # Directories for bundled fonts - Linux only
 DEFAULT_FONTCONFIG_PATH = join(DEFAULT_TBB_DATA_DIR, 'fontconfig')

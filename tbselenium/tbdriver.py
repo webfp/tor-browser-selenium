@@ -305,10 +305,11 @@ class TorBrowserDriver(FirefoxDriver):
 
     def init_tb_version(self):
         self.tb_version = "Unknown"
-        version_file = join(self.tbb_path, cm.TB_VERSIONS_PATH)
-        for line in open(version_file):
-            if "TORBROWSER_VERSION=" in line:
-                self.tb_version = line.split("=")[-1]
+        change_log_file = join(self.tbb_path, cm.TB_CHANGE_LOG_PATH)
+        for line in open(change_log_file):
+            if line.startswith("Tor Browser ") and (" -- " in line):
+                self.tb_version = line.split(" ")[2]
+                break
 
     @property
     def supports_sec_slider(self):
