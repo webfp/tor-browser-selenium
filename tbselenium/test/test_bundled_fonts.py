@@ -17,7 +17,11 @@ class TBBundledFonts(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        _, log_file = tempfile.mkstemp()
+        if cm.GECKODRIVER_FIXED_LOGFILE_ISSUE:
+            log_file = cm.GECKODRIVER_LOG
+        else:
+            _, log_file = tempfile.mkstemp()
+
         # https://www.freedesktop.org/software/fontconfig/fontconfig-user.html
         environ["FC_DEBUG"] = "%d" % (1024 + 8 + 1)
         cls.driver = TBDriverFixture(TBB_PATH, tbb_logfile_path=log_file)
@@ -33,6 +37,7 @@ class TBBundledFonts(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        environ["FC_DEBUG"] = "0"
         if cls.driver:
             cls.driver.quit()
 

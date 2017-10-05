@@ -1,5 +1,6 @@
 from os.path import join
 from os import environ
+from tbselenium.test import TBB_PATH
 
 # DEFAULT TBB PATHS works for TBB versions v4.x and above
 # Old TBB versions (V3.X or below) have different directory structures
@@ -12,8 +13,8 @@ DEFAULT_TBB_DATA_DIR = join(DEFAULT_TBB_TORBROWSER_DIR, 'Data')
 DEFAULT_TBB_PROFILE_PATH = join(DEFAULT_TBB_DATA_DIR, 'Browser',
                                 'profile.default')
 DEFAULT_TOR_DATA_PATH = join(DEFAULT_TBB_DATA_DIR, 'Tor')
-TB_VERSIONS_PATH = join(DEFAULT_TBB_TORBROWSER_DIR,
-                        'Docs', 'sources', 'versions')
+TB_CHANGE_LOG_PATH = join(DEFAULT_TBB_TORBROWSER_DIR,
+                          'Docs', 'ChangeLog.txt')
 
 # Directories for bundled fonts - Linux only
 DEFAULT_FONTCONFIG_PATH = join(DEFAULT_TBB_DATA_DIR, 'fontconfig')
@@ -50,3 +51,5 @@ LAUNCH_NEW_TBB_TOR = 0  # use tor in TBB, launch a new process
 USE_RUNNING_TOR = 1  # use the tor installed and running on the system
 
 TRAVIS = "CI" in environ and "TRAVIS" in environ
+GECKODRIVER_FIXED_LOGFILE_ISSUE = 1  # can't set the log file for geckodriver
+GECKODRIVER_LOG = join(TBB_PATH, DEFAULT_TBB_BROWSER_DIR, "geckodriver.log")

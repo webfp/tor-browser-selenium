@@ -7,7 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver import DesiredCapabilities
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
 import tbselenium.common as cm
 from tbselenium.utils import add_canvas_permission, prepend_to_env_var, is_busy
@@ -38,7 +38,8 @@ class TorBrowserDriver(FirefoxDriver):
                  control_port=None,
                  extensions=[],
                  canvas_allowed_hosts=[],
-                 default_bridge_type=""):
+                 default_bridge_type="",
+                 capabilities=None):
 
         self.tor_cfg = tor_cfg
         self.setup_tbb_paths(tbb_path, tbb_fx_binary_path,
@@ -50,7 +51,7 @@ class TorBrowserDriver(FirefoxDriver):
         self.init_ports(tor_cfg, socks_port, control_port)
         self.init_prefs(pref_dict, default_bridge_type)
         self.init_tb_version()
-        self.setup_capabilities()
+        self.setup_capabilities(capabilities)
         self.export_env_vars()
         self.binary = self.get_tb_binary(logfile=tbb_logfile_path)
         self.binary.add_command_line_options('--class', '"Tor Browser"')
@@ -271,13 +272,25 @@ class TorBrowserDriver(FirefoxDriver):
         # Add "TBB_DIR/Browser" to the PATH, see issue #10.
         prepend_to_env_var("PATH", self.tbb_browser_dir)
 
-    def setup_capabilities(self):
+    def setup_capabilities(self, caps):
         """Setup the required webdriver capabilities."""
-        self.capabilities = DesiredCapabilities.FIREFOX
-        self.capabilities.update({'handlesAlerts': True,
-                                  'databaseEnabled': True,
-                                  'javascriptEnabled': True,
-                                  'browserConnectionEnabled': True})
+        if caps is None:
+            self.capabilities = {
+                "capabilities": {
+                    "alwaysMatch": {
+                        "moz:firefoxOptions": {
+                            "binary": self.tbb_fx_binary_path,
+                            "args": ["-profile", self.profile.path],
+                            "log": {
+                                "level": "trace"
+                            }
+                        }
+                    }
+                }
+            }
+            # tbb_major_ver = int(self.tb_version.split(".")[0])
+        else:
+            self.capabilities = caps
 
     def get_tb_binary(self, logfile=None):
         """Return FirefoxBinary pointing to the TBB's firefox binary."""
@@ -292,10 +305,11 @@ class TorBrowserDriver(FirefoxDriver):
 
     def init_tb_version(self):
         self.tb_version = "Unknown"
-        version_file = join(self.tbb_path, cm.TB_VERSIONS_PATH)
-        for line in open(version_file):
-            if "TORBROWSER_VERSION=" in line:
-                self.tb_version = line.split("=")[-1]
+        change_log_file = join(self.tbb_path, cm.TB_CHANGE_LOG_PATH)
+        for line in open(change_log_file):
+            if line.startswith("Tor Browser ") and (" -- " in line):
+                self.tb_version = line.split(" ")[2]
+                break
 
     @property
     def supports_sec_slider(self):
@@ -331,7 +345,7 @@ class TorBrowserDriver(FirefoxDriver):
         self.is_running = False
         try:
             super(TorBrowserDriver, self).quit()
-        except (CannotSendRequest, AttributeError):
+        except (CannotSendRequest, AttributeError, WebDriverException):
             try:  # Clean up  if webdriver.quit() throws
                 if hasattr(self, "binary"):
                     self.binary.kill()
