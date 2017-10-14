@@ -38,5 +38,6 @@ def main():
     args = parser.parse_args()
     launch_browsers_in_parallel(args.tbb_path)
 
+
 if __name__ == '__main__':
     main()

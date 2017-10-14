@@ -23,5 +23,6 @@ def main():
     args = parser.parse_args()
     search_with_ddg_hidden_service(args.tbb_path)
 
+
 if __name__ == '__main__':
     main()

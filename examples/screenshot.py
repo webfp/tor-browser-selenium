@@ -21,5 +21,6 @@ def main():
     args = parser.parse_args()
     visit_and_capture(args.tbb_path, args.url)
 
+
 if __name__ == '__main__':
     main()
