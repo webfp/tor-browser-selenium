@@ -15,10 +15,7 @@ class TorBrowserTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if cm.GECKODRIVER_FIXED_LOGFILE_ISSUE:
-            cls.log_file = cm.GECKODRIVER_LOG
-        else:
-            _, cls.log_file = tempfile.mkstemp()
+        _, cls.log_file = tempfile.mkstemp()
         cls.driver = TBDriverFixture(TBB_PATH, tbb_logfile_path=cls.log_file)
 
     @classmethod

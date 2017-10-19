@@ -25,8 +25,6 @@ class TBDriverFixture(TorBrowserDriver):
         self.change_default_tor_cfg(kwargs)
         last_err = None
         log_file = kwargs["tbb_logfile_path"]
-        if cm.GECKODRIVER_FIXED_LOGFILE_ISSUE:
-            open(log_file, "w").close()  # reset the file
 
         for tries in range(MAX_FIXTURE_TRIES):
             try:
@@ -67,10 +65,7 @@ class TBDriverFixture(TorBrowserDriver):
             kwargs["tor_cfg"] = cm.USE_RUNNING_TOR
         if FORCE_TB_LOGS_DURING_TESTS and\
                 kwargs.get("tbb_logfile_path") is None:
-            if cm.GECKODRIVER_FIXED_LOGFILE_ISSUE:
-                self.log_file = cm.GECKODRIVER_LOG
-            else:
-                _, self.log_file = tempfile.mkstemp()
+            _, self.log_file = tempfile.mkstemp()
             kwargs["tbb_logfile_path"] = self.log_file
 
     def load_url_ensure(self, *args, **kwargs):
