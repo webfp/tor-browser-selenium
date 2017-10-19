@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
 import tbselenium.common as cm
-from tbselenium.utils import add_canvas_permission, prepend_to_env_var, is_busy
+from tbselenium.utils import prepend_to_env_var, is_busy
 from tbselenium.tbbinary import TBBinary
 from tbselenium.exceptions import (TBDriverConfigError, TBDriverPortError,
                                    TBDriverPathError)
@@ -37,16 +37,13 @@ class TorBrowserDriver(FirefoxDriver):
                  socks_port=None,
                  control_port=None,
                  extensions=[],
-                 canvas_allowed_hosts=[],
                  default_bridge_type="",
                  capabilities=None):
 
         self.tor_cfg = tor_cfg
         self.setup_tbb_paths(tbb_path, tbb_fx_binary_path,
                              tbb_profile_path, tor_data_dir)
-        self.canvas_allowed_hosts = canvas_allowed_hosts
         self.profile = webdriver.FirefoxProfile(self.tbb_profile_path)
-        add_canvas_permission(self.profile.path, self.canvas_allowed_hosts)
         self.install_extensions(extensions)
         self.init_ports(tor_cfg, socks_port, control_port)
         self.init_prefs(pref_dict, default_bridge_type)
@@ -217,9 +214,6 @@ class TorBrowserDriver(FirefoxDriver):
         # disable auto-update
         set_pref('app.update.enabled', False)
         set_pref('extensions.torbutton.versioncheck_enabled', False)
-        # following is only needed for TBB < 4.5a3 to add canvas permissions
-        if self.canvas_allowed_hosts:
-            set_pref('permissions.memory_only', False)
         if default_bridge_type:
             # to use a non-default bridge, overwrite the relevant pref, e.g.:
             # extensions.torlauncher.default_bridge.meek-azure.1 = meek 0.0....
