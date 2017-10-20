@@ -31,8 +31,7 @@ class TestGeckoDriverChromeScript(unittest.TestCase):
             # do not disable this pref when crawling untrusted sites
             pref_dict = {"dom.ipc.cpows.forbid-unsafe-from-browser": False}
 
-            with TBDriverFixture(TBB_PATH, tor_cfg=USE_RUNNING_TOR,
-                                 pref_dict=pref_dict) as driver:
+            with TBDriverFixture(TBB_PATH, pref_dict=pref_dict) as driver:
                 driver.load_url_ensure(CHECK_TPO_URL)
                 driver.set_context('chrome')
                 components = driver.execute_script(COMPONENT_CLASSES_JS)

@@ -34,6 +34,8 @@ matrix:
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
+  - sudo apt-get -qq update
+  - sudo apt-get install -y tor
 install:
   - pip install -r requirements-travis.txt
   - easy_install .
