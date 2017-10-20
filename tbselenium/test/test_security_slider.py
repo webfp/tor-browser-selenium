@@ -17,8 +17,6 @@ class TBSecuritySlider(unittest.TestCase):
         """Slider setting `High` should disable JavaScript."""
         with TBDriverFixture(TBB_PATH,
                              pref_dict={SEC_SLIDER_PREF: 1}) as driver:
-            if not driver.supports_sec_slider:
-                pytest.skip("Security slider is not supported")
             driver.load_url_ensure(cm.CHECK_TPO_URL)
             try:
                 driver.find_element_by("JavaScript is enabled.",
@@ -33,8 +31,6 @@ class TBSecuritySlider(unittest.TestCase):
         for sec_slider_setting in [2, 3, 4]:
             slider_dict = {SEC_SLIDER_PREF: sec_slider_setting}
             with TBDriverFixture(TBB_PATH, pref_dict=slider_dict) as driver:
-                if not driver.supports_sec_slider:
-                    pytest.skip("Security slider is not supported")
                 driver.load_url_ensure(cm.CHECK_TPO_URL)
                 driver.find_element_by("JavaScript is enabled.",
                                        find_by=By.LINK_TEXT, timeout=5)

@@ -24,7 +24,7 @@ class TBDriverFixture(TorBrowserDriver):
     def __init__(self, *args, **kwargs):
         self.change_default_tor_cfg(kwargs)
         last_err = None
-        log_file = kwargs["tbb_logfile_path"]
+        log_file = kwargs.get("tbb_logfile_path")
 
         for tries in range(MAX_FIXTURE_TRIES):
             try:
@@ -34,7 +34,7 @@ class TBDriverFixture(TorBrowserDriver):
                 print ("\nTBDriver init error. Attempt %s %s" %
                        ((tries + 1), last_err))
                 if FORCE_TB_LOGS_DURING_TESTS:
-                    logs = read_file(kwargs.get("tbb_logfile_path"))
+                    logs = read_file(log_file)
                     if len(logs):
                         print("TB logs:\n%s\n(End of TB logs)" % logs)
                 super(TBDriverFixture, self).quit()  # clean up
@@ -50,19 +50,22 @@ class TBDriverFixture(TorBrowserDriver):
             os.remove(self.log_file)
 
     def change_default_tor_cfg(self, kwargs):
-        """Use system Tor if the caller doesn't specifically wants
+        """Use the Tor that we started if the caller doesn't specifically wants
         to launch a new TBB Tor.
-
-        if FORCE_TB_LOGS_DURING_TESTS is True add a log file arg to make
-        it easier to debug the failures.
 
         This makes tests faster and more robust against network
         issues since otherwise we'd have to launch a new Tor process
         for each test.
+
+        if FORCE_TB_LOGS_DURING_TESTS is True add a log file arg to make
+        it easier to debug the failures.
+
         """
 
         if kwargs.get("tor_cfg") is None and is_busy(cm.DEFAULT_SOCKS_PORT):
             kwargs["tor_cfg"] = cm.USE_RUNNING_TOR
+            kwargs["socks_port"] = cm.DEFAULT_SOCKS_PORT
+            kwargs["control_port"] = cm.DEFAULT_CONTROL_PORT
         if FORCE_TB_LOGS_DURING_TESTS and\
                 kwargs.get("tbb_logfile_path") is None:
             _, self.log_file = tempfile.mkstemp()

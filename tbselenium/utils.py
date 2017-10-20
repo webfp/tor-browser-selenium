@@ -60,16 +60,17 @@ def launch_tbb_tor_with_stem(tbb_path=None, torrc=None, tor_binary=None):
     """Launch the Tor binary in tbb_path using Stem."""
     if not (tor_binary or tbb_path):
         raise StemLaunchError("Either pass tbb_path or tor_binary")
+
     if not tor_binary and tbb_path:
         tor_binary = join(tbb_path, cm.DEFAULT_TOR_BINARY_PATH)
+
     if not isfile(tor_binary):
         raise StemLaunchError("Invalid Tor binary")
 
     prepend_to_env_var("LD_LIBRARY_PATH", dirname(tor_binary))
-    temp_data_dir = tempfile.mkdtemp()
     if torrc is None:
         torrc = {'ControlPort': str(cm.STEM_CONTROL_PORT),
                  'SOCKSPort': str(cm.STEM_SOCKS_PORT),
-                 'DataDirectory': temp_data_dir}
+                 'DataDirectory': tempfile.mkdtemp()}
 
     return launch_tor_with_config(config=torrc, tor_cmd=tor_binary)

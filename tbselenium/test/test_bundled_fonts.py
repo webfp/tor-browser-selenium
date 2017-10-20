@@ -23,9 +23,6 @@ class TBBundledFonts(unittest.TestCase):
         environ["FC_DEBUG"] = "%d" % (1024 + 8 + 1)
         cls.driver = TBDriverFixture(TBB_PATH, tbb_logfile_path=log_file)
         driver = cls.driver
-        if not driver.supports_bundled_fonts:
-            cls.tearDownClass()
-            pytest.skip("Skip bundled font tests. V%s" % driver.tb_version)
         driver.load_url_ensure("https://www.wikipedia.org/")
         cls.log_txt = ut.read_file(log_file)
         cls.bundled_fonts_dir = join(driver.tbb_path,

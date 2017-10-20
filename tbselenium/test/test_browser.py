@@ -2,6 +2,7 @@ import pytest
 import sys
 import unittest
 import tempfile
+import psutil
 from tbselenium.test.fixtures import TBDriverFixture
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
@@ -44,11 +45,18 @@ class TorBrowserTest(unittest.TestCase):
         """
 
         driver = self.driver
-        pid = driver.binary.process.pid
+        geckodriver_pid = driver.service.process.pid
+        process = psutil.Process(geckodriver_pid)
+        tbbinary_path = self.driver.binary.which('firefox')
+        for child in process.children():
+            if tbbinary_path == child.exe():
+                tb_pid = child.pid
+                break
+
         xul_lib_path = join(driver.tbb_browser_dir, "libxul.so")
         std_c_lib_path = join(driver.tbb_path, cm.DEFAULT_TOR_BINARY_DIR,
                               "libstdc++.so.6")
-        proc_mem_map_file = "/proc/%d/maps" % (pid)
+        proc_mem_map_file = "/proc/%d/maps" % (tb_pid)
         mem_map = read_file(proc_mem_map_file)
         self.assertIn(xul_lib_path, mem_map)
         self.assertIn(std_c_lib_path, mem_map)

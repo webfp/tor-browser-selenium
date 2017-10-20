@@ -23,7 +23,8 @@ class TBDriverTest(unittest.TestCase):
         self.assertEqual(status.text, congrats)
 
     def test_should_load_hidden_service(self):
-        self.tb_driver.load_url_ensure("http://3g2upl4pq6kufc4m.onion")
+        self.tb_driver.load_url_ensure("http://3g2upl4pq6kufc4m.onion",
+                                       wait_for_page_body=True)
         self.assertIn("DuckDuckGo", self.tb_driver.title)
 
     def test_should_check_environ_in_prepend(self):
@@ -38,14 +39,14 @@ class TBDriverCleanUp(unittest.TestCase):
     def setUp(self):
         self.tb_driver = TBDriverFixture(TBB_PATH)
 
-    def test_browser_process_should_be_terminated_after_quit(self):
+    def test_should_terminate_geckodriver_process_on_quit(self):
         driver = self.tb_driver
-        fx_process = driver.binary.process
-        self.assertEqual(fx_process.poll(), None)
+        geckodriver_process = driver.service.process
+        self.assertEqual(geckodriver_process.poll(), None)
         driver.quit()
-        self.assertNotEqual(fx_process.poll(), None)
+        self.assertNotEqual(geckodriver_process.poll(), None)
 
-    def test_profile_dirs_should_be_removed(self):
+    def test_should_remove_profile_dirs_on_quit(self):
         driver = self.tb_driver
         tempfolder = driver.profile.tempfolder
         profile_path = driver.profile.path

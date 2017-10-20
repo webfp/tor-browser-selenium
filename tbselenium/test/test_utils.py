@@ -26,5 +26,6 @@ class UtilsTest(unittest.TestCase):
         ut.prepend_to_env_var("non_existent_env_var", value1)
         self.assertEqual(environ["non_existent_env_var"], value1)
 
+
 if __name__ == "__main__":
     unittest.main()

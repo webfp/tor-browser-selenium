@@ -2,3 +2,4 @@ pyvirtualdisplay
 stem
 pytest
 pytest-cov
+psutil

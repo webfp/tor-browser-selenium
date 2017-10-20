@@ -132,8 +132,12 @@ class TBDriverExceptions(unittest.TestCase):
         self.assertTrue(isdir(tempfolder))
         self.assertTrue(isdir(profile_path))
         # kill the browser process
-        driver.binary.kill()
-        driver.quit()
+        if driver.w3c:
+            driver.service.stop()
+            driver.quit()
+        else:
+            driver.binary.kill()
+            driver.quit()
         self.assertFalse(isdir(profile_path))
         self.assertFalse(isdir(tempfolder))
 

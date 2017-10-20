@@ -2,7 +2,6 @@ import shutil
 from os import environ, chdir
 from os.path import isdir, isfile, join, abspath
 from time import sleep
-from distutils.version import LooseVersion
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -47,7 +46,6 @@ class TorBrowserDriver(FirefoxDriver):
         self.install_extensions(extensions)
         self.init_ports(tor_cfg, socks_port, control_port)
         self.init_prefs(pref_dict, default_bridge_type)
-        self.init_tb_version()
         self.setup_capabilities(capabilities)
         self.export_env_vars()
         self.binary = self.get_tb_binary(logfile=tbb_logfile_path)
@@ -55,7 +53,8 @@ class TorBrowserDriver(FirefoxDriver):
         super(TorBrowserDriver, self).__init__(firefox_profile=self.profile,
                                                firefox_binary=self.binary,
                                                capabilities=self.capabilities,
-                                               timeout=cm.TB_INIT_TIMEOUT)
+                                               timeout=cm.TB_INIT_TIMEOUT,
+                                               log_path=tbb_logfile_path)
         self.is_running = True
         sleep(1)
 
@@ -270,19 +269,15 @@ class TorBrowserDriver(FirefoxDriver):
         """Setup the required webdriver capabilities."""
         if caps is None:
             self.capabilities = {
+                "marionette": True,
                 "capabilities": {
                     "alwaysMatch": {
                         "moz:firefoxOptions": {
-                            "binary": self.tbb_fx_binary_path,
-                            "args": ["-profile", self.profile.path],
-                            "log": {
-                                "level": "trace"
-                            }
+                            "log": {"level": "info"}
                         }
                     }
                 }
             }
-            # tbb_major_ver = int(self.tb_version.split(".")[0])
         else:
             self.capabilities = caps
 
@@ -296,31 +291,6 @@ class TorBrowserDriver(FirefoxDriver):
     def is_connection_error_page(self):
         """Check if we get a connection error, i.e. 'Problem loading page'."""
         return "ENTITY connectionFailure.title" in self.page_source
-
-    def init_tb_version(self):
-        self.tb_version = "Unknown"
-        change_log_file = join(self.tbb_path, cm.TB_CHANGE_LOG_PATH)
-        for line in open(change_log_file):
-            if line.startswith("Tor Browser ") and (" -- " in line):
-                self.tb_version = line.split(" ")[2]
-                break
-
-    @property
-    def supports_sec_slider(self):
-        """Checks if security slider is supported or not."""
-        version = self.tb_version
-        if not version or (LooseVersion(version) < LooseVersion('4.5')):
-            return False
-        return True
-
-    @property
-    def supports_bundled_fonts(self):
-        """Checks if shipped with bundled fonts or not."""
-        version = self.tb_version
-        # This comparison may fail for alpha versions, e.g. 4.5a1
-        if not version or (LooseVersion(version) < LooseVersion('4.5')):
-            return False
-        return True
 
     def clean_up_profile_dirs(self):
         """Remove temporary profile directories.
@@ -341,6 +311,8 @@ class TorBrowserDriver(FirefoxDriver):
             super(TorBrowserDriver, self).quit()
         except (CannotSendRequest, AttributeError, WebDriverException):
             try:  # Clean up  if webdriver.quit() throws
+                if self.w3c:
+                    self.service.stop()
                 if hasattr(self, "binary"):
                     self.binary.kill()
                 if hasattr(self, "profile"):
