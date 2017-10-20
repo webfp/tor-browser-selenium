@@ -5,8 +5,8 @@ dist: trusty
 env:
   global:
     - DOWNLOAD_DIR=${HOME}/download
-    - STABLE=7.0.6
-    - EXPERIMENTAL=7.5a5
+    - STABLE=7.0.7
+    - EXPERIMENTAL=7.5a6
     - TBB_ARCHIVE_URL=https://archive.torproject.org/tor-package-archive/torbrowser
   matrix:
     - TRAVIS_EXTRA_JOB_WORKAROUND=true
@@ -27,9 +27,7 @@ matrix:
       env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_zh-CN.tar.xz"
     - python: "2.7"
       env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_ar.tar.xz"
-    - python: "3.4"
-      env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_en-US.tar.xz"
-    - python: "3.5"
+    - python: "3.6"
       env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_en-US.tar.xz"
   exclude:
     - env: TRAVIS_EXTRA_JOB_WORKAROUND=true
@@ -46,4 +44,4 @@ install:
 
 before_script:
   - cd tbselenium
-script: travis_retry py.test -s -v --cov=tbselenium --cov-report term-missing --durations=10 test
+script: py.test -s -v --rerun 3 --cov=tbselenium --cov-report term-missing --durations=10 test
