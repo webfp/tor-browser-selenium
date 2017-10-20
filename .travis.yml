@@ -8,6 +8,10 @@ env:
     - STABLE=7.0.7
     - EXPERIMENTAL=7.5a6
     - TBB_ARCHIVE_URL=https://archive.torproject.org/tor-package-archive/torbrowser
+    - TESTS=test_[a-b]*
+    - TESTS=test_[c-j]*
+    - TESTS=test_[k-s]*
+    - TESTS=test_[t-z]*
   matrix:
     - TRAVIS_EXTRA_JOB_WORKAROUND=true
 cache:
@@ -43,5 +47,5 @@ install:
   - export TBB_PATH=${HOME}/tor-browser${locale}
 
 before_script:
-  - cd tbselenium
-script: py.test -s -v --rerun 3 --cov=tbselenium --cov-report term-missing --durations=10 test
+  - cd tbselenium/test
+script: py.test -s -v --rerun 3 --cov=tbselenium --cov-report term-missing --durations=10 $TESTS
