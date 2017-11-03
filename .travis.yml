@@ -46,4 +46,4 @@ install:
 
 before_script:
   - cd tbselenium
-script: py.test -s -v --rerun 3 --cov=tbselenium --cov-report term-missing --durations=10 test
+script: travis_retry py.test -s -v --cov=tbselenium --cov-report term-missing --durations=10 test
