@@ -128,7 +128,8 @@ class TorBrowserDriver(FirefoxDriver):
         self.tbb_path = abspath(tbb_path)
         self.tbb_profile_path = abspath(tbb_profile_path)
         self.tbb_fx_binary_path = abspath(tbb_fx_binary_path)
-        self.tbb_browser_dir = join(tbb_path, cm.DEFAULT_TBB_BROWSER_DIR)
+        self.tbb_browser_dir = abspath(join(tbb_path,
+                                            cm.DEFAULT_TBB_BROWSER_DIR))
         if tor_data_dir:
             self.tor_data_dir = tor_data_dir  # only relevant if we launch tor
         else:
