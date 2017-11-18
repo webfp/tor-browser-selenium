@@ -1,6 +1,5 @@
 from os.path import join
 from os import environ
-from tbselenium.test import TBB_PATH
 
 # DEFAULT TBB PATHS works for TBB versions v4.x and above
 # Old TBB versions (V3.X or below) have different directory structures
