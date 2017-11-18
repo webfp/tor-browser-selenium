@@ -25,18 +25,6 @@ class HTTPSEverywhereTest(unittest.TestCase):
                 until(EC.title_contains("httpbin"))
             self.assertEqual(driver.current_url, self.HE_HTTPS_URL)
 
-    def test_https_everywhere_disabled(self):
-        """Make sure the HTTP->HTTPS redirection in the above test
-        is due to HTTPSEverywhere - not because the site is forwarding
-        to HTTPS by default.
-
-        """
-
-        disable_HE_pref = {"extensions.https_everywhere.globalEnabled": False}
-        with TBDriverFixture(TBB_PATH, pref_dict=disable_HE_pref) as driver:
-            driver.load_url_ensure(self.HE_HTTP_URL, 1)
-            self.assertEqual(driver.current_url, self.HE_HTTP_URL)
-
 
 class NoScriptTest(unittest.TestCase):
 
