@@ -72,7 +72,7 @@ Solutions to potential issues:
 
 * Outdated (or incompatible) Python `selenium` package: This is the source of various obscure errors. Make sure you have `selenium` version **3.3** or above.
 * Outdated Tor Browser Bundle: Download and use a more recent TBB version.
-* Try an older geckodriver version that matches the current Firefox version number inside the Tor Browser Bundle 
+* Try an older geckodriver version that matches the current Firefox version number inside the Tor Browser Bundle.
 * Port conflict with other (`Tor`) process: Pick a different SOCKS and controller port using `socks_port` argument.
 * Use `tbb_logfile_path` argument of TorBrowserDriver to debug obscure errors. This can help with problems due to missing display, missing libraries (e.g. when the LD_LIBRARY_PATH is not set correctly) or other errors that Tor Browser logs to standard output.
 * When you use `LAUNCH_NEW_TBB_TOR` option and get the following [error message](https://github.com/webfp/tor-browser-selenium/issues/62) during the initialization, it's likely that Tor failed to bootstrap (due to network etc.):
