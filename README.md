@@ -22,7 +22,7 @@ TorBrowserDriver does not download Tor Browser Bundle (TBB) for you. You should 
 ## Test and development
 Install the Python packages that are needed for development and testing:
 
-`pip install requirements-dev.txt`
+`pip install -r requirements-dev.txt`
 
 Install `xvfb` package by running `apt-get install xvfb` or using your distro's package manager.
 
