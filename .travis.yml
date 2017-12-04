@@ -37,8 +37,8 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y tor
 install:
-  - pip install --ignore-installed -r requirements-travis.txt
-  - easy_install .
+  - pip install -r requirements-travis.txt
+  - pip install .
   - TARBALL=`echo ${VERSION_ARCH} |cut -d'/' -f 2`
   - . ./travis.sh
   - locale="_"`echo $TARBALL |cut -d'_' -f 2 | cut -d'.' -f 1`
