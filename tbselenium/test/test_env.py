@@ -1,4 +1,5 @@
 import unittest
+import subprocess
 from distutils.version import LooseVersion
 
 
@@ -8,6 +9,12 @@ class EnvironmentTest(unittest.TestCase):
         import selenium
         pkg_ver = selenium.__version__
         self.assertGreaterEqual(LooseVersion(pkg_ver), LooseVersion("2.45"))
+
+    def test_geckodriver_version(self):
+        """Make sure that the right geckodriver version is installed."""
+        GECKODRIVER_VERSION_STR = "geckodriver 0.17.0"
+        gd_v_out = subprocess.check_output(["geckodriver", "-V"])
+        self.assertEqual(GECKODRIVER_VERSION_STR, gd_v_out.split("\n")[0])
 
 
 if __name__ == "__main__":
