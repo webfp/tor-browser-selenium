@@ -71,6 +71,8 @@ Check the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/e
 * 7.5a9
 * 6.5.1
 
+Windows and macOS are not supported.
+
 ## Troubleshooting
 
 Solutions to potential issues:
