@@ -2,6 +2,7 @@ sudo: false
 language: python
 os: linux
 dist: trusty
+group: deprecated-2017Q4
 env:
   global:
     - DOWNLOAD_DIR=${HOME}/download
