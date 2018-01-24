@@ -5,8 +5,8 @@ dist: trusty
 env:
   global:
     - DOWNLOAD_DIR=${HOME}/download
-    - STABLE=7.0.11
-    - EXPERIMENTAL=7.5a9
+    - STABLE=7.5
+    - EXPERIMENTAL=8.0a1
     - TBB_DIST_URL=https://www.torproject.org/dist/torbrowser/
   matrix:
     - TRAVIS_EXTRA_JOB_WORKAROUND=true

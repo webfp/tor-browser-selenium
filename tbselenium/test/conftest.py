@@ -22,7 +22,8 @@ def launch_tor():
 
 
 def pytest_sessionstart(session):
-    if "TRAVIS" not in environ and "NO_XVFB" not in environ:
+    if ("TRAVIS" not in environ and
+            ("NO_XVFB" not in environ or environ["NO_XVFB"] != "1")):
         test_conf["xvfb_display"] = start_xvfb()
     test_conf["temp_data_dir"], test_conf["tor_process"] = launch_tor()
 
