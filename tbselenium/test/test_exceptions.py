@@ -72,31 +72,6 @@ class TBDriverExceptions(unittest.TestCase):
         with self.assertRaises(AttributeError):
             TorBrowserDriver(TBB_PATH, pref_dict=(1, 2))
 
-    def test_should_fail_launching_tbb_tor_on_custom_socks_port(self):
-        with self.assertRaises(TBDriverPortError):
-            TorBrowserDriver(TBB_PATH, socks_port=free_port(),
-                             tor_cfg=cm.LAUNCH_NEW_TBB_TOR)
-
-    def test_should_fail_launching_tbb_tor_on_used_socks_port(self):
-        self.occupy_port(cm.DEFAULT_SOCKS_PORT)
-        with self.assertRaises(TBDriverPortError) as exc:
-            TorBrowserDriver(TBB_PATH,
-                             socks_port=cm.DEFAULT_SOCKS_PORT,
-                             tor_cfg=cm.LAUNCH_NEW_TBB_TOR)
-        self.assertEqual(str(exc.exception),
-                         "SOCKS port %s is already in use"
-                         % cm.DEFAULT_SOCKS_PORT)
-
-    def test_should_fail_launching_tbb_tor_on_used_control_port(self):
-        self.occupy_port(cm.DEFAULT_CONTROL_PORT)
-        with self.assertRaises(TBDriverPortError) as exc:
-            TorBrowserDriver(TBB_PATH,
-                             control_port=cm.DEFAULT_CONTROL_PORT,
-                             tor_cfg=cm.LAUNCH_NEW_TBB_TOR)
-        self.assertEqual(str(exc.exception),
-                         "Control port %s is already in use"
-                         % cm.DEFAULT_CONTROL_PORT)
-
     def test_should_not_load_with_wrong_sys_socks_port(self):
         socks_port = free_port()
         with self.assertRaises(TBDriverPortError) as exc:

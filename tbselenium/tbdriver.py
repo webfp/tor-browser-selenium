@@ -27,7 +27,7 @@ class TorBrowserDriver(FirefoxDriver):
     """
     def __init__(self,
                  tbb_path="",
-                 tor_cfg=cm.LAUNCH_NEW_TBB_TOR,
+                 tor_cfg=cm.USE_RUNNING_TOR,
                  tbb_fx_binary_path="",
                  tbb_profile_path="",
                  tbb_logfile_path="",
@@ -64,38 +64,23 @@ class TorBrowserDriver(FirefoxDriver):
 
     def init_ports(self, tor_cfg, socks_port, control_port):
         """Check SOCKS port and Tor config inputs."""
-        if tor_cfg not in [cm.USE_RUNNING_TOR, cm.LAUNCH_NEW_TBB_TOR]:
+        if tor_cfg == cm.LAUNCH_NEW_TBB_TOR:
+            raise TBDriverConfigError(
+                """`LAUNCH_NEW_TBB_TOR` config is not supported anymore.
+                Use tor_cfg=USE_RUNNING_TOR""")
+
+        if tor_cfg != cm.USE_RUNNING_TOR:
             raise TBDriverConfigError("Unrecognized tor_cfg: %s" % tor_cfg)
 
         if socks_port is None:
-            if tor_cfg == cm.USE_RUNNING_TOR:
-                socks_port = cm.DEFAULT_SOCKS_PORT  # 9050
-            else:
-                socks_port = cm.TBB_SOCKS_PORT  # 9150
+            socks_port = cm.DEFAULT_SOCKS_PORT  # 9050
 
         if control_port is None:
-            if tor_cfg == cm.USE_RUNNING_TOR:
-                control_port = cm.DEFAULT_CONTROL_PORT  # 9051
-            else:
-                control_port = cm.TBB_CONTROL_PORT  # 9151
+            control_port = cm.DEFAULT_CONTROL_PORT  # 9051
 
-        if tor_cfg == cm.LAUNCH_NEW_TBB_TOR:
-            if is_busy(socks_port):
-                raise TBDriverPortError("SOCKS port %s is already in use"
-                                        % socks_port)
-            if is_busy(control_port):
-                raise TBDriverPortError("Control port %s is already in use"
-                                        % control_port)
-            if socks_port != cm.TBB_SOCKS_PORT or\
-                    control_port != cm.TBB_CONTROL_PORT:
-                # No support for launching TBB's Tor on a custom port, use Stem
-                raise TBDriverPortError("Can only launch Tor on TBB's default"
-                                        "ports (9150-9151). Use Stem for"
-                                        "launching Tor on a custom ports")
-        elif tor_cfg == cm.USE_RUNNING_TOR:
-            if not is_busy(socks_port):
-                raise TBDriverPortError("SOCKS port %s is not listening"
-                                        % socks_port)
+        if not is_busy(socks_port):
+            raise TBDriverPortError("SOCKS port %s is not listening"
+                                    % socks_port)
 
         self.socks_port = socks_port
         self.control_port = control_port
@@ -194,6 +179,7 @@ class TorBrowserDriver(FirefoxDriver):
         set_pref('extensions.torbutton.custom.socks_port', self.socks_port)
         set_pref('extensions.torbutton.inserted_button', True)
         set_pref('extensions.torbutton.launch_warning', False)
+        set_pref('privacy.spoof_english', False)
         set_pref('extensions.torbutton.loglevel', 2)
         set_pref('extensions.torbutton.logmethod', 0)
         set_pref('extensions.torbutton.settings_method', 'custom')
@@ -225,28 +211,7 @@ class TorBrowserDriver(FirefoxDriver):
         set_pref('network.proxy.socks_port', self.socks_port)
         set_pref('extensions.torbutton.socks_port', self.socks_port)
         set_pref('extensions.torlauncher.control_port', self.control_port)
-        if self.tor_cfg == cm.LAUNCH_NEW_TBB_TOR:
-            set_pref('extensions.torlauncher.start_tor', True)
-            set_pref('extensions.torlauncher.tordatadir_path',
-                     self.tor_data_dir)
-            set_pref('extensions.torlauncher.tor_path',
-                     join(self.tbb_path, cm.DEFAULT_TOR_BINARY_PATH))
-            # TBB > 6.0a5 cannot find the right path for torrc and
-            # torrc-defaults unless we set the corresponding pref.
-            # This should be due to the fix for #13252
-            torrc_path = join(self.tor_data_dir, "torrc")
-            set_pref('extensions.torlauncher.torrc_path', torrc_path)
-            # Fall back to torrc-defaults in tbb_path if it's not present
-            # in the (custom) tor_data_dir
-            torrc_defaults_path = join(self.tor_data_dir, "torrc-defaults")
-            if not isfile(torrc_defaults_path):
-                torrc_defaults_path = join(self.tbb_path,
-                                           cm.DEFAULT_TOR_DATA_PATH,
-                                           "torrc-defaults")
-            set_pref('extensions.torlauncher.torrc-defaults_path',
-                     torrc_defaults_path)
-        else:
-            self.set_tb_prefs_for_using_system_tor(self.control_port)
+        self.set_tb_prefs_for_using_system_tor(self.control_port)
         # pref_dict overwrites above preferences
         for pref_name, pref_val in pref_dict.items():
             set_pref(pref_name, pref_val)

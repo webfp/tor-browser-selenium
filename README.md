@@ -8,9 +8,9 @@ A Python library to automate Tor Browser with Selenium.
 pip install tbselenium
 ```
 
-You also need to install **geckodriver v0.17.0** from the [geckodriver releases page](https://github.com/mozilla/geckodriver/releases/tag/v0.17.0). Make sure you install the v0.17.0 version; newer or older versions will not be compatible with the current Tor Browser series.
+Install `geckodriver` from the [geckodriver releases page](https://github.com/mozilla/geckodriver/releases/). Make sure you install version v0.23.0 version or newer; older versions may not be compatible with the current Tor Browser series.
 
-Test your `geckodriver` installation by running the command below; it must return `geckodriver 0.17.0`:
+Test your `geckodriver` installation by running the command below:
 ```
 geckodriver --version
 ```
