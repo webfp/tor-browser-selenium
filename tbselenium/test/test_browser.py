@@ -32,8 +32,7 @@ class TorBrowserTest(unittest.TestCase):
 
     def test_tbb_logfile(self):
         log_txt = read_file(self.log_file)
-        self.assertIn("torbutton@torproject.org", log_txt)
-        self.assertIn("addons.manager", log_txt)
+        self.assertIn("Torbutton INFO", log_txt)
 
     @pytest.mark.skipif(sys.platform != 'linux2', reason='Requires Linux')
     def test_should_load_tbb_firefox_libs(self):
@@ -43,19 +42,19 @@ class TorBrowserTest(unittest.TestCase):
         The memory map of the TB process is used to find loaded libraries.
         http://man7.org/linux/man-pages/man5/proc.5.html
         """
-
+        FF_BINARY_SUFFIX = '.real'
         driver = self.driver
         geckodriver_pid = driver.service.process.pid
         process = psutil.Process(geckodriver_pid)
-        tbbinary_path = self.driver.binary.which('firefox')
+        tbbinary_path = self.driver.binary.which('firefox') + FF_BINARY_SUFFIX
         for child in process.children():
             if tbbinary_path == child.exe():
                 tb_pid = child.pid
                 break
-
+        else:
+            self.fail("Cannot find the firefox process")
         xul_lib_path = join(driver.tbb_browser_dir, "libxul.so")
-        std_c_lib_path = join(driver.tbb_path, cm.DEFAULT_TOR_BINARY_DIR,
-                              "libstdc++.so.6")
+        std_c_lib_path = join(driver.tbb_browser_dir, "libssl3.so")
         proc_mem_map_file = "/proc/%d/maps" % (tb_pid)
         mem_map = read_file(proc_mem_map_file)
         self.assertIn(xul_lib_path, mem_map)
