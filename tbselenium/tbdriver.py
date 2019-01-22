@@ -179,7 +179,7 @@ class TorBrowserDriver(FirefoxDriver):
         set_pref('extensions.torbutton.custom.socks_port', self.socks_port)
         set_pref('extensions.torbutton.inserted_button', True)
         set_pref('extensions.torbutton.launch_warning', False)
-        set_pref('privacy.spoof_english', False)
+        set_pref('privacy.spoof_english', 2)
         set_pref('extensions.torbutton.loglevel', 2)
         set_pref('extensions.torbutton.logmethod', 0)
         set_pref('extensions.torbutton.settings_method', 'custom')
