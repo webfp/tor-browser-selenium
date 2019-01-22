@@ -54,7 +54,7 @@ class TorBrowserDriver(FirefoxDriver):
                                                firefox_binary=self.binary,
                                                capabilities=self.capabilities,
                                                timeout=cm.TB_INIT_TIMEOUT,
-                                               service_log_path=tbb_logfile_path)
+                                               log_path=tbb_logfile_path)
         self.is_running = True
         sleep(1)
 

@@ -70,15 +70,14 @@ class TBDriverTorDataDir(unittest.TestCase):
         """
         tmp_dir = tempfile.mkdtemp()
         mod_time_before = getmtime(self.TOR_DATA_PATH)
-
-        with TBDriverFixture(TBB_PATH, tor_data_dir=tmp_dir,
-                             tor_cfg=cm.LAUNCH_NEW_TBB_TOR) as driver:
+        with TBDriverFixture(TBB_PATH, tor_data_dir=tmp_dir) as driver:
             driver.load_url_ensure(cm.CHECK_TPO_URL)
         mod_time_after = getmtime(self.TOR_DATA_PATH)
         self.assertEqual(mod_time_before, mod_time_after)
 
-    @pytest.mark.skipif(cm.TRAVIS, reason="Requires Tor bootstrap,"
-                        "unreliable on Travis")
+    # @pytest.mark.skipif(cm.TRAVIS, reason="Requires Tor bootstrap,"
+    #                    "unreliable on Travis")
+    @pytest.mark.xfail
     def test_non_temp_tor_data_dir(self):
         """Tor data directory in TBB should be modified if we don't
         use a separate tor_data_dir.
