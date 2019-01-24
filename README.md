@@ -10,19 +10,33 @@ pip install tbselenium
 
 Install `geckodriver` from the [geckodriver releases page](https://github.com/mozilla/geckodriver/releases/). Make sure you install version v0.23.0 version or newer; older versions may not be compatible with the current Tor Browser series.
 
-Test your `geckodriver` installation by running the command below:
-```
-geckodriver --version
-```
 
 ## Basic usage
-```python
+- Using with system `tor`
+```
 from tbselenium.tbdriver import TorBrowserDriver
 with TorBrowserDriver("/path/to/TorBrowserBundle/") as driver:
     driver.get('https://check.torproject.org')
 ```
 
-TorBrowserDriver does not download Tor Browser Bundle (TBB) for you. You should [download](https://www.torproject.org/projects/torbrowser.html.en) and extract TBB and provide its path when you initialize `TorBrowserDriver`.
+- Using with `Stem`
+```
+import tbselenium.common as cm
+from tbselenium.tbdriver import TorBrowserDriver
+from tbselenium.utils import launch_tbb_tor_with_stem
+
+tbb_dir = "/path/to/TorBrowserBundle/"
+tor_process = launch_tbb_tor_with_stem(tbb_path=tbb_dir)
+with TorBrowserDriver(tbb_dir,
+                      tor_cfg=cm.USE_RUNNING_TOR,
+                      socks_port=cm.STEM_SOCKS_PORT,
+                      control_port=cm.STEM_CONTROL_PORT) as driver:
+    driver.load_url("https://check.torproject.org")
+
+tor_process.kill()
+```
+
+TorBrowserDriver does not download Tor Browser Bundle (TBB) for you. You should [download](https://www.torproject.org/projects/torbrowser.html.en), extract TBB and provide its path when you initialize `TorBrowserDriver`.
 
 ## Test and development
 Install the Python packages that are needed for development and testing:
@@ -67,9 +81,8 @@ Check the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/e
 ## Compatibility
 [Tested](https://travis-ci.org/webfp/tor-browser-selenium) with the following Tor Browser Bundle versions on Debian and Ubuntu:
 
-* 8.0
-* 8.5a1
-* 6.5.1
+* 8.0.4
+* 8.5a6
 
 Windows and macOS are not supported.
 
