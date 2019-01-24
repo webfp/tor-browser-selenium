@@ -29,7 +29,7 @@ class TBStemTest(unittest.TestCase):
         cls.controller = Controller.from_port(port=cls.control_port)
         cls.controller.authenticate()
         cls.driver = TBDriverFixture(TBB_PATH,
-                                     tor_cfg=cm.USE_RUNNING_TOR,
+                                     tor_cfg=cm.USE_STEM,
                                      socks_port=cls.socks_port,
                                      control_port=cls.control_port)
 

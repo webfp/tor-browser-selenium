@@ -67,16 +67,21 @@ class TorBrowserDriver(FirefoxDriver):
         if tor_cfg == cm.LAUNCH_NEW_TBB_TOR:
             raise TBDriverConfigError(
                 """`LAUNCH_NEW_TBB_TOR` config is not supported anymore.
-                Use tor_cfg=USE_RUNNING_TOR""")
+                Use USE_RUNNING_TOR or USE_STEM""")
 
-        if tor_cfg != cm.USE_RUNNING_TOR:
+        if tor_cfg not in [cm.USE_RUNNING_TOR, cm.USE_STEM]:
             raise TBDriverConfigError("Unrecognized tor_cfg: %s" % tor_cfg)
 
         if socks_port is None:
-            socks_port = cm.DEFAULT_SOCKS_PORT  # 9050
-
+            if tor_cfg == cm.USE_RUNNING_TOR:
+                socks_port = cm.DEFAULT_SOCKS_PORT  # 9050
+            else:
+                socks_port = cm.STEM_SOCKS_PORT
         if control_port is None:
-            control_port = cm.DEFAULT_CONTROL_PORT  # 9051
+            if tor_cfg == cm.USE_RUNNING_TOR:
+                control_port = cm.DEFAULT_CONTROL_PORT
+            else:
+                control_port = cm.STEM_CONTROL_PORT
 
         if not is_busy(socks_port):
             raise TBDriverPortError("SOCKS port %s is not listening"
