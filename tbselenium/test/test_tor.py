@@ -12,9 +12,7 @@ class Test(unittest.TestCase):
             self.fail("System Tor doesn't appear to be running.")
 
         with TBDriverFixture(TBB_PATH,
-                             tor_cfg=cm.USE_RUNNING_TOR,
-                             socks_port=cm.DEFAULT_SOCKS_PORT,
-                             control_port=cm.DEFAULT_CONTROL_PORT) as driver:
+                             tor_cfg=cm.USE_RUNNING_TOR) as driver:
             driver.load_url_ensure(cm.CHECK_TPO_URL)
             driver.find_element_by("h1.on")
 

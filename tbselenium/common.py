@@ -46,7 +46,8 @@ TEST_URL = CHECK_TPO_URL
 ABOUT_TOR_URL = "about:tor"
 
 # Which tor process/binary to use
-LAUNCH_NEW_TBB_TOR = 0  # use tor in TBB, launch a new process
-USE_RUNNING_TOR = 1  # use the tor installed and running on the system
+LAUNCH_NEW_TBB_TOR = 0  # Not supported (use tor in TBB, launch a new process)
+USE_RUNNING_TOR = 1  # use system tor or tor started with stem
+USE_STEM = 2  # use tor started with Stem
 
 TRAVIS = "CI" in environ and "TRAVIS" in environ
