@@ -1,10 +1,12 @@
-import sqlite3
 import tempfile
 import tbselenium.common as cm
 from os import environ
 from os.path import dirname, isfile, join
 from tbselenium.exceptions import StemLaunchError
 from selenium.webdriver.common.utils import is_connectable
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+from time import sleep
 
 try:  # only needed for tests
     from pyvirtualdisplay import Display
@@ -74,3 +76,15 @@ def launch_tbb_tor_with_stem(tbb_path=None, torrc=None, tor_binary=None):
                  'DataDirectory': tempfile.mkdtemp()}
 
     return launch_tor_with_config(config=torrc, tor_cmd=tor_binary)
+
+
+def disable_js(driver):
+    driver.get("about:config")
+    accept_risk_button = driver.find_element_by_id("warningButton")
+    if accept_risk_button:  # I accept the risk
+        accept_risk_button.click()
+    ActionChains(driver).send_keys(Keys.RETURN).\
+        send_keys("javascript.enabled").perform()
+    sleep(1)  # wait for the table update
+    ActionChains(driver).send_keys(Keys.TAB).send_keys(Keys.RETURN).perform()
+    sleep(1)  # wait for the pref to update
