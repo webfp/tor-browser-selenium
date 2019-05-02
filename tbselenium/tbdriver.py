@@ -125,7 +125,7 @@ class TorBrowserDriver(FirefoxDriver):
         else:
             self.tor_data_dir = join(tbb_path, cm.DEFAULT_TOR_DATA_PATH)
         # TB can't find bundled "fonts" if we don't switch to tbb_browser_dir
-        chdir(self.tbb_browser_dir)
+        #chdir(self.tbb_browser_dir)
 
     def load_url(self, url, wait_on_page=0, wait_for_page_body=False):
         """Load a URL and wait before returning.
