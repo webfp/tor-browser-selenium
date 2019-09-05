@@ -51,7 +51,7 @@ def prepend_to_env_var(env_var, new_value):
         environ[env_var] = new_value
 
 
-def read_file(file_path, mode='rU'):
+def read_file(file_path, mode='r'):
     """Read and return file content."""
     with open(file_path, mode) as f:
         content = f.read()
