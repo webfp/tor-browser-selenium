@@ -1,6 +1,7 @@
 import shutil
 from os import environ, chdir
 from os.path import isdir, isfile, join, abspath
+from os import name as currentOS
 from time import sleep
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -54,7 +55,7 @@ class TorBrowserDriver(FirefoxDriver):
                                                firefox_binary=self.binary,
                                                capabilities=self.capabilities,
                                                timeout=cm.TB_INIT_TIMEOUT,
-                                               service_log_path=tbb_logfile_path)
+                                               log_path=tbb_logfile_path, executable_path="webdriver/geckodriver.exe")
         self.is_running = True
         sleep(1)
 
@@ -75,6 +76,7 @@ class TorBrowserDriver(FirefoxDriver):
         if socks_port is None:
             if tor_cfg == cm.USE_RUNNING_TOR:
                 socks_port = cm.DEFAULT_SOCKS_PORT  # 9050
+                socks_port = 9150
             else:
                 socks_port = cm.STEM_SOCKS_PORT
         if control_port is None:
@@ -82,7 +84,6 @@ class TorBrowserDriver(FirefoxDriver):
                 control_port = cm.DEFAULT_CONTROL_PORT
             else:
                 control_port = cm.STEM_CONTROL_PORT
-
         if not is_busy(socks_port):
             raise TBDriverPortError("SOCKS port %s is not listening"
                                     % socks_port)
@@ -125,7 +126,8 @@ class TorBrowserDriver(FirefoxDriver):
         else:
             self.tor_data_dir = join(tbb_path, cm.DEFAULT_TOR_DATA_PATH)
         # TB can't find bundled "fonts" if we don't switch to tbb_browser_dir
-        chdir(self.tbb_browser_dir)
+        if currentOS != "nt":
+            chdir(self.tbb_browser_dir)
 
     def load_url(self, url, wait_on_page=0, wait_for_page_body=False):
         """Load a URL and wait before returning.
