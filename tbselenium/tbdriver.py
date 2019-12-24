@@ -76,7 +76,6 @@ class TorBrowserDriver(FirefoxDriver):
         if socks_port is None:
             if tor_cfg == cm.USE_RUNNING_TOR:
                 socks_port = cm.DEFAULT_SOCKS_PORT  # 9050
-                socks_port = 9150
             else:
                 socks_port = cm.STEM_SOCKS_PORT
         if control_port is None:
