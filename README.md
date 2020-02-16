@@ -12,14 +12,14 @@ Install `geckodriver` from the [geckodriver releases page](https://github.com/mo
 
 
 ## Basic usage
-- Using with system `tor` (`tor` needs to be installed and running on port 9050. Run `apt install tor` if you don't have it installed)
+- Using with system `tor` (`tor` needs to be installed and running on port 9050. Run `apt install tor` if you don't have it installed.)
 ```
 from tbselenium.tbdriver import TorBrowserDriver
 with TorBrowserDriver("/path/to/TorBrowserBundle/") as driver:
     driver.get('https://check.torproject.org')
 ```
 
-- Using with `Stem` (this will start a new `tor` process, so you don't have to have `tor` installed)
+- Using with `Stem` (This will start a new `tor` proces. You don't need to have `tor` installed on your system.)
 ```
 import tbselenium.common as cm
 from tbselenium.tbdriver import TorBrowserDriver
