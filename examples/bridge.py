@@ -11,7 +11,7 @@ def visit_using_bridge(tbb_dir, bridge_type="meek-amazon"):
     with TorBrowserDriver(
             tbb_dir, default_bridge_type=bridge_type) as driver:
         driver.load_url(url)
-        print driver.find_element_by("h1.on").text  # status text
+        print(driver.find_element_by("h1.on").text)  # status text
         sleep(10)  # To verify that the bridge is indeed uses, go to
         # Tor Network Settings dialog
 
