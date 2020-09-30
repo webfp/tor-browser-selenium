@@ -6,8 +6,8 @@ group: deprecated-2017Q4
 env:
   global:
     - DOWNLOAD_DIR=${HOME}/download
-    - STABLE=9.5.3
-    - EXPERIMENTAL=10.0a4
+    - STABLE=10.0
+    - EXPERIMENTAL=10.5a1
     - TBB_DIST_URL=https://www.torproject.org/dist/torbrowser/
   matrix:
     - TRAVIS_EXTRA_JOB_WORKAROUND=true
