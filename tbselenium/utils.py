@@ -22,6 +22,11 @@ except ImportError:
 DEFAULT_XVFB_WIN_W = 1280
 DEFAULT_XVFB_WIN_H = 800
 
+# Security slider settings
+SECURITY_HIGH = 1
+SECURITY_MEDIUM = 3  # '2' corresponds to deprecated TBB medium-high setting
+SECURITY_LOW = 4
+
 
 def start_xvfb(win_width=DEFAULT_XVFB_WIN_W,
                win_height=DEFAULT_XVFB_WIN_H):
@@ -76,6 +81,23 @@ def launch_tbb_tor_with_stem(tbb_path=None, torrc=None, tor_binary=None):
                  'DataDirectory': tempfile.mkdtemp()}
 
     return launch_tor_with_config(config=torrc, tor_cmd=tor_binary)
+
+
+def set_security_level(driver, level):
+    if level not in {SECURITY_HIGH, SECURITY_MEDIUM, SECURITY_LOW}:
+        raise ValueError("Invalid Tor Browser security setting: " + str(level))
+    driver.get("about:config")
+    accept_risk_button = driver.find_element_by_id("warningButton")
+    if accept_risk_button:
+        accept_risk_button.click()
+    ActionChains(driver).send_keys(Keys.RETURN).\
+        send_keys("extensions.torbutton.security_slider").perform()
+    sleep(1)
+    ActionChains(driver).send_keys(Keys.TAB).\
+        send_keys(Keys.RETURN).perform()
+    ActionChains(driver).send_keys(str(level)).\
+        send_keys(Keys.RETURN).perform()
+    sleep(1)
 
 
 def disable_js(driver):
