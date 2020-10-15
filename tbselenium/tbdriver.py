@@ -15,12 +15,12 @@ from tbselenium.tbbinary import TBBinary
 from tbselenium.exceptions import (TBDriverConfigError, TBDriverPortError,
                                    TBDriverPathError)
 
-
-
 try:
     from httplib import CannotSendRequest
 except ImportError:
     from http.client import CannotSendRequest
+
+DEFAULT_BANNED_PORTS = "9050,9051,9150,9151"
 
 
 class TorBrowserDriver(FirefoxDriver):
@@ -37,7 +37,7 @@ class TorBrowserDriver(FirefoxDriver):
                  pref_dict={},
                  socks_port=None,
                  control_port=None,
-                 extensions=[],
+                 extensions=None,
                  default_bridge_type="",
                  capabilities=None,
                  headless=False):
@@ -53,19 +53,23 @@ class TorBrowserDriver(FirefoxDriver):
         self.export_env_vars()
         self.binary = self.get_tb_binary(logfile=tbb_logfile_path)
         self.binary.add_command_line_options('--class', '"Tor Browser"')
-        options= Options()
+        options = Options()
         if headless:
             options.set_headless()
-        super(TorBrowserDriver, self).__init__(firefox_profile=self.profile,
-                                               firefox_binary=self.binary,
-                                               capabilities=self.capabilities,
-                                               timeout=cm.TB_INIT_TIMEOUT,
-                                               service_log_path=tbb_logfile_path,
-                                               options=options)
+        super(TorBrowserDriver, self).__init__(
+            firefox_profile=self.profile,
+            firefox_binary=self.binary,
+            capabilities=self.capabilities,
+            timeout=cm.TB_INIT_TIMEOUT,
+            service_log_path=tbb_logfile_path,
+            options=options)
         self.is_running = True
         sleep(1)
 
     def install_extensions(self, extensions):
+        """Install the given extension to the profile we are launching."""
+        if extensions is None:
+            return
         for extension in extensions:
             self.profile.add_extension(extension)
 
@@ -170,7 +174,7 @@ class TorBrowserDriver(FirefoxDriver):
             return
         tb_prefs = self.profile.default_preferences
         set_pref = self.profile.set_preference
-        DEFAULT_BANNED_PORTS = "9050,9051,9150,9151"
+
         for port_ban_pref in cm.PORT_BAN_PREFS:
             banned_ports = tb_prefs.get(port_ban_pref, DEFAULT_BANNED_PORTS)
             set_pref(port_ban_pref, "%s,%s,%s" %
@@ -185,7 +189,7 @@ class TorBrowserDriver(FirefoxDriver):
         set_pref = self.profile.set_preference
         # Prevent Tor Browser running its own Tor process
         set_pref('extensions.torlauncher.start_tor', False)
-        # TODO: investigate why we're asked to disable 'block_disk'
+        # TODO: investigate whether these prefs are up to date or not
         set_pref('extensions.torbutton.block_disk', False)
         set_pref('extensions.torbutton.custom.socks_host', '127.0.0.1')
         set_pref('extensions.torbutton.custom.socks_port', self.socks_port)
@@ -301,5 +305,5 @@ class TorBrowserDriver(FirefoxDriver):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, value, traceback):
+    def __exit__(self, *args):
         self.quit()
