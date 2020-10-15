@@ -39,8 +39,8 @@ class TorBrowserDriver(FirefoxDriver):
                  control_port=None,
                  extensions=[],
                  default_bridge_type="",
-                 capabilities=None, 
-                 headless = False):
+                 capabilities=None,
+                 headless=False):
 
         self.tor_cfg = tor_cfg
         self.setup_tbb_paths(tbb_path, tbb_fx_binary_path,
