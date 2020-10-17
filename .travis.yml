@@ -2,6 +2,8 @@ sudo: false
 language: python
 os: linux
 dist: focal
+services:
+  - xvfb
 addons:
   apt:
     sources:
@@ -38,9 +40,6 @@ matrix:
       env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_en-US.tar.xz"
   exclude:
     - env: TRAVIS_EXTRA_JOB_WORKAROUND=true
-before_install:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
 install:
   - pip install -r requirements-travis.txt
   - pip install .
