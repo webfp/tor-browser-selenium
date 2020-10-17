@@ -84,7 +84,7 @@ Check the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/e
 ## Compatibility
 [Tested](https://travis-ci.org/webfp/tor-browser-selenium) with the following Tor Browser Bundle versions on Debian and Ubuntu:
 
-* 10.0
+* 10.0.1
 * 10.5a1
 
 Windows and macOS are not supported.
@@ -97,15 +97,17 @@ Solutions to potential issues:
 * Outdated (or incompatible) Python `selenium` package: This is the source of various obscure errors. Make sure you have `selenium` version **3.3** or above.
 * No display: When running on a cloud machine, follow the [headless.py example](https://github.com/webfp/tor-browser-selenium/blob/master/examples/headless.py#L10) to start a virtual display.
 * Outdated Tor Browser Bundle: Download and use a more recent TBB version.
-* Make sure you install geckodriver version v0.23.0 or newer.
+* Make sure you install the latest geckodriver version.
 * Port conflict with other (`Tor`) process: Pick a different SOCKS and controller port using `socks_port` argument.
-* Use `tbb_logfile_path` argument of TorBrowserDriver to debug obscure errors. This can help with problems due to missing display, missing libraries (e.g. when the LD_LIBRARY_PATH is not set correctly) or other errors that Tor Browser logs to standard output.
+* Use `tbb_logfile_path` argument of TorBrowserDriver to debug obscure errors. This can help with problems due to missing display, missing libraries (e.g. when the LD_LIBRARY_PATH is not set correctly) or other errors that Tor Browser logs to standard output/error.
 * When you use `LAUNCH_NEW_TBB_TOR` option and get the following [error message](https://github.com/webfp/tor-browser-selenium/issues/62) during the initialization, it's likely that Tor failed to bootstrap (due to network etc.):
 
  ```
  Can't load the profile. Profile Dir: /tmp/tmpO7i1lL/webdriver-py-profilecopy If you specified a log_file in the FirefoxBinary constructor, check it for details
  ```
 * `driver.get_cookies()` returns an empty list. This is due to Private Browsing Mode (PBM), which Selenium uses under the hood. See [#79](https://github.com/webfp/tor-browser-selenium/issues/79) for a possible solution.
+* WebGL is not supported in the headless mode started with `headless=True` due to Firefox bug [#1375585](https://bugzilla.mozilla.org/show_bug.cgi?id=1375585). To enable WebGL in a headless setting, use `pyvirtualdisplay` following the [headless.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/headless.py) example.
+* `set_security_level` doesn't work with the current alpha (10.5a1).
 
 ## Credits
 We greatly benefited from the following two projects:

@@ -1,9 +1,10 @@
 import unittest
+import pytest
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from tbselenium.test.fixtures import TBDriverFixture
 from tbselenium.test import TBB_PATH
-from tbselenium.common import CHECK_TPO_URL
+from tbselenium.common import CHECK_TPO_URL, CI_ALPHA_TEST
 from tbselenium.utils import set_security_level
 from tbselenium.utils import SECURITY_HIGH, SECURITY_MEDIUM, SECURITY_LOW
 
@@ -33,6 +34,9 @@ class SecurityLevelTest(unittest.TestCase):
             except (NoSuchElementException, TimeoutException):
                 pass
 
+    @pytest.mark.skipif(
+        CI_ALPHA_TEST,
+        reason="Not compatible with the current alpha (10.5a1)")
     def test_set_security_high(self):
         with TBDriverFixture(TBB_PATH) as driver:
             set_security_level(driver, SECURITY_HIGH)

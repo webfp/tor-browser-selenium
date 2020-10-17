@@ -51,3 +51,5 @@ USE_RUNNING_TOR = 1  # use system tor or tor started with stem
 USE_STEM = 2  # use tor started with Stem
 
 TRAVIS = "CI" in environ and "TRAVIS" in environ
+# TODO: remove once the issue is resolved
+CI_ALPHA_TEST = "a" in environ.get('VERSION_ARCH', '').split("/")[0]
