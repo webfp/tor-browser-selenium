@@ -4,9 +4,8 @@ from os import environ
 from os.path import dirname, isfile, join
 from tbselenium.exceptions import StemLaunchError
 from selenium.webdriver.common.utils import is_connectable
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
 from time import sleep
+import json
 
 try:  # only needed for tests
     from pyvirtualdisplay import Display
@@ -83,30 +82,34 @@ def launch_tbb_tor_with_stem(tbb_path=None, torrc=None, tor_binary=None):
     return launch_tor_with_config(config=torrc, tor_cmd=tor_binary)
 
 
+def set_tbb_pref(driver, name, value):
+    try:
+        script = 'const { Services } = '\
+                 'ChromeUtils.import("resource://gre/modules/Services.jsm");'
+        script += 'Services.prefs.'
+        if isinstance(value, bool):
+            script += 'setBoolPref'
+        elif isinstance(value, (str)):
+            script += 'setStringPref'
+        else:
+            script += 'setIntPref'
+        script += '({0}, {1});'.format(json.dumps(name), json.dumps(value))
+        driver.set_context(driver.CONTEXT_CHROME)
+        driver.execute_script(script)
+    except Exception:
+        raise
+    finally:
+        driver.set_context(driver.CONTEXT_CONTENT)
+
+
 def set_security_level(driver, level):
     if level not in {SECURITY_HIGH, SECURITY_MEDIUM, SECURITY_LOW}:
         raise ValueError("Invalid Tor Browser security setting: " + str(level))
-    driver.get("about:config")
-    accept_risk_button = driver.find_element_by_id("warningButton")
-    if accept_risk_button:
-        accept_risk_button.click()
-    ActionChains(driver).send_keys(Keys.RETURN).\
-        send_keys("extensions.torbutton.security_slider").perform()
-    sleep(1)
-    ActionChains(driver).send_keys(Keys.TAB).\
-        send_keys(Keys.RETURN).perform()
-    ActionChains(driver).send_keys(str(level)).\
-        send_keys(Keys.RETURN).perform()
-    sleep(1)
+
+    set_tbb_pref(driver, "extensions.torbutton.security_slider", level)
+    sleep(1)  # wait for the pref to update
 
 
 def disable_js(driver):
-    driver.get("about:config")
-    accept_risk_button = driver.find_element_by_id("warningButton")
-    if accept_risk_button:  # I accept the risk
-        accept_risk_button.click()
-    ActionChains(driver).send_keys(Keys.RETURN).\
-        send_keys("javascript.enabled").perform()
-    sleep(1)  # wait for the table update
-    ActionChains(driver).send_keys(Keys.TAB).send_keys(Keys.RETURN).perform()
+    set_tbb_pref(driver, "javascript.enabled", False)
     sleep(1)  # wait for the pref to update
