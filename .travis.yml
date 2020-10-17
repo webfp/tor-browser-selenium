@@ -6,7 +6,7 @@ group: deprecated-2017Q4
 env:
   global:
     - DOWNLOAD_DIR=${HOME}/download
-    - STABLE=10.0
+    - STABLE=10.0.1
     - EXPERIMENTAL=10.5a1
     - TBB_DIST_URL=https://www.torproject.org/dist/torbrowser/
   matrix:
