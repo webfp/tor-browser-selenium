@@ -26,37 +26,6 @@ class HTTPSEverywhereTest(unittest.TestCase):
             self.assertEqual(driver.current_url, self.HE_HTTPS_URL)
 
 
-class NoScriptTest(unittest.TestCase):
-
-    # xfail due to flaky test page.
-    # TODO: set up a webgl test page using Gist and jsdlvr
-    # @pytest.mark.skipif(cm.TRAVIS, reason="CI doesn't support WebGL")
-    @pytest.mark.xfail
-    def test_noscript_should_disable_webgl(self):
-        webgl_status_disabled = ("This browser supports WebGL 1, "
-                                 "but it is disabled or unavailable.")
-        with TBDriverFixture(TBB_PATH) as driver:
-            driver.load_url_ensure("http://webglreport.com/",
-                                   wait_for_page_body=True)
-            status = driver.find_element_by(".header > p").text
-            self.assertIn(webgl_status_disabled, status)
-
-    # xfail due to flaky test page.
-    # TODO: set up a webgl test page using Gist and jsdlvr
-    # @pytest.mark.skipif(cm.TRAVIS, reason="CI doesn't support WebGL")
-    @pytest.mark.xfail
-    def test_noscript_disable_webgl_block(self):
-        """WebGL should work when we disable NoScript's WebGL blocking."""
-        disable_NS_webgl_pref = {"noscript.forbidWebGL": False}
-        webgl_status_enabled = ("This browser supports WebGL 1")
-        with TBDriverFixture(TBB_PATH,
-                             pref_dict=disable_NS_webgl_pref) as driver:
-            driver.load_url_ensure("http://webglreport.com/",
-                                   wait_for_page_body=True)
-            status = driver.find_element_by(".header > p").text
-            self.assertIn(webgl_status_enabled, status)
-
-
 class CustomExtensionTest(unittest.TestCase):
 
     def test_should_install_custom_extension(self):
