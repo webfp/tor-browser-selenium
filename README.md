@@ -84,8 +84,8 @@ Check the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/e
 ## Compatibility
 [Tested](https://travis-ci.org/webfp/tor-browser-selenium) with the following Tor Browser Bundle versions on Debian and Ubuntu:
 
-* 10.0.1
-* 10.5a1
+* 10.0.5
+* 10.5a4
 
 Windows and macOS are not supported.
 
