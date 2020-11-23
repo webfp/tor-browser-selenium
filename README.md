@@ -42,7 +42,7 @@ tor_process.kill()
 TorBrowserDriver does not download Tor Browser Bundle (TBB) for you. You should [download](https://www.torproject.org/projects/torbrowser.html.en), extract TBB and provide its path when you initialize `TorBrowserDriver`.
 
 ### Setting `geckodriver`'s location without using PATH
-If `geckodriver` is not on the system PATH, the binary location can be set programatically:
+If `geckodriver` is not on the system PATH, the binary location can be set programmatically:
 
 ```python
 TorBrowserDriver(executable_path="/path/to/geckodriver")
