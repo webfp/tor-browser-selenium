@@ -34,6 +34,7 @@ class TorBrowserDriver(FirefoxDriver):
                  tbb_profile_path="",
                  tbb_logfile_path="",
                  tor_data_dir="",
+                 executable_path="geckodriver",
                  pref_dict={},
                  socks_port=None,
                  control_port=None,
@@ -62,6 +63,7 @@ class TorBrowserDriver(FirefoxDriver):
             capabilities=self.capabilities,
             timeout=cm.TB_INIT_TIMEOUT,
             service_log_path=tbb_logfile_path,
+            executable_path=executable_path,
             options=options)
         self.is_running = True
         sleep(1)

@@ -16,7 +16,7 @@ Install `geckodriver` from the [geckodriver releases page](https://github.com/mo
 
 `tor` needs to be installed (`apt install tor`) and running on port 9050.
 
-```
+```python
 from tbselenium.tbdriver import TorBrowserDriver
 with TorBrowserDriver("/path/to/TorBrowserBundle/") as driver:
     driver.get('https://check.torproject.org')
@@ -26,7 +26,7 @@ with TorBrowserDriver("/path/to/TorBrowserBundle/") as driver:
 First, make sure you have `Stem` installed (`pip install stem`).
 The following will start a new `tor` process using `Stem`. It will not use the `tor` installed on your system.
 
-```
+```python
 import tbselenium.common as cm
 from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.utils import launch_tbb_tor_with_stem
@@ -40,6 +40,13 @@ tor_process.kill()
 ```
 
 TorBrowserDriver does not download Tor Browser Bundle (TBB) for you. You should [download](https://www.torproject.org/projects/torbrowser.html.en), extract TBB and provide its path when you initialize `TorBrowserDriver`.
+
+### Setting `geckodriver`'s location without using PATH
+If `geckodriver` is not on the system PATH, the binary location can be set programatically:
+
+```python
+TorBrowserDriver(executable_path="/path/to/geckodriver")
+```
 
 ## Test and development
 Install the Python packages that are needed for development and testing:
