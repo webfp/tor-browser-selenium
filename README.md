@@ -116,6 +116,20 @@ Solutions to potential issues:
 * WebGL is not supported in the headless mode started with `headless=True` due to Firefox bug [#1375585](https://bugzilla.mozilla.org/show_bug.cgi?id=1375585). To enable WebGL in a headless setting, use `pyvirtualdisplay` following the [headless.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/headless.py) example.
 * `set_security_level` doesn't work with the current alpha (10.5a1).
 
+## Reference
+Please don't forget to cite this repository if you use `tor-browser-selenium` in your academic publications.
+
+```
+@misc{tor-browser-selenium,
+  author = {Gunes Acar and Marc Juarez and individual contributors},
+  title = {tor-browser-selenium - Tor Browser automation with Selenium},
+  year = {2020},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/webfp/tor-browser-selenium}}
+}
+```
+
 ## Credits
 We greatly benefited from the following two projects:
 * [tor-browser-selenium](https://github.com/isislovecruft/tor-browser-selenium) by @isislovecruft.
