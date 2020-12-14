@@ -14,8 +14,8 @@ def visit(tbb_dir):
             select.select_by_value(lang_code)
             sleep(1)
             print("\n======== Locale: %s ========" % lang_code)
-            print driver.find_element_by("h1.on").text  # status text
-            print driver.find_element_by(".content > p").text  # IP address
+            print(driver.find_element_by("h1.on").text)  # status text
+            print(driver.find_element_by(".content > p").text)  # IP address
 
 
 def main():
