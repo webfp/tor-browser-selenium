@@ -1,13 +1,19 @@
 from os.path import join
-from os import environ
+from os import environ, name as current_os
 
 # DEFAULT TBB PATHS works for TBB versions v4.x and above
 # Old TBB versions (V3.X or below) have different directory structures
 DEFAULT_TBB_BROWSER_DIR = 'Browser'
 DEFAULT_TBB_TORBROWSER_DIR = join('Browser', 'TorBrowser')
-DEFAULT_TBB_FX_BINARY_PATH = join('Browser', 'firefox')
+if current_os == "nt":
+    DEFAULT_TBB_FX_BINARY_PATH = join('Browser', 'firefox.exe')
+else:
+    DEFAULT_TBB_FX_BINARY_PATH = join('Browser', 'firefox')
 DEFAULT_TOR_BINARY_DIR = join(DEFAULT_TBB_TORBROWSER_DIR, 'Tor')
-DEFAULT_TOR_BINARY_PATH = join(DEFAULT_TOR_BINARY_DIR, 'tor')
+if current_os == "nt":
+    DEFAULT_TOR_BINARY_PATH = join(DEFAULT_TOR_BINARY_DIR, 'tor.exe')
+else:
+    DEFAULT_TOR_BINARY_PATH = join(DEFAULT_TOR_BINARY_DIR, 'tor')
 DEFAULT_TBB_DATA_DIR = join(DEFAULT_TBB_TORBROWSER_DIR, 'Data')
 DEFAULT_TBB_PROFILE_PATH = join(DEFAULT_TBB_DATA_DIR, 'Browser',
                                 'profile.default')
@@ -16,10 +22,11 @@ TB_CHANGE_LOG_PATH = join(DEFAULT_TBB_TORBROWSER_DIR,
                           'Docs', 'ChangeLog.txt')
 
 # Directories for bundled fonts - Linux only
-DEFAULT_FONTCONFIG_PATH = join(DEFAULT_TBB_DATA_DIR, 'fontconfig')
-FONTCONFIG_FILE = "fonts.conf"
-DEFAULT_FONTS_CONF_PATH = join(DEFAULT_FONTCONFIG_PATH, FONTCONFIG_FILE)
-DEFAULT_BUNDLED_FONTS_PATH = join('Browser', 'fonts')
+if current_os != "nt":
+    DEFAULT_FONTCONFIG_PATH = join(DEFAULT_TBB_DATA_DIR, 'fontconfig')
+    FONTCONFIG_FILE = "fonts.conf"
+    DEFAULT_FONTS_CONF_PATH = join(DEFAULT_FONTCONFIG_PATH, FONTCONFIG_FILE)
+    DEFAULT_BUNDLED_FONTS_PATH = join('Browser', 'fonts')
 
 # SYSTEM TOR PORTS
 DEFAULT_SOCKS_PORT = 9050
@@ -51,5 +58,3 @@ USE_RUNNING_TOR = 1  # use system tor or tor started with stem
 USE_STEM = 2  # use tor started with Stem
 
 TRAVIS = "CI" in environ and "TRAVIS" in environ
-# TODO: remove once the issue is resolved
-CI_ALPHA_TEST = "a" in environ.get('VERSION_ARCH', '').split("/")[0]
