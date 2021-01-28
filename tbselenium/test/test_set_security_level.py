@@ -16,7 +16,7 @@ class SecurityLevelTest(unittest.TestCase):
 
     def get_webgl_test_page_status_text(self, driver):
         status = driver.find_element_by(
-                    "h1.good", find_by=By.CSS_SELECTOR, timeout=5)
+                    "support", find_by=By.ID, timeout=5)
         return status.text
 
     def get_webgl_test_page_webgl_container_inner_html(self, driver):
@@ -42,7 +42,7 @@ class SecurityLevelTest(unittest.TestCase):
             try:
                 # test the status text
                 status_text = self.get_webgl_test_page_status_text(driver)
-                assert status_text == "Your browser supports WebGL"
+                assert status_text.startswith("Your browser supports WebGL")
 
                 # make sure WebGL is enabled
                 webgl_container_inner_html = \
@@ -62,7 +62,7 @@ class SecurityLevelTest(unittest.TestCase):
             try:
                 driver.find_element_by("JavaScript is disabled.",
                                        find_by=By.LINK_TEXT, timeout=5)
-                self.fail("Security level does not seem to be set to Standard")
+                self.fail("Security level does not seem to be set to Medium")
             except (NoSuchElementException, TimeoutException):
                 pass
 
@@ -73,7 +73,9 @@ class SecurityLevelTest(unittest.TestCase):
             try:
                 # test the status text
                 status_text = self.get_webgl_test_page_status_text(driver)
-                assert status_text == "Your browser supports WebGL"
+                assert status_text.startswith(
+                    "Hmm. While your browser seems to support WebGL, it is disabled or unavailable"
+                    )
 
                 # make sure WebGL is click-to-play (NoScript)
                 webgl_container_inner_html = \
@@ -110,7 +112,7 @@ class SecurityLevelTest(unittest.TestCase):
 
             try:
                 status_text = self.get_webgl_test_page_status_text(driver)
-                assert status_text == ""
+                assert status_text == "You must enable JavaScript to use WebGL."
             except (NoSuchElementException, TimeoutException):
                 self.fail("Security level does not seem to be set to Safest")
 
