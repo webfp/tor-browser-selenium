@@ -9,7 +9,7 @@ def visit(tbb_dir):
     with TorBrowserDriver(tbb_dir) as driver:
         driver.load_url(url)
         # Iterate over a bunch of locales from the drop-down menu
-        for lang_code in ["en_US", "fr", "zh_CN", "fa", "ru", "hi", "ja"]:
+        for lang_code in ["en_US", "fr", "zh_CN", "th", "tr"]:
             select = Select(driver.find_element_by_id("cl"))
             select.select_by_value(lang_code)
             sleep(1)
