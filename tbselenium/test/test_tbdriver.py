@@ -23,9 +23,11 @@ class TBDriverTest(unittest.TestCase):
         self.assertEqual(status.text, congrats)
 
     def test_should_load_hidden_service(self):
-        self.tb_driver.load_url_ensure("http://3g2upl4pq6kufc4m.onion",
-                                       wait_for_page_body=True)
-        self.assertIn("DuckDuckGo", self.tb_driver.title)
+        TPO_ONION_URL = "http://2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion/index.html"  # noqa
+        self.tb_driver.load_url_ensure(TPO_ONION_URL, wait_for_page_body=True)
+        self.assertEqual(
+            'Tor Project | Anonymity Online',
+            self.tb_driver.title)
 
     def test_should_check_environ_in_prepend(self):
         self.tb_driver.quit()
