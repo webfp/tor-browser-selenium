@@ -101,11 +101,11 @@ Windows and macOS are not supported.
 
 Solutions to potential issues:
 
-* Make sure you can run Firefox on the same system. This may help discover various issues such as missing libraries, displays etc..
-* Outdated (or incompatible) Python `selenium` package: This is the source of various obscure errors. Make sure you have `selenium` version **3.3** or above.
+* Make sure you can run Firefox on the same system. This may help discover issues such as missing libraries, displays etc..
+* Outdated (or incompatible) Python `selenium` package: This is the source of various obscure errors. Make sure you have an up-to-date `selenium` package installed.
 * No display: When running on a cloud machine, follow the [headless.py example](https://github.com/webfp/tor-browser-selenium/blob/master/examples/headless.py#L10) to start a virtual display.
 * Outdated Tor Browser Bundle: Download and use a more recent TBB version.
-* Make sure you install the latest geckodriver version.
+* Make sure you install the latest `geckodriver` version.
 * Port conflict with other (`Tor`) process: Pick a different SOCKS and controller port using `socks_port` argument.
 * Use `tbb_logfile_path` argument of TorBrowserDriver to debug obscure errors. This can help with problems due to missing display, missing libraries (e.g. when the LD_LIBRARY_PATH is not set correctly) or other errors that Tor Browser logs to standard output/error.
 * When you use `LAUNCH_NEW_TBB_TOR` option and get the following [error message](https://github.com/webfp/tor-browser-selenium/issues/62) during the initialization, it's likely that Tor failed to bootstrap (due to network etc.):
