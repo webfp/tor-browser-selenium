@@ -14,7 +14,7 @@ addons:
 env:
   global:
     - DOWNLOAD_DIR=${HOME}/download
-    - STABLE=10.0.16
+    - STABLE=10.0.17
     - EXPERIMENTAL=10.5a15
     - TBB_DIST_URL=https://www.torproject.org/dist/torbrowser/
   matrix:
@@ -24,20 +24,14 @@ cache:
   - ${DOWNLOAD_DIR}
 matrix:
   include:
-    - python: "3.6"
+    - python: "3.8"
       env: VERSION_ARCH="${EXPERIMENTAL}/tor-browser-linux64-${EXPERIMENTAL}_en-US.tar.xz"
-    - python: "3.6"
+    - python: "3.8"
       env: VERSION_ARCH="${EXPERIMENTAL}/tor-browser-linux64-${EXPERIMENTAL}_zh-CN.tar.xz"
-    - python: "3.6"
-      env: VERSION_ARCH="${EXPERIMENTAL}/tor-browser-linux64-${EXPERIMENTAL}_ar.tar.xz"
-    - python: "3.6"
+    - python: "3.8"
       env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_en-US.tar.xz"
-    - python: "3.6"
+    - python: "3.8"
       env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_zh-CN.tar.xz"
-    - python: "3.6"
-      env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_ar.tar.xz"
-    - python: "2.7"
-      env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_en-US.tar.xz"
   exclude:
     - env: TRAVIS_EXTRA_JOB_WORKAROUND=true
 install:
