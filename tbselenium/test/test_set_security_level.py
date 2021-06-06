@@ -18,11 +18,15 @@ class SecurityLevelTest(unittest.TestCase):
         webgl_container = driver.find_element_by_id("logo-container")
         return webgl_container.get_attribute('innerHTML').strip()
 
+    def get_js_status_text(self, driver):
+        return driver.find_element_by_id('js').\
+                get_attribute("innerText")
+
     def test_set_security_low(self):
         with TBDriverFixture(TBB_PATH) as driver:
             set_security_level(driver, SECURITY_LOW)
             driver.load_url_ensure(CHECK_TPO_URL)
-            js_status = driver.find_element_by_id('js').text
+            js_status = self.get_js_status_text(driver)
             assert js_status == "JavaScript is enabled."
 
     def test_set_security_low_webgl(self):
@@ -49,7 +53,7 @@ class SecurityLevelTest(unittest.TestCase):
         with TBDriverFixture(TBB_PATH) as driver:
             set_security_level(driver, SECURITY_MEDIUM)
             driver.load_url_ensure(CHECK_TPO_URL)
-            js_status = driver.find_element_by_id('js').text
+            js_status = self.get_js_status_text(driver)
             assert js_status == "JavaScript is enabled."
 
     def test_set_security_medium_webgl(self):
@@ -80,7 +84,7 @@ class SecurityLevelTest(unittest.TestCase):
         with TBDriverFixture(TBB_PATH) as driver:
             set_security_level(driver, SECURITY_HIGH)
             driver.load_url_ensure(CHECK_TPO_URL)
-            js_status = driver.find_element_by_id('js').text
+            js_status = self.get_js_status_text(driver)
             assert js_status == "JavaScript is disabled."
 
     def test_set_security_high_webgl(self):
