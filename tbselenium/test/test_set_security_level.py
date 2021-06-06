@@ -14,26 +14,16 @@ GET_WEBGL_ORG_URL = "https://get.webgl.org/"
 
 class SecurityLevelTest(unittest.TestCase):
 
-    def get_webgl_test_page_status_text(self, driver):
-        status = driver.find_element_by(
-                    "support", find_by=By.ID, timeout=5)
-        return status.text
-
     def get_webgl_test_page_webgl_container_inner_html(self, driver):
-        webgl_container = driver.find_element_by(
-                    "logo-container", find_by=By.ID, timeout=5)
+        webgl_container = driver.find_element_by_id("logo-container")
         return webgl_container.get_attribute('innerHTML').strip()
 
     def test_set_security_low(self):
         with TBDriverFixture(TBB_PATH) as driver:
             set_security_level(driver, SECURITY_LOW)
             driver.load_url_ensure(CHECK_TPO_URL)
-            try:
-                driver.find_element_by("JavaScript is disabled.",
-                                       find_by=By.LINK_TEXT, timeout=5)
-                self.fail("Security level does not seem to be set to Standard")
-            except (NoSuchElementException, TimeoutException):
-                pass
+            js_status = driver.find_element_by_id('js').text
+            assert js_status == "JavaScript is enabled."
 
     def test_set_security_low_webgl(self):
         with TBDriverFixture(TBB_PATH) as driver:
@@ -41,7 +31,7 @@ class SecurityLevelTest(unittest.TestCase):
             driver.load_url_ensure(GET_WEBGL_ORG_URL)
             try:
                 # test the status text
-                status_text = self.get_webgl_test_page_status_text(driver)
+                status_text = driver.find_element_by_id("support").text
                 assert status_text.startswith("Your browser supports WebGL")
 
                 # make sure WebGL is enabled
@@ -52,19 +42,15 @@ class SecurityLevelTest(unittest.TestCase):
 
             except (NoSuchElementException, TimeoutException) as exc:
                 self.fail(
-                    "Security level does not seem to be set to Standard: %s"
+                    "Security level cannot be set to 'Standard': %s"
                     % exc)
 
     def test_set_security_medium(self):
         with TBDriverFixture(TBB_PATH) as driver:
             set_security_level(driver, SECURITY_MEDIUM)
             driver.load_url_ensure(CHECK_TPO_URL)
-            try:
-                driver.find_element_by("JavaScript is disabled.",
-                                       find_by=By.LINK_TEXT, timeout=5)
-                self.fail("Security level does not seem to be set to Medium")
-            except (NoSuchElementException, TimeoutException):
-                pass
+            js_status = driver.find_element_by_id('js').text
+            assert js_status == "JavaScript is enabled."
 
     def test_set_security_medium_webgl(self):
         with TBDriverFixture(TBB_PATH) as driver:
@@ -72,10 +58,9 @@ class SecurityLevelTest(unittest.TestCase):
             driver.load_url_ensure(GET_WEBGL_ORG_URL)
             try:
                 # test the status text
-                status_text = self.get_webgl_test_page_status_text(driver)
+                status_text = driver.find_element_by_id("support").text
                 assert status_text.startswith("Your browser supports WebGL")
-                experimental = driver.find_element_by(
-                    "webgl-experimental", find_by=By.ID, timeout=5)
+                experimental = driver.find_element_by_id("webgl-experimental")
                 assert "However, it indicates that support is experimental; "
                 "Not all WebGL functionality may be supported, and content may"
                 " not run as expected." == experimental.text
@@ -88,19 +73,15 @@ class SecurityLevelTest(unittest.TestCase):
 
             except (NoSuchElementException, TimeoutException) as exc:
                 self.fail(
-                    "Security level does not seem to be set to Medium: %s"
+                    "Security level cannot to be set to 'Safer': %s"
                     % exc)
 
     def test_set_security_high(self):
         with TBDriverFixture(TBB_PATH) as driver:
             set_security_level(driver, SECURITY_HIGH)
             driver.load_url_ensure(CHECK_TPO_URL)
-            try:
-                driver.find_element_by("JavaScript is enabled.",
-                                       find_by=By.LINK_TEXT, timeout=5)
-                self.fail("Security level does not seem to be set to Safest")
-            except (NoSuchElementException, TimeoutException):
-                pass
+            js_status = driver.find_element_by_id('js').text
+            assert js_status == "JavaScript is disabled."
 
     def test_set_security_high_webgl(self):
         with TBDriverFixture(TBB_PATH) as driver:
@@ -108,10 +89,10 @@ class SecurityLevelTest(unittest.TestCase):
             driver.load_url_ensure(GET_WEBGL_ORG_URL)
 
             try:
-                status_text = self.get_webgl_test_page_status_text(driver)
-                assert status_text == "You must enable JavaScript to use WebGL."
+                status = driver.find_element_by_id("support").text
+                assert status == "You must enable JavaScript to use WebGL."
             except (NoSuchElementException, TimeoutException):
-                self.fail("Security level does not seem to be set to Safest")
+                self.fail("Security level cannot be set to 'Safest'")
 
 
 if __name__ == "__main__":
