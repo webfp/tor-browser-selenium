@@ -63,11 +63,10 @@ class SecurityLevelTest(unittest.TestCase):
             try:
                 # test the status text
                 status_text = driver.find_element_by_id("support").text
-                assert status_text.startswith("Your browser supports WebGL")
-                experimental = driver.find_element_by_id("webgl-experimental")
-                assert "However, it indicates that support is experimental; "
-                "Not all WebGL functionality may be supported, and content may"
-                " not run as expected." == experimental.text
+                assert status_text.startswith(
+                    "Hmm. While your browser seems to support WebGL, it is "
+                    "disabled or unavailable. If possible, please ensure that "
+                    "you are running the latest drivers for your video card.")
 
                 # make sure WebGL is click-to-play (NoScript)
                 webgl_container_inner_html = \
