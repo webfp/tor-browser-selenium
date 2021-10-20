@@ -60,8 +60,7 @@ class TorBrowserDriver(FirefoxDriver):
         super(TorBrowserDriver, self).__init__(
             firefox_profile=self.profile,
             firefox_binary=self.binary,
-            capabilities=self.capabilities,
-            timeout=cm.TB_INIT_TIMEOUT,
+            capabilities=self.caps,
             service_log_path=tbb_logfile_path,
             executable_path=executable_path,
             options=options)
@@ -252,7 +251,7 @@ class TorBrowserDriver(FirefoxDriver):
     def setup_capabilities(self, caps):
         """Setup the required webdriver capabilities."""
         if caps is None:
-            self.capabilities = {
+            self.caps = {
                 "marionette": True,
                 "capabilities": {
                     "alwaysMatch": {
@@ -263,7 +262,7 @@ class TorBrowserDriver(FirefoxDriver):
                 }
             }
         else:
-            self.capabilities = caps
+            self.caps = caps
 
     def get_tb_binary(self, logfile=None):
         """Return FirefoxBinary pointing to the TBB's firefox binary."""
