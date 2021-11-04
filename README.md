@@ -103,7 +103,7 @@ Solutions to potential issues:
 
 * Make sure you can run Firefox on the same system. This may help discover issues such as missing libraries, displays etc..
 * Outdated (or incompatible) Python `selenium` package: This is the source of various obscure errors. Make sure you have an up-to-date `selenium` package installed.
-* No display: When running on a cloud machine, follow the [headless.py example](https://github.com/webfp/tor-browser-selenium/blob/master/examples/headless.py#L10) to start a virtual display.
+* No display: When running on a cloud machine, follow the [headless.py example](https://github.com/webfp/tor-browser-selenium/blob/master/examples/headless.py#L10) to start a virtual display. Also you need to install PyVirtualDisplay pip module
 * Outdated Tor Browser Bundle: Download and use a more recent TBB version.
 * Make sure you install the latest `geckodriver` version.
 * Port conflict with other (`Tor`) process: Pick a different SOCKS and controller port using `socks_port` argument.
