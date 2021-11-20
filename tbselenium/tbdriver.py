@@ -7,8 +7,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 import tbselenium.common as cm
 from tbselenium.utils import prepend_to_env_var, is_busy
 from tbselenium.tbbinary import TBBinary
@@ -46,26 +48,37 @@ class TorBrowserDriver(FirefoxDriver):
         self.tor_cfg = tor_cfg
         self.setup_tbb_paths(tbb_path, tbb_fx_binary_path,
                              tbb_profile_path, tor_data_dir)
-        self.profile = webdriver.FirefoxProfile(self.tbb_profile_path)
-        self.install_extensions(extensions)
+        self.options = Options()
+        # FIXME: DeprecationWarning: firefox_profile has been deprecated, please use an Options object
+        # self.profile = webdriver.FirefoxProfile(self.tbb_profile_path)
+        self.options.profile = FirefoxProfile(self.tbb_profile_path)
         self.init_ports(tor_cfg, socks_port, control_port)
+        # TODO: set prefs in Options
         self.init_prefs(pref_dict, default_bridge_type)
-        self.setup_capabilities(capabilities)
+        # TODO: add capabilities to Options
+        # self.setup_capabilities(capabilities)
         self.export_env_vars()
-        self.binary = self.get_tb_binary(logfile=tbb_logfile_path)
-        self.binary.add_command_line_options('--class', '"Tor Browser"')
-        options = Options()
+        # TODO:
+        # self.binary = self.get_tb_binary(logfile=tbb_logfile_path)
+        tbb_service = Service(self.tbb_fx_binary_path, log_path=tbb_logfile_path)
+        self.options.binary = self.tbb_fx_binary_path
+        self.options.add_argument('--class')
+        self.options.add_argument('"Tor Browser"')
+        # self.binary.add_command_line_options('--class', '"Tor Browser"')
         if headless:
-            options.set_headless()
+            self.options.set_headless()
         super(TorBrowserDriver, self).__init__(
-            firefox_profile=self.profile,
-            firefox_binary=self.binary,
-            capabilities=self.capabilities,
-            timeout=cm.TB_INIT_TIMEOUT,
+            # firefox_profile=self.profile,
+            service=tbb_service,
+            # TODO: FIXME
+            # capabilities=self.capabilities,
+            # TODO: FIXME
+            # timeout=cm.TB_INIT_TIMEOUT,
             service_log_path=tbb_logfile_path,
             executable_path=executable_path,
-            options=options)
+            options=self.options)
         self.is_running = True
+        self.install_extensions(extensions)
         sleep(1)
 
     def install_extensions(self, extensions):
@@ -73,7 +86,8 @@ class TorBrowserDriver(FirefoxDriver):
         if extensions is None:
             return
         for extension in extensions:
-            self.profile.add_extension(extension)
+            print("========== Will InSTALL ADDON", extension)
+            self.install_addon(extension)
 
     def init_ports(self, tor_cfg, socks_port, control_port):
         """Check SOCKS port and Tor config inputs."""
@@ -174,8 +188,8 @@ class TorBrowserDriver(FirefoxDriver):
         """
         if socks_port in cm.KNOWN_SOCKS_PORTS:
             return
-        tb_prefs = self.profile.default_preferences
-        set_pref = self.profile.set_preference
+        tb_prefs = self.options.preferences
+        set_pref = self.options.set_preference
 
         for port_ban_pref in cm.PORT_BAN_PREFS:
             banned_ports = tb_prefs.get(port_ban_pref, DEFAULT_BANNED_PORTS)
@@ -188,7 +202,7 @@ class TorBrowserDriver(FirefoxDriver):
 
         We set these prefs for running with Tor started with Stem as well.
         """
-        set_pref = self.profile.set_preference
+        set_pref = self.options.set_preference
         # Prevent Tor Browser running its own Tor process
         set_pref('extensions.torlauncher.start_tor', False)
         # TODO: investigate whether these prefs are up to date or not
@@ -209,8 +223,9 @@ class TorBrowserDriver(FirefoxDriver):
 
     def init_prefs(self, pref_dict, default_bridge_type):
         self.add_ports_to_fx_banned_ports(self.socks_port, self.control_port)
-        set_pref = self.profile.set_preference
+        set_pref = self.options.set_preference
         set_pref('browser.startup.page', "0")
+        set_pref('torbrowser.settings.quickstart.enabled', True)
         set_pref('browser.startup.homepage', 'about:newtab')
         set_pref('extensions.torlauncher.prompt_at_startup', 0)
         # load strategy normal is equivalent to "onload"
@@ -233,7 +248,7 @@ class TorBrowserDriver(FirefoxDriver):
         # pref_dict overwrites above preferences
         for pref_name, pref_val in pref_dict.items():
             set_pref(pref_name, pref_val)
-        self.profile.update_preferences()
+        # self.profile.update_preferences()
 
     def export_env_vars(self):
         """Setup LD_LIBRARY_PATH and HOME environment variables.
@@ -280,8 +295,8 @@ class TorBrowserDriver(FirefoxDriver):
         """Remove temporary profile directories.
         Only called when WebDriver.quit() is interrupted
         """
-        tempfolder = self.profile.tempfolder
-        profile_path = self.profile.path
+        tempfolder = self.options.profile.tempfolder
+        profile_path = self.options.profile.path
 
         if tempfolder and isdir(tempfolder):
             shutil.rmtree(tempfolder)
