@@ -60,16 +60,15 @@ class TorBrowserDriver(FirefoxDriver):
         self.export_env_vars()
         # TODO:
         # self.binary = self.get_tb_binary(logfile=tbb_logfile_path)
-        tbb_service = Service(self.tbb_fx_binary_path, log_path=tbb_logfile_path)
+        # tbb_service = Service(executable_path=self.tbb_fx_binary_path, log_path=tbb_logfile_path)
         self.options.binary = self.tbb_fx_binary_path
         self.options.add_argument('--class')
         self.options.add_argument('"Tor Browser"')
-        # self.binary.add_command_line_options('--class', '"Tor Browser"')
         if headless:
             self.options.set_headless()
         super(TorBrowserDriver, self).__init__(
             # firefox_profile=self.profile,
-            service=tbb_service,
+            # service=tbb_service,
             # TODO: FIXME
             # capabilities=self.capabilities,
             # TODO: FIXME
