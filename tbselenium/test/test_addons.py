@@ -29,12 +29,13 @@ class HTTPSEverywhereTest(unittest.TestCase):
 class CustomExtensionTest(unittest.TestCase):
 
     def test_should_install_custom_extension(self):
-        # We test if we can install the extension.
-        # We should improve the test by checking the expected outcome.
+        XPI_NAME = "borderify.xpi"  # sample extension based on:
+        # https://github.com/mdn/webextensions-examples/tree/master/borderify
+        # Currently we only install the addon.
+        # TODO: Improve by checking the expected outcome
+        # (e.g. different borders due to borderify addon).
         test_dir = os.path.dirname(os.path.realpath(__file__))
-        xpi_name = "borderify.xpi"  # sample extension taken from:
-        # https://developer.mozilla.org/en-US/Add-ons/Overlay_Extensions/XUL_School/Getting_Started_with_Firefox_Extensions#Extension_Contents  # noqa
-        xpi_path = os.path.join(test_dir, "test_data", xpi_name)
+        xpi_path = os.path.join(test_dir, "test_data", XPI_NAME)
         with TBDriverFixture(TBB_PATH,
                              extensions=[xpi_path]) as driver:
             driver.load_url_ensure(cm.CHECK_TPO_URL)
