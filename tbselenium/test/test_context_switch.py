@@ -3,7 +3,6 @@ from tbselenium.test import TBB_PATH
 from tbselenium.test.fixtures import TBDriverFixture
 from tbselenium.common import CHECK_TPO_URL
 from selenium.common.exceptions import WebDriverException
-from selenium import CONTEXT_CHROME, CONTEXT_CONTENT
 
 
 # based on https://stackoverflow.com/a/6549765
@@ -24,7 +23,7 @@ class TestGeckoDriverChromeScript(unittest.TestCase):
 
     def test_should_run_chrome_script(self):
         with TBDriverFixture(TBB_PATH) as driver:
-            driver.set_context(CONTEXT_CHROME)
+            driver.set_context(driver.CONTEXT_CHROME)
             driver.execute_script(COMPONENT_CLASSES_JS)
 
     def test_bundled_fonts_via_chrome_script(self):
@@ -33,7 +32,7 @@ class TestGeckoDriverChromeScript(unittest.TestCase):
 
         with TBDriverFixture(TBB_PATH, pref_dict=pref_dict) as driver:
             driver.load_url_ensure(CHECK_TPO_URL)
-            driver.set_context(CONTEXT_CHROME)
+            driver.set_context(driver.CONTEXT_CHROME)
             components = driver.execute_script(COMPONENT_CLASSES_JS)
             self.assertIn("@mozilla.org/gfx/fontenumerator",
                           str(components))
