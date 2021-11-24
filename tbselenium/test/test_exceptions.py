@@ -1,3 +1,4 @@
+from time import sleep
 import unittest
 from os.path import isdir, join
 import tempfile
@@ -97,23 +98,6 @@ class TBDriverExceptions(unittest.TestCase):
             launch_tbb_tor_with_stem(tbb_path="", tor_binary="")
         with self.assertRaises(StemLaunchError):
             launch_tbb_tor_with_stem(tbb_path=temp_dir, tor_binary="")
-
-    def test_missing_browser(self):
-        driver = TBDriverFixture(TBB_PATH)
-
-        tempfolder = driver.profile.tempfolder
-        profile_path = driver.profile.path
-
-        self.assertTrue(isdir(tempfolder))
-        self.assertTrue(isdir(profile_path))
-        # kill the browser process
-        driver.service.stop()
-        driver.quit()
-        # else:
-        #     driver.binary.kill()
-        #     driver.quit()
-        self.assertFalse(isdir(profile_path))
-        self.assertFalse(isdir(tempfolder))
 
 
 if __name__ == "__main__":

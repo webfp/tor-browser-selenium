@@ -34,7 +34,7 @@ class TorBrowserTest(unittest.TestCase):
         log_txt = read_file(self.log_file)
         self.assertIn("Torbutton INFO", log_txt)
 
-    @pytest.mark.skipif(sys.platform != 'linux2', reason='Requires Linux')
+    @pytest.mark.skipif(sys.platform != 'linux', reason='Requires Linux')
     def test_should_load_tbb_firefox_libs(self):
         """Make sure we load the Firefox libraries from the TBB directories.
         We only test libxul (main Firefox/Gecko library) and libstdc++.
