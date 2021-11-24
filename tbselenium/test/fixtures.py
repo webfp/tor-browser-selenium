@@ -28,7 +28,7 @@ class TBDriverFixture(TorBrowserDriver):
                 return super(TBDriverFixture, self).__init__(*args, **kwargs)
             except (TimeoutException, WebDriverException,
                     socket_error) as last_err:
-                print("\nTBDriver init error. Attempt %s %s" %
+                print("\nERROR: TBDriver init error. Attempt %s %s" %
                       ((tries + 1), last_err))
                 if FORCE_TB_LOGS_DURING_TESTS:
                     logs = read_file(log_file)
@@ -37,9 +37,10 @@ class TBDriverFixture(TorBrowserDriver):
                 super(TBDriverFixture, self).quit()  # clean up
                 continue
         # Raise if we didn't return yet
-        to_raise = last_err if last_err else\
-            TorBrowserDriverInitError("Cannot initialize")
-        raise to_raise
+        try:
+            raise last_err
+        except Exception:
+            raise TorBrowserDriverInitError("Cannot initialize")
 
     def __del__(self):
         # remove the temp log file if we created
@@ -84,9 +85,10 @@ class TBDriverFixture(TorBrowserDriver):
                       ((tries + 1), last_err))
                 continue
         # Raise if we didn't return yet
-        to_raise = last_err if last_err else\
-            WebDriverException("Can't load the page")
-        raise to_raise
+        try:
+            raise last_err
+        except Exception:
+            raise WebDriverException("Can't load the page")
 
 
 def launch_tbb_tor_with_stem_fixture(*args, **kwargs):
@@ -101,6 +103,7 @@ def launch_tbb_tor_with_stem_fixture(*args, **kwargs):
             else:  # we don't want to retry if this is not a timeout
                 raise
     # Raise if we didn't return yet
-    to_raise = last_err if last_err else\
-        StemLaunchError("Cannot start Tor")
-    raise to_raise
+    try:
+        raise last_err
+    except Exception:
+        raise StemLaunchError("Cannot start Tor")
