@@ -1,6 +1,6 @@
 import shutil
 from os import environ, chdir
-from os.path import isdir, isfile, join, abspath
+from os.path import isdir, isfile, join, abspath, dirname
 from time import sleep
 from http.client import CannotSendRequest
 from selenium.webdriver.support.ui import WebDriverWait
@@ -160,6 +160,10 @@ class TorBrowserDriver(FirefoxDriver):
                                         % tbb_path)
             tbb_fx_binary_path = join(tbb_path, cm.DEFAULT_TBB_FX_BINARY_PATH)
             tbb_profile_path = join(tbb_path, cm.DEFAULT_TBB_PROFILE_PATH)
+        else:
+            # based on https://github.com/webfp/tor-browser-selenium/issues/159#issue-1016463002
+            tbb_path = dirname(dirname(tbb_fx_binary_path))
+
         if not isfile(tbb_fx_binary_path):
             raise TBDriverPathError("Invalid Firefox binary %s"
                                     % tbb_fx_binary_path)
