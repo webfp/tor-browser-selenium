@@ -66,9 +66,9 @@ class TBDriverCleanUp(unittest.TestCase):
         self.assertNotEqual(geckodriver_process.poll(), None)
 
     def test_should_remove_profile_dirs_on_quit(self):
-        temp_profile_dir = self.driver.temp_profile_dir
+        temp_profile_dir = self.tb_driver.temp_profile_dir
         self.assertTrue(isdir(temp_profile_dir))
-        self.driver.quit()
+        self.tb_driver.quit()
         self.assertFalse(isdir(temp_profile_dir))
 
 
