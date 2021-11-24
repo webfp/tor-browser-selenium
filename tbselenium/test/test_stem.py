@@ -42,7 +42,7 @@ class TBStemTest(unittest.TestCase):
 
     def test_should_add_custom_ports_to_fx_banned_ports(self):
         for pref in cm.PORT_BAN_PREFS:
-            banned_ports = self.driver.profile.default_preferences[pref]
+            banned_ports = self.driver.options.preferences[pref]
             self.assertIn(str(self.socks_port), banned_ports)
             self.assertIn(str(self.control_port), banned_ports)
 

@@ -3,7 +3,10 @@ import unittest
 import pytest
 from os import environ
 from os.path import join, isdir, getmtime
+from time import time
 
+from selenium.webdriver.common.timeouts import Timeouts
+from selenium.common.exceptions import TimeoutException
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
 from tbselenium.test.fixtures import TBDriverFixture
@@ -36,6 +39,20 @@ class TBDriverTest(unittest.TestCase):
         tbbpath_count = paths.count(self.tb_driver.tbb_browser_dir)
         self.assertEqual(tbbpath_count, 1)
 
+    def test_should_set_timeouts(self):
+        LOW_PAGE_LOAD_LIMIT = 0.05
+        self.tb_driver.timeouts = Timeouts(page_load=LOW_PAGE_LOAD_LIMIT)
+        timed_out = False
+        t_before_load = time()
+        try:
+            self.tb_driver.load_url(cm.CHECK_TPO_URL)
+        except TimeoutException:
+            timed_out = True
+        finally:
+            t_spent = time() - t_before_load
+            self.assertAlmostEqual(t_spent, LOW_PAGE_LOAD_LIMIT, delta=1)
+            assert timed_out
+
 
 class TBDriverCleanUp(unittest.TestCase):
     def setUp(self):
@@ -49,15 +66,10 @@ class TBDriverCleanUp(unittest.TestCase):
         self.assertNotEqual(geckodriver_process.poll(), None)
 
     def test_should_remove_profile_dirs_on_quit(self):
-        driver = self.tb_driver
-        tempfolder = driver.profile.tempfolder
-        profile_path = driver.profile.path
-
-        self.assertTrue(isdir(tempfolder))
-        self.assertTrue(isdir(profile_path))
-        driver.quit()
-        self.assertFalse(isdir(profile_path))
-        self.assertFalse(isdir(tempfolder))
+        temp_profile_dir = self.tb_driver.temp_profile_dir
+        self.assertTrue(isdir(temp_profile_dir))
+        self.tb_driver.quit()
+        self.assertFalse(isdir(temp_profile_dir))
 
 
 class TBDriverTorDataDir(unittest.TestCase):
@@ -76,3 +88,7 @@ class TBDriverTorDataDir(unittest.TestCase):
             driver.load_url_ensure(cm.CHECK_TPO_URL)
         mod_time_after = getmtime(self.TOR_DATA_PATH)
         self.assertEqual(mod_time_before, mod_time_after)
+
+
+if __name__ == "__main__":
+    unittest.main()
