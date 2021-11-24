@@ -76,11 +76,17 @@ class TorBrowserDriver(FirefoxDriver):
         self.export_env_vars()
         # TODO:
         # self.binary = self.get_tb_binary(logfile=tbb_logfile_path)
-        tbb_service = Service(
-            executable_path=executable_path,
-            log_path=tbb_logfile_path,
-            service_args=["--marionette-port", "2828"]
-            )
+        if use_custom_profile:
+            tbb_service = Service(
+                executable_path=executable_path,
+                log_path=tbb_logfile_path,
+                service_args=["--marionette-port", "2828"]
+                )
+        else:
+            tbb_service = Service(
+                executable_path=executable_path,
+                log_path=tbb_logfile_path
+                )
         self.options.binary = self.tbb_fx_binary_path
         self.options.add_argument('--class')
         self.options.add_argument('"Tor Browser"')
