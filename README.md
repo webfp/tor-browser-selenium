@@ -67,7 +67,7 @@ You may disable `Xvfb` by exporting the following environment variable:
 
 
 
-#### Running individual tests
+### Running individual tests
 First, export a `TBB_PATH` environment variable that points to the TBB version you want to use:
 
 `export TBB_PATH=/path/to/tbb/tor-browser_en-US/`
@@ -77,6 +77,11 @@ Then, use `py.test` to launch the tests you want, e.g.:
 * `py.test tbselenium/test/test_tbdriver.py`
 * `py.test tbselenium/test/test_tbdriver.py::TBDriverTest::test_should_load_check_tpo`
 
+### Disabling console logs
+You can redirect the logs to `/dev/null` by passing the `tbb_logfile_path` initialization parameter:
+```python
+TorBrowserDriver(..., tbb_logfile_path='/dev/null')
+```
 
 ## Examples
 Check the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/examples) to discover different ways to use TorBrowserDriver
