@@ -61,7 +61,7 @@ class TorBrowserDriver(FirefoxDriver):
         if self.use_custom_profile:
             # launch from and write to this custom profile
             self.options.add_argument("-profile")
-            self.options.add_argument(self.tbb_profile_path)
+            self.options.add_argument(tbb_profile_path)
         elif USE_DEPRECATED_PROFILE_METHOD:
             # launch from this custom profile
             self.options.profile = self.tbb_profile_path
