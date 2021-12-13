@@ -145,9 +145,9 @@ class TorBrowserDriver(FirefoxDriver):
         """Update instance variables based on the passed paths.
 
         TorBrowserDriver can be initialized by passing either
-        1) path to TBB directory, or
-        2) path to TBB directory and profile, or
-        3) path to TBB's Firefox binary and profile
+        1) path to TBB directory (tbb_path)
+        2) path to TBB directory and profile (tbb_path, tbb_profile_path)
+        3) path to TBB's Firefox binary and profile (tbb_fx_binary_path, tbb_profile_path)
         """
         if not (tbb_path or (tbb_fx_binary_path and tbb_profile_path)):
             raise TBDriverPathError("Either TBB path or Firefox profile"
@@ -164,6 +164,7 @@ class TorBrowserDriver(FirefoxDriver):
             tbb_path = dirname(dirname(tbb_fx_binary_path))
 
         if not tbb_profile_path:
+            # fall back to the default profile path in TBB
             tbb_profile_path = join(tbb_path, cm.DEFAULT_TBB_PROFILE_PATH)
 
         if not isfile(tbb_fx_binary_path):
@@ -180,6 +181,7 @@ class TorBrowserDriver(FirefoxDriver):
         if tor_data_dir:
             self.tor_data_dir = tor_data_dir  # only relevant if we launch tor
         else:
+            # fall back to default tor data dir in TBB
             self.tor_data_dir = join(tbb_path, cm.DEFAULT_TOR_DATA_PATH)
         # TB can't find bundled "fonts" if we don't switch to tbb_browser_dir
         chdir(self.tbb_browser_dir)

@@ -90,5 +90,41 @@ class TBDriverTorDataDir(unittest.TestCase):
         self.assertEqual(mod_time_before, mod_time_after)
 
 
+class TBDriverProfile(unittest.TestCase):
+
+    TBB_PROFILE_PATH = join(TBB_PATH, cm.DEFAULT_TBB_PROFILE_PATH)
+
+    def test_custom_profile_and_tbb_path(self):
+        """Make sure we use the right profile directory when the TBB
+        path and profile path is provided.
+        """
+        tmp_dir = tempfile.mkdtemp()
+        mod_time_before = getmtime(self.TBB_PROFILE_PATH)
+        with TBDriverFixture(
+            TBB_PATH, tbb_profile_path=tmp_dir,
+                use_custom_profile=True) as driver:
+            assert isdir(tmp_dir)
+            assert driver.temp_profile_dir == tmp_dir
+            driver.load_url_ensure(cm.CHECK_TPO_URL)
+        mod_time_after = getmtime(self.TBB_PROFILE_PATH)
+        self.assertEqual(mod_time_before, mod_time_after)
+
+    def test_custom_profile_and_binary(self):
+        """Make sure we use the right directory when a binary
+        and profile is provided.
+        """
+        tmp_dir = tempfile.mkdtemp()
+        fx_binary = join(TBB_PATH, cm.DEFAULT_TBB_FX_BINARY_PATH)
+        mod_time_before = getmtime(self.TBB_PROFILE_PATH)
+        with TBDriverFixture(
+            tbb_fx_binary_path=fx_binary, tbb_profile_path=tmp_dir,
+                use_custom_profile=True) as driver:
+            assert isdir(tmp_dir)
+            assert driver.temp_profile_dir == tmp_dir
+            driver.load_url_ensure(cm.CHECK_TPO_URL)
+        mod_time_after = getmtime(self.TBB_PROFILE_PATH)
+        self.assertEqual(mod_time_before, mod_time_after)
+
+
 if __name__ == "__main__":
     unittest.main()
