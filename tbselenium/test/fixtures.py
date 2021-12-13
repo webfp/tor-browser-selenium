@@ -14,6 +14,7 @@ MAX_FIXTURE_TRIES = 3
 
 # make sure TB logs to a file, print if init fails
 FORCE_TB_LOGS_DURING_TESTS = True
+ERR_MSG_NETERROR_NETTIMEOUT = "Reached error page: about:neterror?e=netTimeout"
 
 
 class TBDriverFixture(TorBrowserDriver):
@@ -84,6 +85,13 @@ class TBDriverFixture(TorBrowserDriver):
                 print("\nload_url timed out.  Attempt %s %s" %
                       ((tries + 1), last_err))
                 continue
+            except WebDriverException as wd_err:
+                if ERR_MSG_NETERROR_NETTIMEOUT in str(wd_err):
+                    print("\nload_url timed out (WebDriverException). "
+                          "Attempt %s %s" % ((tries + 1), last_err))
+                    continue
+                raise wd_err
+
         # Raise if we didn't return yet
         try:
             raise last_err
