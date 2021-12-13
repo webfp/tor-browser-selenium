@@ -51,7 +51,6 @@ class TorBrowserDriver(FirefoxDriver):
 
         self.use_custom_profile = use_custom_profile
         self.tor_cfg = tor_cfg
-
         self.setup_tbb_paths(tbb_path, tbb_fx_binary_path,
                              tbb_profile_path, tor_data_dir)
         self.options = Options() if options is None else options
@@ -61,7 +60,7 @@ class TorBrowserDriver(FirefoxDriver):
         if self.use_custom_profile:
             # launch from and write to this custom profile
             self.options.add_argument("-profile")
-            self.options.add_argument(tbb_profile_path)
+            self.options.add_argument(self.tbb_profile_path)
         elif USE_DEPRECATED_PROFILE_METHOD:
             # launch from this custom profile
             self.options.profile = self.tbb_profile_path
@@ -147,7 +146,8 @@ class TorBrowserDriver(FirefoxDriver):
 
         TorBrowserDriver can be initialized by passing either
         1) path to TBB directory, or
-        2) path to TBB's Firefox binary and profile
+        2) path to TBB directory and profile, or
+        3) path to TBB's Firefox binary and profile
         """
         if not (tbb_path or (tbb_fx_binary_path and tbb_profile_path)):
             raise TBDriverPathError("Either TBB path or Firefox profile"
@@ -159,10 +159,12 @@ class TorBrowserDriver(FirefoxDriver):
                 raise TBDriverPathError("TBB path is not a directory %s"
                                         % tbb_path)
             tbb_fx_binary_path = join(tbb_path, cm.DEFAULT_TBB_FX_BINARY_PATH)
-            tbb_profile_path = join(tbb_path, cm.DEFAULT_TBB_PROFILE_PATH)
         else:
             # based on https://github.com/webfp/tor-browser-selenium/issues/159#issue-1016463002
             tbb_path = dirname(dirname(tbb_fx_binary_path))
+
+        if not tbb_profile_path:
+            tbb_profile_path = join(tbb_path, cm.DEFAULT_TBB_PROFILE_PATH)
 
         if not isfile(tbb_fx_binary_path):
             raise TBDriverPathError("Invalid Firefox binary %s"
