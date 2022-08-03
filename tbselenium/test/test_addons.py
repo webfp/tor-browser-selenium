@@ -36,7 +36,7 @@ class TBAddonsTest(unittest.TestCase):
 
     def test_builtin_addons_should_come_installed(self):
         """Make sure that the built-in addons come installed."""
-        EXPECTED_ADDONS = set(['HTTPS Everywhere', 'NoScript'])
+        EXPECTED_ADDONS = set(['NoScript'])
         found_addons = []
         with TBDriverFixture(TBB_PATH) as driver:
             found_addons = self.get_list_of_installed_addons(driver)
