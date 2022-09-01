@@ -10,6 +10,8 @@ from selenium.common.exceptions import TimeoutException
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
 from tbselenium.test.fixtures import TBDriverFixture
+from selenium.webdriver.common.utils import free_port
+from tbselenium.utils import is_busy
 
 
 class TBDriverTest(unittest.TestCase):
@@ -124,6 +126,18 @@ class TBDriverProfile(unittest.TestCase):
             driver.load_url_ensure(cm.CHECK_TPO_URL)
         mod_time_after = getmtime(self.TBB_PROFILE_PATH)
         self.assertEqual(mod_time_before, mod_time_after)
+
+
+class TBDriverCustomGeckoDriverPort(unittest.TestCase):
+
+    def test_should_accept_custom_geckodriver_port(self):
+        """Make sure we accept a custom port number to run geckodriver on."""
+        random_port = free_port()
+        with TBDriverFixture(TBB_PATH, geckodriver_port=random_port) as driver:
+            driver.load_url_ensure(cm.CHECK_TPO_URL)
+            self.assertTrue(is_busy(random_port))  # check if the port is used
+        # check if the port is closed after we quit
+        self.assertFalse(is_busy(random_port))
 
 
 if __name__ == "__main__":
