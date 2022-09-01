@@ -40,7 +40,7 @@ class TorBrowserDriver(FirefoxDriver):
                  headless=False,
                  options=None,
                  use_custom_profile=False,
-                 geckodriver_port=0  # a random port will be used, if port is 0
+                 geckodriver_port=0  # by default a random port will be used
                  ):
 
         # use_custom_profile: whether to launch from and *write to* the given
