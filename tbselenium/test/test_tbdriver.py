@@ -134,7 +134,7 @@ class TBDriverCustomGeckoDriverPort(unittest.TestCase):
         """Make sure we accept a custom port number to run geckodriver on."""
         random_port = free_port()
         with TBDriverFixture(TBB_PATH, geckodriver_port=random_port) as driver:
-            driver.load_url_ensure(cm.CHECK_TPO_URL)
+            driver.load_url_ensure(cm.ABOUT_TOR_URL)
             self.assertTrue(is_busy(random_port))  # check if the port is used
         # check if the port is closed after we quit
         self.assertFalse(is_busy(random_port))
