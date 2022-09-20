@@ -39,7 +39,8 @@ class TorBrowserDriver(FirefoxDriver):
                  default_bridge_type="",
                  headless=False,
                  options=None,
-                 use_custom_profile=False
+                 use_custom_profile=False,
+                 geckodriver_port=0  # by default a random port will be used
                  ):
 
         # use_custom_profile: whether to launch from and *write to* the given
@@ -79,12 +80,14 @@ class TorBrowserDriver(FirefoxDriver):
             tbb_service = Service(
                 executable_path=executable_path,
                 log_path=tbb_logfile_path,
-                service_args=["--marionette-port", "2828"]
+                service_args=["--marionette-port", "2828"],
+                port=geckodriver_port
                 )
         else:
             tbb_service = Service(
                 executable_path=executable_path,
-                log_path=tbb_logfile_path
+                log_path=tbb_logfile_path,
+                port=geckodriver_port
                 )
         self.options.binary = self.tbb_fx_binary_path
         self.options.add_argument('--class')
