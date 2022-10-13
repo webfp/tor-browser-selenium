@@ -1,4 +1,3 @@
-sudo: false
 language: python
 os: linux
 dist: focal
@@ -17,12 +16,12 @@ env:
     - STABLE=11.5.4
     - EXPERIMENTAL=12.0a3
     - TBB_DIST_URL=https://www.torproject.org/dist/torbrowser/
-  matrix:
+  jobs:
     - TRAVIS_EXTRA_JOB_WORKAROUND=true
 cache:
   directories:
   - ${DOWNLOAD_DIR}
-matrix:
+jobs:
   include:
     - python: "3.8"
       env: VERSION_ARCH="${EXPERIMENTAL}/tor-browser-linux64-${EXPERIMENTAL}_en-US.tar.xz"
