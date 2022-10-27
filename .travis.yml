@@ -13,7 +13,7 @@ addons:
 env:
   global:
     - DOWNLOAD_DIR=${HOME}/download
-    - STABLE=11.5.4
+    - STABLE=11.5.5
     - EXPERIMENTAL=12.0a3
     - TBB_DIST_URL=https://www.torproject.org/dist/torbrowser/
   jobs:
