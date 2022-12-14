@@ -23,8 +23,10 @@ cache:
   - ${DOWNLOAD_DIR}
 matrix:
   include:
-    - env: VERSION_ARCH="${EXPERIMENTAL}/tor-browser-linux64-${EXPERIMENTAL}_ALL.tar.xz"
-    - env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_ALL.tar.xz"
+    - python: "3.10"
+      env: VERSION_ARCH="${EXPERIMENTAL}/tor-browser-linux64-${EXPERIMENTAL}_ALL.tar.xz"
+    - python: "3.10"
+      env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_ALL.tar.xz"
   exclude:
     - env: TRAVIS_EXTRA_JOB_WORKAROUND=true
 install:
