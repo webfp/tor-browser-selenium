@@ -1,11 +1,14 @@
 import tempfile
 import tbselenium.common as cm
+import json
 from os import environ
 from os.path import dirname, isfile, join
+from time import sleep
 from tbselenium.exceptions import StemLaunchError
 from selenium.webdriver.common.utils import is_connectable
-from time import sleep
-import json
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 try:  # only needed for tests
     from pyvirtualdisplay import Display
@@ -130,7 +133,9 @@ def click_to_set_security_level(driver, level):
     assert level in TB_SECURITY_LEVELS
     with driver.context('content'):
         # makes sure the security level panel is highlighted/scrolled to
-        spotlight = driver.find_element('class name', 'spotlight')
+        spotlight = WebDriverWait(driver, 3).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "spotlight"))
+        )
         assert spotlight.get_attribute("data-subcategory") == "securitylevel"
         # click on the radio button for the desired security level
         driver.find_element(
