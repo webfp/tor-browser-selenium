@@ -1,16 +1,18 @@
 import unittest
-import pytest
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from tbselenium.test.fixtures import TBDriverFixture
 from tbselenium.test import TBB_PATH
 from tbselenium.common import CHECK_TPO_URL
 from tbselenium.utils import set_security_level
-from tbselenium.utils import SECURITY_HIGH, SECURITY_MEDIUM, SECURITY_LOW
+from tbselenium.utils import (
+    TB_SECURITY_LEVEL_SAFEST,
+    TB_SECURITY_LEVEL_SAFER,
+    TB_SECURITY_LEVEL_STANDARD
+    )
 
 
 GET_WEBGL_ORG_URL = "https://get.webgl.org/"
-WAIT_AFTER_PAGE_LOAD = 3  # in seconds
 
 
 class SecurityLevelTest(unittest.TestCase):
@@ -23,21 +25,17 @@ class SecurityLevelTest(unittest.TestCase):
         return driver.find_element(By.ID, 'js').\
                 get_attribute("innerText")
 
-    def test_set_security_low(self):
+    def test_set_security_standard(self):
         with TBDriverFixture(TBB_PATH) as driver:
-            set_security_level(driver, SECURITY_LOW)
-            driver.switch_to.new_window('tab')
-            driver.load_url_ensure(
-                CHECK_TPO_URL, wait_on_page=WAIT_AFTER_PAGE_LOAD)
+            set_security_level(driver, TB_SECURITY_LEVEL_STANDARD)
+            driver.load_url_ensure(CHECK_TPO_URL)
             js_status = self.get_js_status_text(driver)
             assert js_status == "JavaScript is enabled."
 
-    def test_set_security_low_webgl(self):
+    def test_set_security_standard_webgl(self):
         with TBDriverFixture(TBB_PATH) as driver:
-            set_security_level(driver, SECURITY_LOW)
-            driver.switch_to.new_window('tab')
-            driver.load_url_ensure(
-                GET_WEBGL_ORG_URL, wait_on_page=WAIT_AFTER_PAGE_LOAD)
+            set_security_level(driver, TB_SECURITY_LEVEL_STANDARD)
+            driver.load_url_ensure(GET_WEBGL_ORG_URL)
             try:
                 # test the status text
                 status_text = driver.find_element(By.ID, "support").text
@@ -54,21 +52,17 @@ class SecurityLevelTest(unittest.TestCase):
                     "Security level cannot be set to 'Standard': %s"
                     % exc)
 
-    def test_set_security_medium(self):
+    def test_set_security_safer(self):
         with TBDriverFixture(TBB_PATH) as driver:
-            set_security_level(driver, SECURITY_MEDIUM)
-            driver.switch_to.new_window('tab')
-            driver.load_url_ensure(
-                CHECK_TPO_URL, wait_on_page=WAIT_AFTER_PAGE_LOAD)
+            set_security_level(driver, TB_SECURITY_LEVEL_SAFER)
+            driver.load_url_ensure(CHECK_TPO_URL)
             js_status = self.get_js_status_text(driver)
             assert js_status == "JavaScript is enabled."
 
-    def test_set_security_medium_webgl(self):
+    def test_set_security_safer_webgl(self):
         with TBDriverFixture(TBB_PATH) as driver:
-            set_security_level(driver, SECURITY_MEDIUM)
-            driver.switch_to.new_window('tab')
-            driver.load_url_ensure(
-                GET_WEBGL_ORG_URL, wait_on_page=WAIT_AFTER_PAGE_LOAD)
+            set_security_level(driver, TB_SECURITY_LEVEL_SAFER)
+            driver.load_url_ensure(GET_WEBGL_ORG_URL)
             try:
                 # test the status text
                 status_text = driver.find_element(By.ID, "support").text
@@ -88,28 +82,17 @@ class SecurityLevelTest(unittest.TestCase):
                     "Security level cannot to be set to 'Safer': %s"
                     % exc)
 
-    def test_set_security_high(self):
+    def test_set_security_safest(self):
         with TBDriverFixture(TBB_PATH) as driver:
-            set_security_level(driver, SECURITY_HIGH)
-            # We need either "new tab" or refresh the page
-            # (via driver.refresh()) after page load for this setting the
-            # take effect. If we don't open a new tab the test becomes flaky
-            driver.switch_to.new_window('tab')
-            driver.load_url_ensure(
-                CHECK_TPO_URL, wait_on_page=WAIT_AFTER_PAGE_LOAD)
-            driver.refresh()
+            set_security_level(driver, TB_SECURITY_LEVEL_SAFEST)
+            driver.load_url_ensure(CHECK_TPO_URL)
             js_status = self.get_js_status_text(driver)
             assert js_status == "JavaScript is disabled."
 
-    def test_set_security_high_webgl(self):
+    def test_set_security_safest_webgl(self):
         with TBDriverFixture(TBB_PATH) as driver:
-            set_security_level(driver, SECURITY_HIGH)
-            # We need either "new tab" or refresh the page
-            # (via driver.refresh()) after page load for this setting the
-            # take effect. If we don't open a new tab the test becomes flaky
-            driver.switch_to.new_window('tab')
-            driver.load_url_ensure(
-                GET_WEBGL_ORG_URL, wait_on_page=WAIT_AFTER_PAGE_LOAD)
+            set_security_level(driver, TB_SECURITY_LEVEL_SAFEST)
+            driver.load_url_ensure(GET_WEBGL_ORG_URL)
             try:
                 status = driver.find_element(By.ID, "support").text
                 assert status == "You must enable JavaScript to use WebGL."
