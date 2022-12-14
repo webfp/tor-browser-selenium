@@ -34,8 +34,7 @@ install:
   - pip install .
   - TARBALL=`echo ${VERSION_ARCH} |cut -d'/' -f 2`
   - . ./travis.sh
-  - locale="_"`echo $TARBALL |cut -d'_' -f 2 | cut -d'.' -f 1`
-  - export TBB_PATH=${HOME}/tor-browser${locale}
+  - export TBB_PATH=${HOME}/tor-browser
 
 before_script:
   - cd tbselenium
