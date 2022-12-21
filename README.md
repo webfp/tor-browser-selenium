@@ -98,7 +98,7 @@ Check the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/e
 [Tested](https://travis-ci.org/webfp/tor-browser-selenium) with the following Tor Browser Bundle versions on Ubuntu:
 
 * 12.0.1
-* 12.0a5
+* 12.5a1
 
 Warning: **Windows and macOS are not supported.**
 
