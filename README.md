@@ -1,4 +1,4 @@
-# tor-browser-selenium [![Build Status](https://travis-ci.com/webfp/tor-browser-selenium.svg?branch=main)](https://travis-ci.com/webfp/tor-browser-selenium)
+# tor-browser-selenium [![Build Status](https://app.travis-ci.com/webfp/tor-browser-selenium.svg?branch=main)](https://app.travis-ci.com/webfp/tor-browser-selenium)
 
 
 A Python library to automate Tor Browser with Selenium.
@@ -67,7 +67,7 @@ You may disable `Xvfb` by exporting the following environment variable:
 
 
 
-#### Running individual tests
+### Running individual tests
 First, export a `TBB_PATH` environment variable that points to the TBB version you want to use:
 
 `export TBB_PATH=/path/to/tbb/tor-browser_en-US/`
@@ -77,6 +77,11 @@ Then, use `py.test` to launch the tests you want, e.g.:
 * `py.test tbselenium/test/test_tbdriver.py`
 * `py.test tbselenium/test/test_tbdriver.py::TBDriverTest::test_should_load_check_tpo`
 
+### Disabling console logs
+You can redirect the logs to `/dev/null` by passing the `tbb_logfile_path` initialization parameter:
+```python
+TorBrowserDriver(..., tbb_logfile_path='/dev/null')
+```
 
 ## Examples
 Check the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/examples) to discover different ways to use TorBrowserDriver
@@ -92,10 +97,10 @@ Check the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/e
 ## Compatibility
 [Tested](https://travis-ci.org/webfp/tor-browser-selenium) with the following Tor Browser Bundle versions on Ubuntu:
 
-* 10.5.4
-* 11.0a2
+* 12.0.1
+* 12.5a1
 
-Windows and macOS are not supported.
+Warning: **Windows and macOS are not supported.**
 
 ## Troubleshooting
 
@@ -115,10 +120,9 @@ Solutions to potential issues:
  ```
 * `driver.get_cookies()` returns an empty list. This is due to Private Browsing Mode (PBM), which Selenium uses under the hood. See [#79](https://github.com/webfp/tor-browser-selenium/issues/79) for a possible solution.
 * WebGL is not supported in the headless mode started with `headless=True` due to Firefox bug [#1375585](https://bugzilla.mozilla.org/show_bug.cgi?id=1375585). To enable WebGL in a headless setting, use `pyvirtualdisplay` following the [headless.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/headless.py) example.
-* `set_security_level` doesn't work with the current alpha (10.5a1).
 
 ## Reference
-Please don't forget to cite this repository if you use `tor-browser-selenium` in your academic publications.
+Please consider citing this repository if you use `tor-browser-selenium` in your academic publications.
 
 ```
 @misc{tor-browser-selenium,

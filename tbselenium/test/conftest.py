@@ -10,6 +10,7 @@ test_conf = {}
 
 
 def launch_tor():
+    # TODO: Consider using system tor (when available) to speed tests up
     tor_process = None
     temp_data_dir = tempfile.mkdtemp()
     torrc = {'ControlPort': str(cm.STEM_CONTROL_PORT),

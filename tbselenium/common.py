@@ -14,6 +14,10 @@ DEFAULT_TBB_PROFILE_PATH = join(DEFAULT_TBB_DATA_DIR, 'Browser',
 DEFAULT_TOR_DATA_PATH = join(DEFAULT_TBB_DATA_DIR, 'Tor')
 TB_CHANGE_LOG_PATH = join(DEFAULT_TBB_TORBROWSER_DIR,
                           'Docs', 'ChangeLog.txt')
+# noscript .xpi path as found in the TBB distributions
+DEFAULT_TBB_NO_SCRIPT_XPI_PATH = join(
+    DEFAULT_TBB_PROFILE_PATH, 'extensions',
+    '{73a6fe31-595d-460b-a920-fcc0f8843232}.xpi')
 
 # Directories for bundled fonts - Linux only
 DEFAULT_FONTCONFIG_PATH = join(DEFAULT_TBB_DATA_DIR, 'fontconfig')
@@ -37,7 +41,6 @@ KNOWN_SOCKS_PORTS = [DEFAULT_SOCKS_PORT, TBB_SOCKS_PORT]
 PORT_BAN_PREFS = ["extensions.torbutton.banned_ports",
                   "network.security.ports.banned"]
 
-TB_INIT_TIMEOUT = 60
 
 # Test constants
 CHECK_TPO_URL = "http://check.torproject.org"

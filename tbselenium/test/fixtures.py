@@ -7,16 +7,14 @@ from tbselenium.exceptions import StemLaunchError, TorBrowserDriverInitError
 from tbselenium.utils import launch_tbb_tor_with_stem, is_busy, read_file
 from selenium.common.exceptions import TimeoutException, WebDriverException
 
-try:
-    from httplib import CannotSendRequest
-except ImportError:
-    from http.client import CannotSendRequest
+from http.client import CannotSendRequest
 
 
 MAX_FIXTURE_TRIES = 3
 
 # make sure TB logs to a file, print if init fails
 FORCE_TB_LOGS_DURING_TESTS = True
+ERR_MSG_NETERROR_NETTIMEOUT = "Reached error page: about:neterror?e=netTimeout"
 
 
 class TBDriverFixture(TorBrowserDriver):
@@ -31,8 +29,8 @@ class TBDriverFixture(TorBrowserDriver):
                 return super(TBDriverFixture, self).__init__(*args, **kwargs)
             except (TimeoutException, WebDriverException,
                     socket_error) as last_err:
-                print ("\nTBDriver init error. Attempt %s %s" %
-                       ((tries + 1), last_err))
+                print("\nERROR: TBDriver init error. Attempt %s %s" %
+                      ((tries + 1), last_err))
                 if FORCE_TB_LOGS_DURING_TESTS:
                     logs = read_file(log_file)
                     if len(logs):
@@ -40,9 +38,10 @@ class TBDriverFixture(TorBrowserDriver):
                 super(TBDriverFixture, self).quit()  # clean up
                 continue
         # Raise if we didn't return yet
-        to_raise = last_err if last_err else\
-            TorBrowserDriverInitError("Cannot initialize")
-        raise to_raise
+        try:
+            raise last_err
+        except Exception:
+            raise TorBrowserDriverInitError("Cannot initialize")
 
     def __del__(self):
         # remove the temp log file if we created
@@ -83,13 +82,21 @@ class TBDriverFixture(TorBrowserDriver):
                     return
             except (TimeoutException,
                     CannotSendRequest) as last_err:
-                print ("\nload_url timed out.  Attempt %s %s" %
-                       ((tries + 1), last_err))
+                print("\nload_url timed out.  Attempt %s %s" %
+                      ((tries + 1), last_err))
                 continue
+            except WebDriverException as wd_err:
+                if ERR_MSG_NETERROR_NETTIMEOUT in str(wd_err):
+                    print("\nload_url timed out (WebDriverException). "
+                          "Attempt %s %s" % ((tries + 1), last_err))
+                    continue
+                raise wd_err
+
         # Raise if we didn't return yet
-        to_raise = last_err if last_err else\
-            WebDriverException("Can't load the page")
-        raise to_raise
+        try:
+            raise last_err
+        except Exception:
+            raise WebDriverException("Can't load the page")
 
 
 def launch_tbb_tor_with_stem_fixture(*args, **kwargs):
@@ -98,12 +105,13 @@ def launch_tbb_tor_with_stem_fixture(*args, **kwargs):
         try:
             return launch_tbb_tor_with_stem(*args, **kwargs)
         except OSError as last_err:
-            print ("\nlaunch_tor try %s %s" % ((tries + 1), last_err))
+            print("\nlaunch_tor try %s %s" % ((tries + 1), last_err))
             if "timeout without success" in str(last_err):
                 continue
             else:  # we don't want to retry if this is not a timeout
                 raise
     # Raise if we didn't return yet
-    to_raise = last_err if last_err else\
-        StemLaunchError("Cannot start Tor")
-    raise to_raise
+    try:
+        raise last_err
+    except Exception:
+        raise StemLaunchError("Cannot start Tor")

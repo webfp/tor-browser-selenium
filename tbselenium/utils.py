@@ -1,11 +1,14 @@
 import tempfile
 import tbselenium.common as cm
+import json
 from os import environ
 from os.path import dirname, isfile, join
+from time import sleep
 from tbselenium.exceptions import StemLaunchError
 from selenium.webdriver.common.utils import is_connectable
-from time import sleep
-import json
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 try:  # only needed for tests
     from pyvirtualdisplay import Display
@@ -22,9 +25,15 @@ DEFAULT_XVFB_WIN_W = 1280
 DEFAULT_XVFB_WIN_H = 800
 
 # Security slider settings
-SECURITY_HIGH = 1
-SECURITY_MEDIUM = 3  # '2' corresponds to deprecated TBB medium-high setting
-SECURITY_LOW = 4
+TB_SECURITY_LEVEL_STANDARD = 'standard'
+TB_SECURITY_LEVEL_SAFER = 'safer'
+TB_SECURITY_LEVEL_SAFEST = 'safest'
+
+TB_SECURITY_LEVELS = [
+    TB_SECURITY_LEVEL_STANDARD,
+    TB_SECURITY_LEVEL_SAFER,
+    TB_SECURITY_LEVEL_SAFEST
+]
 
 
 def start_xvfb(win_width=DEFAULT_XVFB_WIN_W,
@@ -94,8 +103,9 @@ def set_tbb_pref(driver, name, value):
         else:
             script += 'setIntPref'
         script += '({0}, {1});'.format(json.dumps(name), json.dumps(value))
-        driver.set_context(driver.CONTEXT_CHROME)
-        driver.execute_script(script)
+        # driver.set_context(driver.CONTEXT_CHROME)
+        with driver.context(driver.CONTEXT_CHROME):
+            driver.execute_script(script)
     except Exception:
         raise
     finally:
@@ -103,11 +113,33 @@ def set_tbb_pref(driver, name, value):
 
 
 def set_security_level(driver, level):
-    if level not in {SECURITY_HIGH, SECURITY_MEDIUM, SECURITY_LOW}:
-        raise ValueError("Invalid Tor Browser security setting: " + str(level))
+    if level not in TB_SECURITY_LEVELS:
+        raise ValueError(f"Invalid Tor Browser security setting: {level}")
+    open_security_level_panel(driver)
+    click_to_set_security_level(driver, level)
 
-    set_tbb_pref(driver, "extensions.torbutton.security_slider", level)
-    sleep(1)  # wait for the pref to update
+
+# Based on https://gitlab.torproject.org/tpo/applications/tor-browser-bundle-testsuite/-/blob/main/marionette/tor_browser_tests/test_security_level_ui.py  # noqa
+def open_security_level_panel(driver):
+    with driver.context('chrome'):
+        # emulate a click on the security level button
+        driver.execute_script(
+            'document.getElementById("security-level-button").click();')
+        driver.find_element(
+            'id', 'securityLevel-advancedSecuritySettings').click()
+
+
+def click_to_set_security_level(driver, level):
+    assert level in TB_SECURITY_LEVELS
+    with driver.context('content'):
+        # makes sure the security level panel is highlighted/scrolled to
+        spotlight = WebDriverWait(driver, 3).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "spotlight"))
+        )
+        assert spotlight.get_attribute("data-subcategory") == "securitylevel"
+        # click on the radio button for the desired security level
+        driver.find_element(
+            'css selector', f'#securityLevel-vbox-{level} radio').click()
 
 
 def disable_js(driver):

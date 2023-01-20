@@ -1,4 +1,3 @@
-sudo: false
 language: python
 os: linux
 dist: focal
@@ -14,8 +13,8 @@ addons:
 env:
   global:
     - DOWNLOAD_DIR=${HOME}/download
-    - STABLE=10.5.4
-    - EXPERIMENTAL=11.0a2
+    - STABLE=12.0.1
+    - EXPERIMENTAL=12.5a1
     - TBB_DIST_URL=https://www.torproject.org/dist/torbrowser/
   matrix:
     - TRAVIS_EXTRA_JOB_WORKAROUND=true
@@ -25,13 +24,9 @@ cache:
 matrix:
   include:
     - python: "3.8"
-      env: VERSION_ARCH="${EXPERIMENTAL}/tor-browser-linux64-${EXPERIMENTAL}_en-US.tar.xz"
+      env: VERSION_ARCH="${EXPERIMENTAL}/tor-browser-linux64-${EXPERIMENTAL}_ALL.tar.xz"
     - python: "3.8"
-      env: VERSION_ARCH="${EXPERIMENTAL}/tor-browser-linux64-${EXPERIMENTAL}_zh-CN.tar.xz"
-    - python: "3.8"
-      env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_en-US.tar.xz"
-    - python: "3.8"
-      env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_zh-CN.tar.xz"
+      env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_ALL.tar.xz"
   exclude:
     - env: TRAVIS_EXTRA_JOB_WORKAROUND=true
 install:
@@ -39,8 +34,7 @@ install:
   - pip install .
   - TARBALL=`echo ${VERSION_ARCH} |cut -d'/' -f 2`
   - . ./travis.sh
-  - locale="_"`echo $TARBALL |cut -d'_' -f 2 | cut -d'.' -f 1`
-  - export TBB_PATH=${HOME}/tor-browser${locale}
+  - export TBB_PATH=${HOME}/tor-browser
 
 before_script:
   - cd tbselenium

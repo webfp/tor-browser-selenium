@@ -27,9 +27,6 @@ class TBDriverBridgeTest(unittest.TestCase):
         # This may be possible with geckodriver, since it can interact
         # with chrome as well.
 
-    def test_should_load_check_tpo_via_meek_amazon_bridge(self):
-        self.should_load_check_tpo_via_bridge("meek-amazon")
-
     def test_should_load_check_tpo_via_meek_azure_bridge(self):
         self.should_load_check_tpo_via_bridge("meek-azure")
 

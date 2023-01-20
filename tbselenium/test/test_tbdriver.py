@@ -3,10 +3,15 @@ import unittest
 import pytest
 from os import environ
 from os.path import join, isdir, getmtime
+from time import time
 
+from selenium.webdriver.common.timeouts import Timeouts
+from selenium.common.exceptions import TimeoutException
 from tbselenium import common as cm
 from tbselenium.test import TBB_PATH
 from tbselenium.test.fixtures import TBDriverFixture
+from selenium.webdriver.common.utils import free_port
+from tbselenium.utils import is_busy
 
 
 class TBDriverTest(unittest.TestCase):
@@ -36,6 +41,20 @@ class TBDriverTest(unittest.TestCase):
         tbbpath_count = paths.count(self.tb_driver.tbb_browser_dir)
         self.assertEqual(tbbpath_count, 1)
 
+    def test_should_set_timeouts(self):
+        LOW_PAGE_LOAD_LIMIT = 0.05
+        self.tb_driver.timeouts = Timeouts(page_load=LOW_PAGE_LOAD_LIMIT)
+        timed_out = False
+        t_before_load = time()
+        try:
+            self.tb_driver.load_url(cm.CHECK_TPO_URL)
+        except TimeoutException:
+            timed_out = True
+        finally:
+            t_spent = time() - t_before_load
+            self.assertAlmostEqual(t_spent, LOW_PAGE_LOAD_LIMIT, delta=1)
+            assert timed_out
+
 
 class TBDriverCleanUp(unittest.TestCase):
     def setUp(self):
@@ -49,15 +68,10 @@ class TBDriverCleanUp(unittest.TestCase):
         self.assertNotEqual(geckodriver_process.poll(), None)
 
     def test_should_remove_profile_dirs_on_quit(self):
-        driver = self.tb_driver
-        tempfolder = driver.profile.tempfolder
-        profile_path = driver.profile.path
-
-        self.assertTrue(isdir(tempfolder))
-        self.assertTrue(isdir(profile_path))
-        driver.quit()
-        self.assertFalse(isdir(profile_path))
-        self.assertFalse(isdir(tempfolder))
+        temp_profile_dir = self.tb_driver.temp_profile_dir
+        self.assertTrue(isdir(temp_profile_dir))
+        self.tb_driver.quit()
+        self.assertFalse(isdir(temp_profile_dir))
 
 
 class TBDriverTorDataDir(unittest.TestCase):
@@ -76,3 +90,55 @@ class TBDriverTorDataDir(unittest.TestCase):
             driver.load_url_ensure(cm.CHECK_TPO_URL)
         mod_time_after = getmtime(self.TOR_DATA_PATH)
         self.assertEqual(mod_time_before, mod_time_after)
+
+
+class TBDriverProfile(unittest.TestCase):
+
+    TBB_PROFILE_PATH = join(TBB_PATH, cm.DEFAULT_TBB_PROFILE_PATH)
+
+    def test_custom_profile_and_tbb_path(self):
+        """Make sure we use the right profile directory when the TBB
+        path and profile path is provided.
+        """
+        tmp_dir = tempfile.mkdtemp()
+        mod_time_before = getmtime(self.TBB_PROFILE_PATH)
+        with TBDriverFixture(
+            TBB_PATH, tbb_profile_path=tmp_dir,
+                use_custom_profile=True) as driver:
+            assert isdir(tmp_dir)
+            assert driver.temp_profile_dir == tmp_dir
+            driver.load_url_ensure(cm.CHECK_TPO_URL)
+        mod_time_after = getmtime(self.TBB_PROFILE_PATH)
+        self.assertEqual(mod_time_before, mod_time_after)
+
+    def test_custom_profile_and_binary(self):
+        """Make sure we use the right directory when a binary
+        and profile is provided.
+        """
+        tmp_dir = tempfile.mkdtemp()
+        fx_binary = join(TBB_PATH, cm.DEFAULT_TBB_FX_BINARY_PATH)
+        mod_time_before = getmtime(self.TBB_PROFILE_PATH)
+        with TBDriverFixture(
+            tbb_fx_binary_path=fx_binary, tbb_profile_path=tmp_dir,
+                use_custom_profile=True) as driver:
+            assert isdir(tmp_dir)
+            assert driver.temp_profile_dir == tmp_dir
+            driver.load_url_ensure(cm.CHECK_TPO_URL)
+        mod_time_after = getmtime(self.TBB_PROFILE_PATH)
+        self.assertEqual(mod_time_before, mod_time_after)
+
+
+class TBDriverCustomGeckoDriverPort(unittest.TestCase):
+
+    def test_should_accept_custom_geckodriver_port(self):
+        """Make sure we accept a custom port number to run geckodriver on."""
+        random_port = free_port()
+        with TBDriverFixture(TBB_PATH, geckodriver_port=random_port) as driver:
+            driver.load_url_ensure(cm.ABOUT_TOR_URL)
+            self.assertTrue(is_busy(random_port))  # check if the port is used
+        # check if the port is closed after we quit
+        self.assertFalse(is_busy(random_port))
+
+
+if __name__ == "__main__":
+    unittest.main()
