@@ -5,12 +5,11 @@ from os import environ
 # Old TBB versions (V3.X or below) have different directory structures
 DEFAULT_TBB_BROWSER_DIR = 'Browser'
 DEFAULT_TBB_TORBROWSER_DIR = join('Browser', 'TorBrowser')
-DEFAULT_TBB_FX_BINARY_PATH = join('Browser', 'firefox')
+DEFAULT_TBB_FX_BINARY_PATH = join('MacOS', 'firefox')
 DEFAULT_TOR_BINARY_DIR = join(DEFAULT_TBB_TORBROWSER_DIR, 'Tor')
 DEFAULT_TOR_BINARY_PATH = join(DEFAULT_TOR_BINARY_DIR, 'tor')
 DEFAULT_TBB_DATA_DIR = join(DEFAULT_TBB_TORBROWSER_DIR, 'Data')
-DEFAULT_TBB_PROFILE_PATH = join(DEFAULT_TBB_DATA_DIR, 'Browser',
-                                'profile.default')
+DEFAULT_TBB_PROFILE_PATH = join('Resources', 'defaults')
 DEFAULT_TOR_DATA_PATH = join(DEFAULT_TBB_DATA_DIR, 'Tor')
 TB_CHANGE_LOG_PATH = join(DEFAULT_TBB_TORBROWSER_DIR,
                           'Docs', 'ChangeLog.txt')
