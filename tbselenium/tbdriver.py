@@ -77,9 +77,10 @@ class TorBrowserDriver(FirefoxDriver):
         # TODO:
         # self.binary = self.get_tb_binary(logfile=tbb_logfile_path)
         if use_custom_profile:
+            print(f'Using custom profile: {self.tbb_profile_path}')
             tbb_service = Service(
                 executable_path=executable_path,
-                log_path=tbb_logfile_path,
+                log_path=tbb_logfile_path,  # TODO: deprecated, use log_output
                 service_args=["--marionette-port", "2828"],
                 port=geckodriver_port
                 )
@@ -89,6 +90,10 @@ class TorBrowserDriver(FirefoxDriver):
                 log_path=tbb_logfile_path,
                 port=geckodriver_port
                 )
+        # options.binary is path to the Firefox binary and it can be a string
+        # or a FirefoxBinary object. If it's a string, it will be converted to
+        # a FirefoxBinary object.
+        # https://github.com/SeleniumHQ/selenium/blob/7cfd137085fcde932cd71af78642a15fd56fe1f1/py/selenium/webdriver/firefox/options.py#L54
         self.options.binary = self.tbb_fx_binary_path
         self.options.add_argument('--class')
         self.options.add_argument('"Tor Browser"')
@@ -97,7 +102,6 @@ class TorBrowserDriver(FirefoxDriver):
 
         super(TorBrowserDriver, self).__init__(
             service=tbb_service,
-            executable_path=executable_path,
             options=self.options,
             )
         self.is_running = True
@@ -278,6 +282,8 @@ class TorBrowserDriver(FirefoxDriver):
                      default_bridge_type)
 
         set_pref('extensions.torbutton.prompted_language', True)
+        # https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41378
+        set_pref('intl.language_notification.shown', True)
         # Configure Firefox to use Tor SOCKS proxy
         set_pref('network.proxy.socks_port', self.socks_port)
         set_pref('extensions.torbutton.socks_port', self.socks_port)
