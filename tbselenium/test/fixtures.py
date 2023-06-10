@@ -45,7 +45,7 @@ class TBDriverFixture(TorBrowserDriver):
 
     def __del__(self):
         # remove the temp log file if we created
-        if FORCE_TB_LOGS_DURING_TESTS and os.path.isfile(self.log_file):
+        if FORCE_TB_LOGS_DURING_TESTS and hasattr(self, "log_file") and os.path.isfile(self.log_file):
             os.remove(self.log_file)
 
     def change_default_tor_cfg(self, kwargs):

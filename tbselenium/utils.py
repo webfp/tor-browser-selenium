@@ -9,6 +9,8 @@ from selenium.webdriver.common.utils import is_connectable
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import JavascriptException, NoSuchElementException
+
 
 try:  # only needed for tests
     from pyvirtualdisplay import Display
@@ -125,8 +127,15 @@ def open_security_level_panel(driver):
         # emulate a click on the security level button
         driver.execute_script(
             'document.getElementById("security-level-button").click();')
-        driver.find_element(
-            'id', 'securityLevel-advancedSecuritySettings').click()
+        try:
+            #  12.5a7 and later
+            driver.execute_script(
+                'document.getElementById("securityLevel-settings").click();')
+        except JavascriptException:
+            driver.find_element(By.ID,
+                                'securityLevel-advancedSecuritySettings').click()
+        # settings_button = driver.find_element(By.ID, "securityLevel-settings")
+        # settings_button.click()
 
 
 def click_to_set_security_level(driver, level):
@@ -138,8 +147,17 @@ def click_to_set_security_level(driver, level):
         )
         assert spotlight.get_attribute("data-subcategory") == "securitylevel"
         # click on the radio button for the desired security level
-        driver.find_element(
-            'css selector', f'#securityLevel-vbox-{level} radio').click()
+        try:
+            # 12.5a7 and later
+            level_idx = TB_SECURITY_LEVELS.index(level) + 1
+            # CSS selector for the radio button, extracted via devtools
+            driver.find_element(
+                By.CSS_SELECTOR,
+                f'vbox.securityLevel-radio-option:nth-child({level_idx}) >'
+                ' radio:nth-child(1)').click()
+        except NoSuchElementException:
+            driver.find_element(
+                'css selector', f'#securityLevel-vbox-{level} radio').click()
 
 
 def disable_js(driver):
