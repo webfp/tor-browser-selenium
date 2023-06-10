@@ -31,9 +31,9 @@ class TorBrowserTest(unittest.TestCase):
         try:
             # driver.binary was removed in selenium-4.10.0
             # https://github.com/SeleniumHQ/selenium/pull/12030/files#diff-89ba579445647535b74423c7bf4b8be79ef1ce33847a2768e623c3083a33545dL127
-            tbbinary = self.driver.binary
-        except AttributeError:
             tbbinary = self.driver.options.binary
+        except AttributeError:
+            tbbinary = self.driver.binary
         self.assertTrue(tbbinary.which('firefox').startswith(TBB_PATH))
 
     # TODO: log output is always empty
@@ -57,9 +57,9 @@ class TorBrowserTest(unittest.TestCase):
         try:
             # driver.binary was removed in selenium-4.10.0
             # https://github.com/SeleniumHQ/selenium/pull/12030/files#diff-89ba579445647535b74423c7bf4b8be79ef1ce33847a2768e623c3083a33545dL127
-            tbbinary = self.driver.binary
-        except AttributeError:
             tbbinary = self.driver.options.binary
+        except AttributeError:
+            tbbinary = self.driver.binary
         tbbinary_path = tbbinary.which('firefox') + FF_BINARY_SUFFIX
         for child in process.children():
             if tbbinary_path == child.exe():
