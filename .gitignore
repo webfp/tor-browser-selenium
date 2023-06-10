@@ -1,4 +1,5 @@
 dist
 build
 __pycache__
-
+tbselenium.egg-info
+geckodriver.log
