@@ -9,7 +9,7 @@ A Python library to automate Tor Browser with Selenium.
 pip install tbselenium
 ```
 
-Install `geckodriver` from the [geckodriver releases page](https://github.com/mozilla/geckodriver/releases/).
+Install `geckodriver` v0.31.0 from the [geckodriver releases page](https://github.com/mozilla/geckodriver/releases/).
 
 
 ## Basic usage
@@ -110,7 +110,7 @@ Solutions to potential issues:
 * Outdated (or incompatible) Python `selenium` package: This is the source of various obscure errors. Make sure you have an up-to-date `selenium` package installed.
 * No display: When running on a cloud machine, follow the [headless.py example](https://github.com/webfp/tor-browser-selenium/blob/master/examples/headless.py#L10) to start a virtual display.
 * Outdated Tor Browser Bundle: Download and use a more recent TBB version.
-* Make sure you install the latest `geckodriver` version. 
+* Make sure you install `geckodriver` [version 0.31.0](https://github.com/mozilla/geckodriver/releases/tag/v0.31.0). While older or newer versions may work, they have some known (mostly minor) issues.
 * Port conflict with other (`Tor`) process: Pick a different SOCKS and controller port using `socks_port` argument.
 * Use `tbb_logfile_path` argument of TorBrowserDriver to debug obscure errors. This can help with problems due to missing display, missing libraries (e.g. when the LD_LIBRARY_PATH is not set correctly) or other errors that Tor Browser logs to standard output/error.
 
