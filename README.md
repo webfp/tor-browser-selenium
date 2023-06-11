@@ -1,9 +1,9 @@
 # tor-browser-selenium [![Build Status](https://app.travis-ci.com/webfp/tor-browser-selenium.svg?branch=main)](https://app.travis-ci.com/webfp/tor-browser-selenium)
 
 
-A Python library to automate Tor Browser with Selenium.
+A Python library to automate Tor Browser with Selenium WebDriver.
 
-## Installation
+## 📦 Installation
 
 ```
 pip install tbselenium
@@ -11,7 +11,11 @@ pip install tbselenium
 
 Download `geckodriver` v0.31.0 from the [geckodriver releases page](https://github.com/mozilla/geckodriver/releases/) and add it to PATH.
 
-## Basic usage
+## 🚀 Usage
+
+Download and extract [Tor Browser](https://www.torproject.org/projects/torbrowser.html.en), and pass its path when you initialize `TorBrowserDriver`.
+
+
 ### Using with system `tor`
 
 `tor` needs to be installed (`apt install tor`) and running on port 9050.
@@ -23,8 +27,8 @@ with TorBrowserDriver("/path/to/tor-browser/") as driver:
 ```
 
 ### Using with `Stem`
-First, make sure you have `Stem` installed (`pip install stem`).
-The following will start a new `tor` process using `Stem`. It will not use the `tor` installed on your system.
+You can use `Stem` to start a new tor process programmatically, and connect to it from `tor-browser-selenium`. Make sure you have `Stem` installed: `pip install stem`:
+
 
 ```python
 import tbselenium.common as cm
@@ -39,55 +43,49 @@ with TorBrowserDriver(tbb_dir, tor_cfg=cm.USE_STEM) as driver:
 tor_process.kill()
 ```
 
-`tor-browser-selenium` does not download the Tor Browser for you.
-You should [download](https://www.torproject.org/projects/torbrowser.html.en)
-and extract, and pass its path when you initialize `TorBrowserDriver`.
 
-
-
-## Examples
+## 💡 Examples
 Check the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/examples) to discover different ways to use `tor-browser-selenium`
-* [check_tpo.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/check_tpo.py): Visit check.torproject.org website and print the network status message
-* [headless.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/headless.py): Headless visit and screenshot of check.torproject.org using XVFB
+* [check_tpo.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/check_tpo.py): Visit the `check.torproject.org` website and print the network status message
+* [headless.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/headless.py): Headless visit and screenshot of check.torproject.org using [PyVirtualDisplay](https://pypi.org/project/PyVirtualDisplay/)
 * [onion_service.py](https://github.com/webfp/tor-browser-selenium/blob/main/examples/onion_service.py): Search using DuckDuckGo's Onion service
-* [parallel.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/parallel.py): Visit check.torproject.org with 3 browsers running in parallel
+* [parallel.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/parallel.py): Visit `check.torproject.org`` with 3 browsers running in parallel
 * [screenshot.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/screenshot.py): Take a screenshot
-* [stem_simple.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/stem_simple.py): Using Stem to start the Tor process
-* [stem_adv.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/stem_adv.py): Using Stem with more advanced configuration
+* [stem_simple.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/stem_simple.py): Use Stem to start a `tor` process
+* [stem_adv.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/stem_adv.py): Use Stem to launch `tor` with more advanced configuration
 
 
 
-## Test and development
+## 🛠️ Test and development
 
-Browse the [existing tests](https://github.com/webfp/tor-browser-selenium/tree/main/tbselenium/test) to find out about different ways you can use `tor-browser-selenium`.
+* Browse the [existing tests](https://github.com/webfp/tor-browser-selenium/tree/main/tbselenium/test) to find out about different ways you can use `tor-browser-selenium`.
 
-For development and testing first install the necessary Python packages:
+* For development and testing first install the necessary Python packages:
+  `pip install -r requirements-dev.txt`
 
-`pip install -r requirements-dev.txt`
+* Install the `xvfb` package by running `apt-get install xvfb` or using your distro's package manager.
 
-Install the `xvfb` package by running `apt-get install xvfb` or using your distro's package manager.
+* Run the following to launch the tests:
 
-Run the following to launch the tests:
+  `./run_tests.py /path/to/tor-browser/`
 
-`./run_tests.py /path/to/tor-browser/`
-
-By default, tests will be run using `Xvfb`, so the browser window will not be visible.
+* By default, tests will be run using `Xvfb`, so the browser window will not be visible.
 You may disable `Xvfb` by setting the `NO_XVFB` environment variable:
 
-`export NO_XVFB=1`
+  `export NO_XVFB=1`
 
 
 ### Running individual tests
-First, export the path to Tor Browser folder in the `TBB_PATH` environment variable.
+* First, export the path to Tor Browser folder in the `TBB_PATH` environment variable.
 
 `export TBB_PATH=/path/to/tbb/tor-browser/`
 
-Then, use `py.test` to launch the tests you want, e.g.:
+* Then, use `py.test` to launch the tests you want, e.g.:
 
 * `py.test tbselenium/test/test_tbdriver.py`
 * `py.test tbselenium/test/test_tbdriver.py::TBDriverTest::test_should_load_check_tpo`
 
-Note that the directory pointed by `TBB_PATH` should contain the A custom `start-tor binary can
+
 ### Using a custom `geckodriver`
 A custom `geckodriver` binary can be set via the `executable_path` argument:
 
@@ -101,18 +99,18 @@ You can redirect the logs to `/dev/null` by passing the `tbb_logfile_path` initi
 TorBrowserDriver(..., tbb_logfile_path='/dev/null')
 ```
 
-## Compatibility
+## ⚙️ Compatibility
 
 Warning: **Windows and macOS are not supported.**
 
 [Tested](https://travis-ci.org/webfp/tor-browser-selenium) with the following Tor Browser versions on Ubuntu:
 
-* 12.0.7
-* 12.5a7
+* **Stable**: 12.0.7
+* **Alpha**: 12.5a7
 
 If you need to use a different version of Tor Browser, [view the past test runs](https://travis-ci.org/webfp/tor-browser-selenium) to find out the compatible `selenium` and `geckodriver` versions.
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
 Solutions to potential issues:
 
@@ -128,7 +126,7 @@ Solutions to potential issues:
 * `driver.get_cookies()` returns an empty list. This is due to Private Browsing Mode (PBM), which Selenium uses under the hood. See [#79](https://github.com/webfp/tor-browser-selenium/issues/79) for a possible solution.
 * WebGL is not supported in the headless mode started with `headless=True` due to a Firefox bug ([#1375585](https://bugzilla.mozilla.org/show_bug.cgi?id=1375585)). To enable WebGL in a headless setting, use `pyvirtualdisplay` following the [headless.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/headless.py) example.
 
-## Reference
+## 📚 Reference
 Please use the following reference if you use `tor-browser-selenium` in your academic publications.
 
 ```
@@ -141,5 +139,5 @@ Please use the following reference if you use `tor-browser-selenium` in your aca
 }
 ```
 
-## Credits
+## 🙌 Credits
 We greatly benefited from the [tor-browser-bundle-testsuite](https://gitlab.torproject.org/tpo/applications/tor-browser-bundle-testsuite) and [tor-browser-selenium](https://github.com/isislovecruft/tor-browser-selenium) projects.
