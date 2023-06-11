@@ -1,4 +1,4 @@
-from os.path import join
+from os.path import join, dirname, abspath
 from os import environ
 
 # DEFAULT TBB PATHS works for TBB versions v4.x and above
@@ -54,3 +54,8 @@ USE_RUNNING_TOR = 1  # use system tor or tor started with stem
 USE_STEM = 2  # use tor started with Stem
 
 TRAVIS = "CI" in environ and "TRAVIS" in environ
+
+TB_SELENIUM_DIR = dirname(abspath(__file__))
+TEST_DATA_DIR = join(TB_SELENIUM_DIR, "test", "test_data")
+LOCAL_JS_TEST_URL = 'file://' + join(TEST_DATA_DIR, "js_test.html")
+LOCAL_IMG_TEST_URL = 'file://' + join(TEST_DATA_DIR, "img_test.html")

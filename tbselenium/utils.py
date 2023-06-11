@@ -121,21 +121,36 @@ def set_security_level(driver, level):
     click_to_set_security_level(driver, level)
 
 
+def js_click_by_id(driver, element_id):
+    """Execute a script to find and click an element with the given id."""
+    driver.execute_script(
+        f'document.getElementById("{element_id}").click();')
+
 # Based on https://gitlab.torproject.org/tpo/applications/tor-browser-bundle-testsuite/-/blob/main/marionette/tor_browser_tests/test_security_level_ui.py  # noqa
 def open_security_level_panel(driver):
+    """Click on the Shield (security settings) and "Change" buttons to
+    open the security level settings on the about:preferences#privacy page."""
+
+    # Switch to chrome context since buttons we need to click are
+    # part of the browser UI, not the content page.
     with driver.context('chrome'):
-        # emulate a click on the security level button
-        driver.execute_script(
-            'document.getElementById("security-level-button").click();')
+        # Emulate a click on the Shield button next to the address bar.
+        # Use execute_script() because `driver.find_element`
+        # and similar methods don't seem to match these elements
+        # in chrome context.
+        js_click_by_id(driver, 'security-level-button')
+
+        # Emulate a click on the Change (security settings) button
         try:
-            #  12.5a7 and later
-            driver.execute_script(
-                'document.getElementById("securityLevel-settings").click();')
+            #  For 12.5a7 and later
+            js_click_by_id(driver, 'securityLevel-settings')
         except JavascriptException:
-            driver.find_element(By.ID,
-                                'securityLevel-advancedSecuritySettings').click()
-        # settings_button = driver.find_element(By.ID, "securityLevel-settings")
-        # settings_button.click()
+            # Strangely, for 12.5a6 and earlier, the button can be found
+            # and clicked by driver.find_element.
+            # driver.find_element(By.ID,
+            #                     'securityLevel-advancedSecuritySettings').click()
+            # We use JS click method for consistency.
+            js_click_by_id(driver, 'securityLevel-advancedSecuritySettings')
 
 
 def click_to_set_security_level(driver, level):
@@ -157,9 +172,14 @@ def click_to_set_security_level(driver, level):
                 ' radio:nth-child(1)').click()
         except NoSuchElementException:
             driver.find_element(
-                'css selector', f'#securityLevel-vbox-{level} radio').click()
+                By.CSS_SELECTOR, f'#securityLevel-vbox-{level} radio').click()
 
 
 def disable_js(driver):
     set_tbb_pref(driver, "javascript.enabled", False)
     sleep(1)  # wait for the pref to update
+
+def get_js_status_text(driver):
+    """Return the text of the JS status element."""
+    return driver.find_element(By.ID, 'js').\
+            get_attribute("innerText")

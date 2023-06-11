@@ -4,8 +4,8 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from tbselenium.test.fixtures import TBDriverFixture
 from tbselenium.test import TBB_PATH
-from tbselenium.common import CHECK_TPO_URL
-from tbselenium.utils import set_security_level
+from tbselenium.common import LOCAL_JS_TEST_URL
+from tbselenium.utils import set_security_level, get_js_status_text
 from tbselenium.utils import (
     TB_SECURITY_LEVEL_SAFEST,
     TB_SECURITY_LEVEL_SAFER,
@@ -14,8 +14,6 @@ from tbselenium.utils import (
 
 
 GET_WEBGL_ORG_URL = "https://get.webgl.org/"
-TEST_DIR = dirname(abspath(__file__))
-LOCAL_JS_TEST_URL = 'file://' + join(TEST_DIR, "test_data", "js_test.html")
 
 
 class SecurityLevelTest(unittest.TestCase):
@@ -24,15 +22,11 @@ class SecurityLevelTest(unittest.TestCase):
         webgl_container = driver.find_element(By.ID, "logo-container")
         return webgl_container.get_attribute('innerHTML').strip()
 
-    def get_js_status_text(self, driver):
-        return driver.find_element(By.ID, 'js').\
-                get_attribute("innerText")
-
     def test_set_security_standard(self):
         with TBDriverFixture(TBB_PATH) as driver:
             set_security_level(driver, TB_SECURITY_LEVEL_STANDARD)
             driver.load_url_ensure(LOCAL_JS_TEST_URL)
-            js_status = self.get_js_status_text(driver)
+            js_status = get_js_status_text(driver)
             assert js_status == "JavaScript is enabled."
 
     def test_set_security_standard_webgl(self):
@@ -59,7 +53,7 @@ class SecurityLevelTest(unittest.TestCase):
         with TBDriverFixture(TBB_PATH) as driver:
             set_security_level(driver, TB_SECURITY_LEVEL_SAFER)
             driver.load_url_ensure(LOCAL_JS_TEST_URL)
-            js_status = self.get_js_status_text(driver)
+            js_status = get_js_status_text(driver)
             assert js_status == "JavaScript is enabled."
 
     def test_set_security_safer_webgl(self):
@@ -89,7 +83,7 @@ class SecurityLevelTest(unittest.TestCase):
         with TBDriverFixture(TBB_PATH) as driver:
             set_security_level(driver, TB_SECURITY_LEVEL_SAFEST)
             driver.load_url_ensure(LOCAL_JS_TEST_URL)
-            js_status = self.get_js_status_text(driver)
+            js_status = get_js_status_text(driver)
             assert js_status == "JavaScript is disabled."
 
     def test_set_security_safest_webgl(self):
