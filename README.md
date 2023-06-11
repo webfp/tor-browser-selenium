@@ -18,7 +18,7 @@ Download `geckodriver` v0.31.0 from the [geckodriver releases page](https://gith
 
 ```python
 from tbselenium.tbdriver import TorBrowserDriver
-with TorBrowserDriver("/path/to/TorBrowserBundle/") as driver:
+with TorBrowserDriver("/path/to/tor-browser/") as driver:
     driver.get('https://check.torproject.org')
 ```
 
@@ -31,7 +31,7 @@ import tbselenium.common as cm
 from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.utils import launch_tbb_tor_with_stem
 
-tbb_dir = "/path/to/TorBrowserBundle/"
+tbb_dir = "/path/to/tor-browser/"
 tor_process = launch_tbb_tor_with_stem(tbb_path=tbb_dir)
 with TorBrowserDriver(tbb_dir, tor_cfg=cm.USE_STEM) as driver:
     driver.load_url("https://check.torproject.org")
@@ -39,14 +39,14 @@ with TorBrowserDriver(tbb_dir, tor_cfg=cm.USE_STEM) as driver:
 tor_process.kill()
 ```
 
-TorBrowserDriver does not download the Tor Browser Bundle (TBB) for you.
+`tor-browser-selenium` does not download the Tor Browser for you.
 You should [download](https://www.torproject.org/projects/torbrowser.html.en)
-and extract TBB, and pass its path when you initialize `TorBrowserDriver`.
+and extract, and pass its path when you initialize `TorBrowserDriver`.
 
 
 
 ## Examples
-Check the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/examples) to discover different ways to use TorBrowserDriver
+Check the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/examples) to discover different ways to use `tor-browser-selenium`
 * [check_tpo.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/check_tpo.py): Visit check.torproject.org website and print the network status message
 * [headless.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/headless.py): Headless visit and screenshot of check.torproject.org using XVFB
 * [onion_service.py](https://github.com/webfp/tor-browser-selenium/blob/main/examples/onion_service.py): Search using DuckDuckGo's Onion service
@@ -59,14 +59,13 @@ Check the [examples](https://github.com/webfp/tor-browser-selenium/tree/master/e
 
 ## Test and development
 
-Browse the [existing tests](https://github.com/webfp/tor-browser-selenium/tree/main/tbselenium/test) to find out about
-different ways you can use tbselenium.
+Browse the [existing tests](https://github.com/webfp/tor-browser-selenium/tree/main/tbselenium/test) to find out about different ways you can use `tor-browser-selenium`.
 
 For development and testing first install the necessary Python packages:
 
 `pip install -r requirements-dev.txt`
 
-Install `xvfb` package by running `apt-get install xvfb` or using your distro's package manager.
+Install the `xvfb` package by running `apt-get install xvfb` or using your distro's package manager.
 
 Run the following to launch the tests:
 
@@ -78,15 +77,8 @@ You may disable `Xvfb` by setting the `NO_XVFB` environment variable:
 `export NO_XVFB=1`
 
 
-### Setting `geckodriver`'s location without using PATH
-If `geckodriver` is not on the system PATH, the binary location can be set programmatically:
-
-```python
-TorBrowserDriver(executable_path="/path/to/geckodriver")
-```
-
 ### Running individual tests
-First, export the path to the TBB in the `TBB_PATH` environment variable.
+First, export the path to Tor Browser folder in the `TBB_PATH` environment variable.
 
 `export TBB_PATH=/path/to/tbb/tor-browser/`
 
@@ -95,7 +87,13 @@ Then, use `py.test` to launch the tests you want, e.g.:
 * `py.test tbselenium/test/test_tbdriver.py`
 * `py.test tbselenium/test/test_tbdriver.py::TBDriverTest::test_should_load_check_tpo`
 
-Note that the directory pointed by `TBB_PATH` should contain `start-tor-browser.desktop` file and `Browser` folders.
+Note that the directory pointed by `TBB_PATH` should contain the A custom `start-tor binary can
+### Using a custom `geckodriver`
+A custom `geckodriver` binary can be set via the `executable_path` argument:
+
+```python
+TorBrowserDriver(executable_path="/path/to/geckodriver")
+```
 
 ### Disabling console logs
 You can redirect the logs to `/dev/null` by passing the `tbb_logfile_path` initialization parameter:
@@ -107,18 +105,19 @@ TorBrowserDriver(..., tbb_logfile_path='/dev/null')
 
 Warning: **Windows and macOS are not supported.**
 
-[Tested](https://travis-ci.org/webfp/tor-browser-selenium) with the following Tor Browser Bundle versions on Ubuntu:
+[Tested](https://travis-ci.org/webfp/tor-browser-selenium) with the following Tor Browser versions on Ubuntu:
 
 * 12.0.7
 * 12.5a7
 
 If you need to use a different version of Tor Browser, [view the past test runs](https://travis-ci.org/webfp/tor-browser-selenium) to find out the compatible `selenium` and `geckodriver` versions.
+
 ## Troubleshooting
 
 Solutions to potential issues:
 
-* Make sure you have compatible dependencies. While older or newer versions may work, they may have cause issues.
-  - [Tor Browser bundle](https://www.torproject.org/download/) needs to be downloaded and extracted.
+* Make sure you have compatible dependencies. While older or newer versions may work, they may cause issues.
+  - [Tor Browser](https://www.torproject.org/download/) needs to be downloaded and extracted.
   - Python [`selenium`](https://www.selenium.dev/) (`pip install -U selenium`).
   - `geckodriver` [version 0.31.0](https://github.com/mozilla/geckodriver/releases/tag/v0.31.0).
 
@@ -130,7 +129,7 @@ Solutions to potential issues:
 * WebGL is not supported in the headless mode started with `headless=True` due to a Firefox bug ([#1375585](https://bugzilla.mozilla.org/show_bug.cgi?id=1375585)). To enable WebGL in a headless setting, use `pyvirtualdisplay` following the [headless.py](https://github.com/webfp/tor-browser-selenium/tree/master/examples/headless.py) example.
 
 ## Reference
-Please consider citing this repository if you use `tor-browser-selenium` in your academic publications.
+Please use the following reference if you use `tor-browser-selenium` in your academic publications.
 
 ```
 @misc{tor-browser-selenium,
@@ -143,6 +142,4 @@ Please consider citing this repository if you use `tor-browser-selenium` in your
 ```
 
 ## Credits
-We greatly benefited from the following two projects:
-* [tor-browser-bundle-testsuite](https://gitweb.torproject.org/boklm/tor-browser-bundle-testsuite.git/) by @boklm.
-* [tor-browser-selenium](https://github.com/isislovecruft/tor-browser-selenium) by @isislovecruft.
+We greatly benefited from the [tor-browser-bundle-testsuite](https://gitlab.torproject.org/tpo/applications/tor-browser-bundle-testsuite) and [tor-browser-selenium](https://github.com/isislovecruft/tor-browser-selenium) projects.
