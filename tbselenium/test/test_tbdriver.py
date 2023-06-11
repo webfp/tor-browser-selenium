@@ -28,8 +28,9 @@ class TBDriverTest(unittest.TestCase):
         self.assertEqual(status.text, congrats)
 
     def test_should_load_hidden_service(self):
-        TPO_ONION_URL = "http://2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion/index.html"  # noqa
-        self.tb_driver.load_url_ensure(TPO_ONION_URL, wait_for_page_body=True)
+        # https://support.torproject.org/onionservices/v2-deprecation/index.html
+        TPO_V3_ONION_URL = "http://2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion/"  # noqa
+        self.tb_driver.load_url_ensure(TPO_V3_ONION_URL, wait_for_page_body=True)
         self.assertEqual(
             'Tor Project | Anonymity Online',
             self.tb_driver.title)
