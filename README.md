@@ -105,8 +105,8 @@ Warning: **Windows and macOS are not supported.**
 
 [Tested](https://travis-ci.org/webfp/tor-browser-selenium) with the following Tor Browser versions on Ubuntu:
 
-* **Stable**: 12.5.3
-* **Alpha**: 13.0a3
+* **Stable**: 12.5.4
+* **Alpha**: 13.0a4
 
 If you need to use a different version of Tor Browser, [view the past test runs](https://travis-ci.org/webfp/tor-browser-selenium) to find out the compatible `selenium` and `geckodriver` versions.
 
