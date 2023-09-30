@@ -13,8 +13,8 @@ addons:
 env:
   global:
     - DOWNLOAD_DIR=${HOME}/download
-    - STABLE=12.5.4
-    - EXPERIMENTAL=13.0a4
+    - STABLE_V=12.5.4
+    - ALPHA_V=13.0a4
     - TBB_DIST_URL=https://www.torproject.org/dist/torbrowser/
   matrix:
     - TRAVIS_EXTRA_JOB_WORKAROUND=true
@@ -24,9 +24,9 @@ cache:
 matrix:
   include:
     - python: "3.8"
-      env: VERSION_ARCH="${EXPERIMENTAL}/tor-browser-linux-x86_64-${EXPERIMENTAL}.tar.xz"
+      env: VERSION_ARCH="${ALPHA_V}/tor-browser-linux-x86_64-${ALPHA_V}.tar.xz"
     - python: "3.8"
-      env: VERSION_ARCH="${STABLE}/tor-browser-linux64-${STABLE}_ALL.tar.xz"
+      env: VERSION_ARCH="${STABLE_V}/tor-browser-linux64-${STABLE_V}_ALL.tar.xz"
   exclude:
     - env: TRAVIS_EXTRA_JOB_WORKAROUND=true
 install:
