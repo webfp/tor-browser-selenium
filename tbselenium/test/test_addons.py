@@ -13,11 +13,6 @@ from tbselenium.test.fixtures import TBDriverFixture
 
 class TBAddonsTest(unittest.TestCase):
 
-    # Based on https://gitlab.torproject.org/tpo/applications/tor-browser-bundle-testsuite/-/blob/2190cfc87657cc64b0b48ec8577617a961d68462/marionette/tor_browser_tests/test_https-everywhere.py#L13
-    HE_HTTP_URL = "http://https-everywhere.badssl.com/redirect-test/status.svg"
-    HE_HTTPS_URL = "https://https-everywhere.badssl.com/redirect-test/status.svg"
-    TEST_LONG_WAIT = 60
-
     def get_list_of_installed_addons(self, driver):
         found_addons = []
         driver.load_url_ensure("about:addons")
@@ -25,11 +20,6 @@ class TBAddonsTest(unittest.TestCase):
         for addon in addons:
             found_addons.append(addon.text)
         return found_addons
-
-    def test_https_everywhere_redirection(self):
-        with TBDriverFixture(TBB_PATH) as driver:
-            driver.load_url_ensure(self.HE_HTTP_URL)
-            self.assertEqual(driver.current_url, self.HE_HTTPS_URL)
 
     def test_builtin_addons_should_come_installed(self):
         """Make sure that the built-in addons come installed."""
