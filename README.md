@@ -13,7 +13,7 @@ Download `geckodriver` v0.31.0 from the [geckodriver releases page](https://gith
 
 ## 🚀 Usage
 
-Download and extract [Tor Browser](https://www.torproject.org/projects/torbrowser.html.en), and pass its path when you initialize `TorBrowserDriver`. In the examples below, you should not pass  pass "/path/to/tor-browser/" but the (Tor Browser) folder that contains the directory called `Browser`:
+Download and extract [Tor Browser](https://www.torproject.org/projects/torbrowser.html.en), and pass its path when you initialize `TorBrowserDriver`. In the examples below, you should not pass "/path/to/tor-browser/" but the (Tor Browser) folder that contains the directory called `Browser`:
 
 
 ### Using with system `tor`
