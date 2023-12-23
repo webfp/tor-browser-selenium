@@ -98,7 +98,7 @@ class TorBrowserDriver(FirefoxDriver):
         self.options.add_argument('--class')
         self.options.add_argument('"Tor Browser"')
         if headless:
-            self.options.headless = True
+            self.options.add_argument('-headless')
 
         super(TorBrowserDriver, self).__init__(
             service=tbb_service,

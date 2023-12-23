@@ -141,5 +141,12 @@ class TBDriverCustomGeckoDriverPort(unittest.TestCase):
         self.assertFalse(is_busy(random_port))
 
 
+class TBDriverHeadless(unittest.TestCase):
+
+    def test_should_start_headless(self):
+        """Make sure we can start Tor browser with the built-in headless option."""
+        driver = TBDriverFixture(TBB_PATH, headless=True)
+        driver.quit()
+
 if __name__ == "__main__":
     unittest.main()
