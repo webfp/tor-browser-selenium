@@ -7,7 +7,7 @@ echo ${TBB_DIST_URL}/${VERSION_ARCH}
 tar -xf ${DOWNLOAD_DIR}/$TARBALL -C $HOME
 echo `which curl`
 
-geckodriver_url="https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz"
+geckodriver_url="https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux64.tar.gz"
 geckodriver_tarball=`basename ${geckodriver_url}`
 echo $geckodriver_tarball
 wget -P ${DOWNLOAD_DIR} $geckodriver_url
