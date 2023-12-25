@@ -146,6 +146,9 @@ class TBDriverHeadless(unittest.TestCase):
     def test_should_start_headless(self):
         """Make sure we can start Tor browser with the built-in headless option."""
         driver = TBDriverFixture(TBB_PATH, headless=True)
+        caps = driver.options.to_capabilities()
+        # ensure that the headless argument is present in the options
+        self.assertIn('-headless', caps['moz:firefoxOptions']['args'])
         driver.quit()
 
 if __name__ == "__main__":
