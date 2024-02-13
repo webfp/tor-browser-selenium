@@ -13,8 +13,8 @@ addons:
 env:
   global:
     - DOWNLOAD_DIR=${HOME}/download
-    - STABLE_V=13.0.8
-    - ALPHA_V=13.5a3
+    - STABLE_V=13.0.9
+    - ALPHA_V=13.5a4
     - TBB_DIST_URL=https://www.torproject.org/dist/torbrowser/
   matrix:
     - TRAVIS_EXTRA_JOB_WORKAROUND=true
