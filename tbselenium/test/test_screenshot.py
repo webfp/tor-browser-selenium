@@ -9,7 +9,7 @@ from tbselenium.test import TBB_PATH
 
 # A blank image for https://check.torproject.org/ amounts to ~4.8KB.
 # A real screen capture of the same page is ~57KB. If the capture
-# is not blank it should be at least greater than 20KB.
+# is not blank it should be greater than 20KB.
 SCREENSHOT_MIN_SIZE = 2000
 
 
