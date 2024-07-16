@@ -13,7 +13,7 @@ addons:
 env:
   global:
     - DOWNLOAD_DIR=${HOME}/download
-    - STABLE_V=13.5
+    - STABLE_V=13.5.1
     - ALPHA_V=13.5a9
     - TBB_DIST_URL=https://www.torproject.org/dist/torbrowser/
   matrix:
