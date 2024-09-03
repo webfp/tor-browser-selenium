@@ -95,9 +95,7 @@ def launch_tbb_tor_with_stem(tbb_path=None, torrc=None, tor_binary=None):
 
 def set_tbb_pref(driver, name, value):
     try:
-        script = 'const { Services } = '\
-                 'ChromeUtils.import("resource://gre/modules/Services.jsm");'
-        script += 'Services.prefs.'
+        script = 'Services.prefs.'
         if isinstance(value, bool):
             script += 'setBoolPref'
         elif isinstance(value, (str)):
@@ -105,7 +103,7 @@ def set_tbb_pref(driver, name, value):
         else:
             script += 'setIntPref'
         script += '({0}, {1});'.format(json.dumps(name), json.dumps(value))
-        # driver.set_context(driver.CONTEXT_CHROME)
+
         with driver.context(driver.CONTEXT_CHROME):
             driver.execute_script(script)
     except Exception:
