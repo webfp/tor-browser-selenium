@@ -5,6 +5,9 @@ A Python library to automate Tor Browser with Selenium WebDriver.
 
 ## 📦 Installation
 
+> [!WARNING]
+> Windows and macOS are currently not supported.
+
 ```
 pip install tbselenium
 ```
