@@ -14,7 +14,7 @@ env:
   global:
     - DOWNLOAD_DIR=${HOME}/download
     - STABLE_V=13.5.7
-    - ALPHA_V=14.0a8
+    - ALPHA_V=14.0a9
     - TBB_DIST_URL=https://www.torproject.org/dist/torbrowser/
   matrix:
     - TRAVIS_EXTRA_JOB_WORKAROUND=true
