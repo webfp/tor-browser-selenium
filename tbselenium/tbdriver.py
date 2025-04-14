@@ -1,7 +1,9 @@
 import shutil
-from os import environ, chdir
+from os import environ
+import os
 from os.path import isdir, isfile, join, abspath, dirname
 from time import sleep
+import tempfile
 from http.client import CannotSendRequest
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -19,12 +21,14 @@ from tbselenium.exceptions import (
 
 DEFAULT_BANNED_PORTS = "9050,9051,9150,9151"
 GECKO_DRIVER_EXE_PATH = shutil.which("geckodriver")
+DEFAULT_TBB_BROWSER_DIR = ""
 
 class TorBrowserDriver(FirefoxDriver):
     """
     Extend Firefox webdriver to automate Tor Browser.
     """
     def __init__(self,
+                 tbb_browser_dir=DEFAULT_TBB_BROWSER_DIR,
                  tbb_path="",
                  tor_cfg=cm.USE_RUNNING_TOR,
                  tbb_fx_binary_path="",
@@ -52,7 +56,10 @@ class TorBrowserDriver(FirefoxDriver):
 
         self.use_custom_profile = use_custom_profile
         self.tor_cfg = tor_cfg
-        self.setup_tbb_paths(tbb_path, tbb_fx_binary_path,
+
+        self.remove_on_exit = []
+
+        self.setup_tbb_paths(tbb_browser_dir, tbb_path, tbb_fx_binary_path,
                              tbb_profile_path, tor_data_dir)
         self.options = Options() if options is None else options
         install_noscript = False
@@ -100,10 +107,16 @@ class TorBrowserDriver(FirefoxDriver):
         if headless:
             self.options.add_argument('-headless')
 
-        super(TorBrowserDriver, self).__init__(
-            service=tbb_service,
-            options=self.options,
-            )
+        # __exit__ is not called when this fails
+        try:
+            super(TorBrowserDriver, self).__init__(
+                service=tbb_service,
+                options=self.options,
+                )
+        except Exception as exc:
+            self.quit()
+            raise
+
         self.is_running = True
         self.install_extensions(extensions, install_noscript)
         self.temp_profile_dir = self.capabilities["moz:profile"]
@@ -113,7 +126,7 @@ class TorBrowserDriver(FirefoxDriver):
         """Install the given extensions to the profile we are launching."""
         if install_noscript:
             no_script_xpi = join(
-                self.tbb_path, cm.DEFAULT_TBB_NO_SCRIPT_XPI_PATH)
+                self.tbb_browser_dir, cm.DEFAULT_TBB_NO_SCRIPT_XPI_PATH)
             extensions.append(no_script_xpi)
 
         for extension in extensions:
@@ -147,51 +160,92 @@ class TorBrowserDriver(FirefoxDriver):
         self.socks_port = socks_port
         self.control_port = control_port
 
-    def setup_tbb_paths(self, tbb_path, tbb_fx_binary_path, tbb_profile_path,
-                        tor_data_dir):
+    def setup_tbb_paths(self, tbb_browser_dir, tbb_path, tbb_fx_binary_path,
+                        tbb_profile_path, tor_data_dir):
         """Update instance variables based on the passed paths.
 
         TorBrowserDriver can be initialized by passing either
+        0) path to TBB browser directory (tbb_browser_dir)
         1) path to TBB directory (tbb_path)
         2) path to TBB directory and profile (tbb_path, tbb_profile_path)
         3) path to TBB's Firefox binary and profile (tbb_fx_binary_path, tbb_profile_path)
         """
-        if not (tbb_path or (tbb_fx_binary_path and tbb_profile_path)):
-            raise TBDriverPathError("Either TBB path or Firefox profile"
-                                    " and binary path should be provided"
-                                    " %s" % tbb_path)
+        # all default paths are relative to tbb_browser_dir
+        if tbb_browser_dir:
+            pass
+            """
+            if not tbb_fx_binary_path:
+                tbb_fx_binary_path = join(tbb_browser_dir, cm.DEFAULT_TBB_FX_BINARY_PATH)
+            if not tbb_profile_path:
+                # fall back to the default profile path in TBB
+                tbb_profile_path = join(tbb_browser_dir, cm.DEFAULT_TBB_PROFILE_PATH)
+            if not tbb_path:
+                tbb_path = dirname(tbb_browser_dir)
+            """
+        elif tbb_path:
+            # legacy
+            tbb_browser_dir = join(tbb_path, cm.DEFAULT_TBB_BROWSER_DIR)
 
-        if tbb_path:
-            if not isdir(tbb_path):
-                raise TBDriverPathError("TBB path is not a directory %s"
-                                        % tbb_path)
-            tbb_fx_binary_path = join(tbb_path, cm.DEFAULT_TBB_FX_BINARY_PATH)
+        elif tbb_fx_binary_path and tbb_profile_path:
+            tbb_browser_dir = dirname(tbb_fx_binary_path)
+
         else:
+            raise TBDriverPathError("At least tbb_browser_dir or tbb_path or"
+                                    " (tbb_fx_binary_path and tbb_profile_path)"
+                                    " must be provided")
+
+        if not isdir(tbb_browser_dir):
+            raise TBDriverPathError("Invalid TBB Browser dir %s"
+                                    % tbb_browser_dir)
+
+        """
+        if not tbb_path:
+            if not isfile(tbb_fx_binary_path):
+                raise TBDriverPathError("Invalid Firefox binary %s"
+                                        % tbb_fx_binary_path)
             # based on https://github.com/webfp/tor-browser-selenium/issues/159#issue-1016463002
-            tbb_path = dirname(dirname(tbb_fx_binary_path))
+        if not isdir(tbb_path):
+            raise TBDriverPathError("Invalid TBB path directory %s" % tbb_path)
+        """
 
-        if not tbb_profile_path:
-            # fall back to the default profile path in TBB
-            tbb_profile_path = join(tbb_path, cm.DEFAULT_TBB_PROFILE_PATH)
-
+        if not tbb_fx_binary_path:
+            tbb_fx_binary_path = join(tbb_browser_dir, cm.DEFAULT_TBB_FX_BINARY_PATH)
         if not isfile(tbb_fx_binary_path):
             raise TBDriverPathError("Invalid Firefox binary %s"
                                     % tbb_fx_binary_path)
+
+        if not tbb_profile_path:
+            # fall back to the default profile path in TBB
+            tbb_profile_path = join(tbb_browser_dir, cm.DEFAULT_TBB_PROFILE_PATH)
         if not isdir(tbb_profile_path):
             raise TBDriverPathError("Invalid Firefox profile dir %s"
                                     % tbb_profile_path)
-        self.tbb_path = abspath(tbb_path)
+
+        if not tor_data_dir:
+            # fall back to default tor data dir in TBB
+            tor_data_dir = join(tbb_browser_dir, cm.DEFAULT_TOR_DATA_PATH)
+        # only relevant if we launch tor
+        # if not isdir(tor_data_dir):
+        #     raise TBDriverPathError("Invalid Tor data directory %s" % tor_data_dir)
+
+        # tbb_browser_dir must be writable, but its contents can be read-only
+        # fix: Your Tor Browser profile cannot be loaded. It may be missing or inaccessible.
+        if not os.access(tbb_browser_dir, os.W_OK):
+            temp_tbb_browser_dir = tempfile.mkdtemp(prefix="tbselenium-tbb_browser_dir-")
+            # print(f"not writable tbb_browser_dir {tbb_browser_dir} - using tempdir {temp_tbb_browser_dir}")
+            self.remove_on_exit.append(temp_tbb_browser_dir)
+            # symlink the contents of tbb_browser_dir
+            for name in os.listdir(tbb_browser_dir):
+                src = tbb_browser_dir + "/" + name
+                dst = temp_tbb_browser_dir + "/" + name
+                os.symlink(src, dst, target_is_directory=os.path.isdir(src))
+            tbb_browser_dir = temp_tbb_browser_dir
+
+        #self.tbb_path = abspath(tbb_path)
+        self.tbb_browser_dir = abspath(tbb_browser_dir)
         self.tbb_profile_path = abspath(tbb_profile_path)
         self.tbb_fx_binary_path = abspath(tbb_fx_binary_path)
-        self.tbb_browser_dir = abspath(join(tbb_path,
-                                            cm.DEFAULT_TBB_BROWSER_DIR))
-        if tor_data_dir:
-            self.tor_data_dir = tor_data_dir  # only relevant if we launch tor
-        else:
-            # fall back to default tor data dir in TBB
-            self.tor_data_dir = join(tbb_path, cm.DEFAULT_TOR_DATA_PATH)
-        # TB can't find bundled "fonts" if we don't switch to tbb_browser_dir
-        chdir(self.tbb_browser_dir)
+        self.tor_data_dir = abspath(tor_data_dir)
 
     def load_url(self, url, wait_on_page=0, wait_for_page_body=False):
         """Load a URL and wait before returning.
@@ -299,9 +353,9 @@ class TorBrowserDriver(FirefoxDriver):
 
         We follow start-tor-browser script.
         """
-        tor_binary_dir = join(self.tbb_path, cm.DEFAULT_TOR_BINARY_DIR)
+        tor_binary_dir = join(self.tbb_browser_dir, cm.DEFAULT_TOR_BINARY_DIR)
         environ["LD_LIBRARY_PATH"] = tor_binary_dir
-        environ["FONTCONFIG_PATH"] = join(self.tbb_path,
+        environ["FONTCONFIG_PATH"] = join(self.tbb_browser_dir,
                                           cm.DEFAULT_FONTCONFIG_PATH)
         environ["FONTCONFIG_FILE"] = cm.FONTCONFIG_FILE
         environ["HOME"] = self.tbb_browser_dir
@@ -345,6 +399,14 @@ class TorBrowserDriver(FirefoxDriver):
                     self.clean_up_profile_dirs()
             except Exception as e:
                 print("[tbselenium] Exception while quitting: %s" % e)
+        for path in self.remove_on_exit:
+            # todo: log.debug
+            # print(f"tbdriver __exit__ removing {path}")
+            try:
+                shutil.rmtree(path)
+            except Exception as exc:
+                # todo: log error?
+                pass
 
     def __enter__(self):
         return self
